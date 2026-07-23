@@ -44,3 +44,33 @@ describe("computeFeatures", () => {
     expect(f.dataGaps).toContain("pair-created-at");
   });
 });
+
+describe("non-finite input sanitation", () => {
+  it("converts NaN/Infinity from providers into null + data gap", () => {
+    const dirty: MarketSnapshot = {
+      ...snapshot,
+      priceUsd: NaN,
+      volume24hUsd: Infinity,
+    };
+    const f = computeFeatures({
+      snapshot: dirty, risk: null, sellQuote: null,
+      pairCreatedAt: new Date(now.getTime() - 3 * 60 * 60_000),
+      hasSocials: false, now,
+    });
+    expect(f.priceUsd).toBeNull();
+    expect(f.volume24hUsd).toBeNull();
+    expect(f.dataGaps).toContain("price");
+    for (const v of Object.values(f)) {
+      if (typeof v === "number") expect(Number.isFinite(v)).toBe(true);
+    }
+  });
+
+  it("marks volAccel unknown for tokens younger than 1 hour", () => {
+    const f = computeFeatures({
+      snapshot, risk: null, sellQuote: null,
+      pairCreatedAt: new Date(now.getTime() - 10 * 60_000),
+      hasSocials: false, now,
+    });
+    expect(f.volAccel).toBeNull();
+  });
+});

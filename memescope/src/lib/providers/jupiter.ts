@@ -59,12 +59,14 @@ export class JupiterRoutes implements RouteProvider {
     if (!q || q.error || !q.outAmount) {
       return { source: this.name, dataMode: "live", direction, inAmountUsd: amountUsd, routeFound: false, raw: q ?? undefined };
     }
+    const impactRaw = q.priceImpactPct ? Math.abs(parseFloat(q.priceImpactPct)) * 100 : NaN;
     return {
       source: this.name,
       dataMode: "live",
       direction,
       inAmountUsd: amountUsd,
-      priceImpactPct: q.priceImpactPct ? Math.abs(parseFloat(q.priceImpactPct)) * 100 : undefined,
+      // NaN/Infinity must never leak into features/DB — undefined means "unknown".
+      priceImpactPct: Number.isFinite(impactRaw) ? impactRaw : undefined,
       routeFound: true,
       raw: { routes: q.routePlan?.length ?? 0 },
     };

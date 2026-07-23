@@ -39,8 +39,12 @@ export function computeFeatures(inp: FeatureInputs): FeatureVector {
   const vol5m = s?.volume5mUsd ?? null;
   const vol1h = s?.volume1hUsd ?? null;
   // Volume acceleration: annualize 5m window vs 1h window. >1 = accelerating.
+  // Meaningless before the token has lived a full hour (the 1h window covers
+  // its whole life and the ratio degenerates to ~12) — treat as unknown.
   const volAccel =
-    vol5m != null && vol1h != null && vol1h > 0 ? (vol5m * 12) / vol1h : null;
+    vol5m != null && vol1h != null && vol1h > 0 && tokenAgeMin != null && tokenAgeMin >= 60
+      ? (vol5m * 12) / vol1h
+      : null;
   if (volAccel === null) gaps.push("vol-accel");
 
   const buys1h = s?.buys1h ?? null;
@@ -53,7 +57,7 @@ export function computeFeatures(inp: FeatureInputs): FeatureVector {
   const volume24hUsd = s ? num(s.volume24hUsd, "volume24h") : null;
   const fdvUsd = s?.fdvUsd ?? null;
 
-  return {
+  const vector: FeatureVector = {
     computedAt: now,
     tokenAgeMin,
     priceUsd: s ? num(s.priceUsd, "price") : null,
@@ -86,4 +90,16 @@ export function computeFeatures(inp: FeatureInputs): FeatureVector {
     hasSocials: inp.hasSocials,
     dataGaps: [...new Set(gaps)],
   };
+
+  // Final safety net: no numeric feature may be NaN/Infinity. A non-finite
+  // value becomes null + a data gap, so scoring stays finite and Prisma never
+  // sees NaN (PrismaClientValidationError otherwise).
+  for (const key of Object.keys(vector) as (keyof FeatureVector)[]) {
+    const v = vector[key];
+    if (typeof v === "number" && !Number.isFinite(v)) {
+      (vector as unknown as Record<string, unknown>)[key] = null;
+      if (!vector.dataGaps.includes(key)) vector.dataGaps.push(key);
+    }
+  }
+  return vector;
 }
