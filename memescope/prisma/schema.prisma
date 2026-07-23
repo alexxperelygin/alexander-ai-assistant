@@ -1,0 +1,214 @@
+// MemeScope AI data model.
+// Default provider is SQLite for zero-setup local runs. For production switch
+// provider to "postgresql" and set DATABASE_URL accordingly (see docs/ARCHITECTURE.md).
+// JSON payloads are stored as String columns for SQLite compatibility.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Token {
+  id            String   @id @default(cuid())
+  chain         String   @default("solana")
+  mint          String   @unique
+  symbol        String
+  name          String
+  pairAddress   String?
+  dex           String?
+  pairCreatedAt DateTime?
+  firstSeenAt   DateTime @default(now())
+  website       String?
+  twitter       String?
+  telegram      String?
+
+  snapshots     TokenSnapshot[]
+  riskReports   RiskReport[]
+  opportunities Opportunity[]
+  positions     Position[]
+}
+
+// One observation of market state. Every row records provenance:
+// source, when we fetched it, when the source observed it, and the raw payload.
+model TokenSnapshot {
+  id           String   @id @default(cuid())
+  tokenId      String
+  token        Token    @relation(fields: [tokenId], references: [id])
+  source       String // dexscreener | geckoterminal | jupiter | mock
+  dataMode     String // live | mock
+  fetchedAt    DateTime @default(now())
+  observedAt   DateTime
+  freshnessMs  Int // fetchedAt - observedAt at ingestion time
+  raw          String? // raw payload reference (JSON string, truncated)
+
+  priceUsd       Float?
+  liquidityUsd   Float?
+  fdvUsd         Float?
+  marketCapUsd   Float?
+  volume5mUsd    Float?
+  volume1hUsd    Float?
+  volume24hUsd   Float?
+  buys5m         Int?
+  sells5m        Int?
+  buys1h         Int?
+  sells1h        Int?
+  priceChange5m  Float?
+  priceChange1h  Float?
+  priceChange24h Float?
+  holders        Int?
+  errors         String? // JSON array of field-level errors/gaps
+
+  @@index([tokenId, fetchedAt])
+}
+
+model RiskReport {
+  id          String   @id @default(cuid())
+  tokenId     String
+  token       Token    @relation(fields: [tokenId], references: [id])
+  source      String // rugcheck | jupiter-sim | mock
+  dataMode    String
+  fetchedAt   DateTime @default(now())
+  mintAuthority   Boolean?
+  freezeAuthority Boolean?
+  top10Pct        Float?
+  insiderPct      Float?
+  lpLockedPct     Float?
+  rugged          Boolean?
+  sellRouteOk     Boolean? // Jupiter sell-quote simulation succeeded
+  sellImpactPct   Float? // price impact on simulated sell
+  riskLevel       String? // low | medium | high | critical
+  flags           String? // JSON array of {name, severity, description}
+  raw             String?
+
+  @@index([tokenId, fetchedAt])
+}
+
+model Opportunity {
+  id        String   @id @default(cuid())
+  tokenId   String
+  token     Token    @relation(fields: [tokenId], references: [id])
+  status    String // WATCH | CANDIDATE | READY | BUY | HOLD | TAKE_PROFIT | EXIT | INVALIDATED | AVOID | DATA_UNAVAILABLE
+  dataMode  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime?
+
+  opportunityScore Float
+  riskScore        Float
+  confidence       Float
+  scores           String // JSON: component scores with formulas/explanations
+  reasons          String // JSON array of human-readable reasons
+  risks            String // JSON array of detected risks
+  rejections       String? // JSON array of hard-rejection rule hits
+  plan             String? // JSON trade plan (entry range, slippage cap, sizing, invalidation, exits)
+  featuresRef      String? // JSON: feature vector used at decision time (reproducibility)
+
+  signals   SignalEvent[]
+  positions Position[]
+
+  @@index([status, updatedAt])
+}
+
+// Append-only signal/state-transition history for every opportunity.
+model SignalEvent {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id])
+  createdAt     DateTime    @default(now())
+  fromStatus    String?
+  toStatus      String
+  reason        String
+  payload       String? // JSON snapshot of scores/plan at transition time
+
+  @@index([opportunityId, createdAt])
+}
+
+model Position {
+  id            String   @id @default(cuid())
+  tokenId       String
+  token         Token    @relation(fields: [tokenId], references: [id])
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  mode          String // paper | live (live = user-confirmed manual trade, tracked only)
+  status        String // OPEN | PARTIAL_EXIT | CLOSED | STOPPED | INVALIDATED
+  openedAt      DateTime @default(now())
+  closedAt      DateTime?
+
+  entryPriceUsd  Float
+  quantity       Float // token units
+  costUsd        Float // including fees+slippage
+  feesUsd        Float
+  slippagePct    Float
+  remainingQty   Float
+  realizedPnlUsd Float    @default(0)
+  stopPriceUsd   Float?
+  takeProfits    String? // JSON array [{price, fraction, done}]
+  invalidation   String? // JSON invalidation conditions
+  closeReason    String?
+
+  events PositionEvent[]
+
+  @@index([status, openedAt])
+}
+
+model PositionEvent {
+  id         String   @id @default(cuid())
+  positionId String
+  position   Position @relation(fields: [positionId], references: [id])
+  createdAt  DateTime @default(now())
+  kind       String // OPEN | PARTIAL_FILL | TP_HIT | STOP_HIT | ALERT | CLOSE | NOTE
+  message    String
+  payload    String? // JSON details (price, qty, fees, pnl)
+
+  @@index([positionId, createdAt])
+}
+
+model Setting {
+  key       String   @id
+  value     String // JSON
+  updatedAt DateTime @updatedAt
+}
+
+model SourceHealth {
+  source      String   @id
+  lastOkAt    DateTime?
+  lastErrorAt DateTime?
+  lastError   String?
+  latencyMs   Int?
+  okCount     Int      @default(0)
+  errorCount  Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  level     String // info | warning | critical
+  title     String
+  body      String
+  readAt    DateTime?
+  channel   String   @default("inapp") // inapp | telegram
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  actor     String // system | worker | user | api
+  action    String
+  details   String? // JSON
+}
+
+model BacktestRun {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  status     String // RUNNING | DONE | FAILED | NO_DATA
+  params     String // JSON: thresholds, horizons, cost model
+  periodFrom DateTime?
+  periodTo   DateTime?
+  metrics    String? // JSON: signals, winRate, expectancy, medianReturn, profitFactor, maxDrawdown, rugRate, unclosablePct, byMonth, baselines
+  notes      String?
+}

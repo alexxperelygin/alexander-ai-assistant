@@ -1,0 +1,39 @@
+{
+  "name": "memescope-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Research MVP: Solana meme-coin scanner, transparent scoring, paper trading. No guaranteed profits.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "cross-env NODE_ENV=production next build",
+    "start": "next start",
+    "worker": "tsx src/worker/index.ts",
+    "worker:mock": "cross-env DATA_MODE=mock tsx src/worker/index.ts",
+    "backtest": "tsx src/lib/backtest/cli.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.0",
+    "next": "^15.3.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "cross-env": "^7.0.3",
+    "prisma": "^6.10.0",
+    "tailwindcss": "^4.1.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.0"
+  }
+}
