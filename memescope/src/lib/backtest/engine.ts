@@ -112,7 +112,7 @@ async function toSignalRecord(
 ): Promise<SignalRecord | null> {
   // Entry price = last snapshot at/before the signal (data available at decision time).
   const snap = await prisma.tokenSnapshot.findFirst({
-    where: { tokenId, fetchedAt: { lte: at }, dataMode: params.dataMode, priceUsd: { not: null } },
+    where: { tokenId, fetchedAt: { lte: at }, dataMode: params.dataMode, priceUsd: { gt: 0 } },
     orderBy: { fetchedAt: "desc" },
   });
   if (!snap?.priceUsd) return null;
@@ -128,7 +128,7 @@ async function toSignalRecord(
 
 async function forwardSeries(tokenId: string, after: Date, dataMode: string): Promise<PricePoint[]> {
   const snaps = await prisma.tokenSnapshot.findMany({
-    where: { tokenId, fetchedAt: { gt: after }, dataMode, priceUsd: { not: null } },
+    where: { tokenId, fetchedAt: { gt: after }, dataMode, priceUsd: { gt: 0 } },
     orderBy: { fetchedAt: "asc" },
     take: 2000,
   });
@@ -140,7 +140,7 @@ async function baselineAllTokens(params: BacktestParams): Promise<SignalOutcome[
     where: { snapshots: { some: { dataMode: params.dataMode } } },
     include: {
       snapshots: {
-        where: { dataMode: params.dataMode, priceUsd: { not: null } },
+        where: { dataMode: params.dataMode, priceUsd: { gt: 0 } },
         orderBy: { fetchedAt: "asc" },
         take: 1,
       },
