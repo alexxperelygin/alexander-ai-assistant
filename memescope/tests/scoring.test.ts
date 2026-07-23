@@ -103,3 +103,18 @@ describe("computeScores", () => {
     }
   });
 });
+
+describe("NaN safety (regression: PrismaClientValidationError)", () => {
+  const ctx = { positionUsd: 50, solChange24hPct: 3 };
+
+  it("keeps persisted floats finite even when a NaN sneaks into features", () => {
+    const dirty = baseFeatures();
+    // Simulate an unguarded parseFloat leaking NaN into a feature.
+    (dirty as unknown as Record<string, number>).sellImpactPct = NaN;
+    (dirty as unknown as Record<string, number>).volAccel = NaN;
+    const s = computeScores(dirty, cleanRisk, ctx);
+    expect(Number.isFinite(s.opportunityScore)).toBe(true);
+    expect(Number.isFinite(s.riskScore)).toBe(true);
+    expect(Number.isFinite(s.confidence)).toBe(true);
+  });
+});

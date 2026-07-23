@@ -4,7 +4,8 @@ import { Card, DataModeBadge, Empty, ScoreBar, StatusBadge, fmtUsd, timeAgo } fr
 
 export const dynamic = "force-dynamic";
 
-const FILTERS = ["ALL", "READY", "CANDIDATE", "WATCH", "AVOID", "DATA_UNAVAILABLE"] as const;
+const FILTERS = ["INTERESTING", "ALL", "READY", "CANDIDATE", "WATCH", "AVOID", "DATA_UNAVAILABLE"] as const;
+const FILTER_LABELS: Record<string, string> = { INTERESTING: "ИНТЕРЕСНЫЕ", ALL: "ВСЕ" };
 
 export default async function ScannerPage({
   searchParams,
@@ -12,14 +13,19 @@ export default async function ScannerPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
-  const filter = FILTERS.includes((status ?? "ALL") as (typeof FILTERS)[number])
-    ? (status ?? "ALL")
-    : "ALL";
+  const filter = FILTERS.includes((status ?? "INTERESTING") as (typeof FILTERS)[number])
+    ? (status ?? "INTERESTING")
+    : "INTERESTING";
 
   const opps = await prisma.opportunity.findMany({
-    where: filter === "ALL" ? {} : { status: filter },
+    where:
+      filter === "ALL"
+        ? {}
+        : filter === "INTERESTING"
+          ? { status: { in: ["READY", "CANDIDATE", "WATCH"] } }
+          : { status: filter },
     include: { token: { include: { snapshots: { orderBy: { fetchedAt: "desc" }, take: 1 } } } },
-    orderBy: { updatedAt: "desc" },
+    orderBy: filter === "INTERESTING" ? { opportunityScore: "desc" } : { updatedAt: "desc" },
     take: 100,
   });
 
@@ -31,13 +37,19 @@ export default async function ScannerPage({
         {FILTERS.map((f) => (
           <Link
             key={f}
-            href={f === "ALL" ? "/scanner" : `/scanner?status=${f}`}
+            href={f === "INTERESTING" ? "/scanner" : `/scanner?status=${f}`}
             className={`rounded px-2 py-1 text-xs ${filter === f ? "bg-zinc-700 text-zinc-100" : "bg-zinc-900 text-zinc-500 hover:text-zinc-300"}`}
           >
-            {f.replace("_", " ")}
+            {FILTER_LABELS[f] ?? f.replace("_", " ")}
           </Link>
         ))}
       </div>
+      {filter === "INTERESTING" && (
+        <p className="text-xs text-zinc-500">
+          Показаны только токены, прошедшие hard-фильтры (WATCH/CANDIDATE/READY), по убыванию score.
+          Отбракованные — во вкладке AVOID. Значок ↗ открывает монету на DexScreener для проверки.
+        </p>
+      )}
 
       <Card title={`Поток монет (${opps.length})`}>
         {opps.length === 0 ? (
@@ -64,6 +76,15 @@ export default async function ScannerPage({
                       <Link href={`/opportunity/${o.id}`} className="text-sky-400 hover:underline">
                         {o.token.symbol}
                       </Link>{" "}
+                      <a
+                        href={`https://dexscreener.com/solana/${o.token.pairAddress ?? o.token.mint}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-500 hover:text-sky-400"
+                        title="Проверить на DexScreener"
+                      >
+                        ↗
+                      </a>{" "}
                       <DataModeBadge mode={o.dataMode} />
                     </td>
                     <td><StatusBadge status={o.status} /></td>

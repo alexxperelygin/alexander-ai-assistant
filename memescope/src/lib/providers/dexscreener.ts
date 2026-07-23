@@ -38,24 +38,27 @@ export class DexScreenerMarketData implements MarketDataProvider {
     const errors: string[] = [];
     if (best.priceUsd == null) errors.push("priceUsd missing");
     if (best.liquidity?.usd == null) errors.push("liquidity missing");
+    // API values are untrusted: anything non-finite becomes undefined ("unknown").
+    const fin = (v: number | undefined): number | undefined =>
+      v != null && Number.isFinite(v) ? v : undefined;
     return {
       source: this.name,
       dataMode: "live",
       observedAt: new Date(), // DexScreener serves near-real-time state
-      priceUsd: best.priceUsd ? parseFloat(best.priceUsd) : undefined,
-      liquidityUsd: best.liquidity?.usd,
-      fdvUsd: best.fdv,
-      marketCapUsd: best.marketCap,
-      volume5mUsd: best.volume?.m5,
-      volume1hUsd: best.volume?.h1,
-      volume24hUsd: best.volume?.h24,
-      buys5m: best.txns?.m5?.buys,
-      sells5m: best.txns?.m5?.sells,
-      buys1h: best.txns?.h1?.buys,
-      sells1h: best.txns?.h1?.sells,
-      priceChange5m: best.priceChange?.m5,
-      priceChange1h: best.priceChange?.h1,
-      priceChange24h: best.priceChange?.h24,
+      priceUsd: best.priceUsd ? fin(parseFloat(best.priceUsd)) : undefined,
+      liquidityUsd: fin(best.liquidity?.usd),
+      fdvUsd: fin(best.fdv),
+      marketCapUsd: fin(best.marketCap),
+      volume5mUsd: fin(best.volume?.m5),
+      volume1hUsd: fin(best.volume?.h1),
+      volume24hUsd: fin(best.volume?.h24),
+      buys5m: fin(best.txns?.m5?.buys),
+      sells5m: fin(best.txns?.m5?.sells),
+      buys1h: fin(best.txns?.h1?.buys),
+      sells1h: fin(best.txns?.h1?.sells),
+      priceChange5m: fin(best.priceChange?.m5),
+      priceChange1h: fin(best.priceChange?.h1),
+      priceChange24h: fin(best.priceChange?.h24),
       raw: {
         pairAddress: best.pairAddress,
         dexId: best.dexId,

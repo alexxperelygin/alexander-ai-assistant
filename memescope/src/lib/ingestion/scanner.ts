@@ -69,9 +69,16 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
       return !st || !TERMINAL.includes(st);
     })
     .sort((a, b) => {
+      // Promising tokens refresh first, brand-new second, the rest by staleness.
+      const prio = (t: (typeof candidates)[number]): number => {
+        const st = t.opportunities[0]?.status;
+        if (st === "READY" || st === "CANDIDATE") return 0;
+        if (!st) return 1;
+        return 2;
+      };
       const au = a.opportunities[0]?.updatedAt?.getTime() ?? 0;
       const bu = b.opportunities[0]?.updatedAt?.getTime() ?? 0;
-      return au - bu; // least-recently evaluated first
+      return prio(a) - prio(b) || au - bu;
     })
     .slice(0, config.maxCandidatesPerCycle);
 
@@ -145,11 +152,13 @@ async function evaluateToken(
     // Enrich token identity/socials from snapshot raw metadata if present.
     const raw = snapshot.raw as { symbol?: string; name?: string; websites?: string[]; socials?: string[]; pairCreatedAt?: number } | undefined;
     if (raw && (raw.symbol || raw.websites?.length || raw.socials?.length || raw.pairCreatedAt)) {
+      // DexScreener is the canonical identity source — GeckoTerminal pool
+      // names parse into junk like "/Share" for some pools.
       await prisma.token.update({
         where: { id: tokenId },
         data: {
-          symbol: raw.symbol && symbol === "?" ? raw.symbol : undefined,
-          name: raw.name && symbol === "?" ? raw.name : undefined,
+          symbol: raw.symbol?.trim() || undefined,
+          name: raw.name?.trim() || undefined,
           website: raw.websites?.[0],
           twitter: raw.socials?.find((s) => s.startsWith("twitter"))?.split(":").slice(1).join(":"),
           pairCreatedAt: !pairCreatedAt && raw.pairCreatedAt ? new Date(raw.pairCreatedAt) : undefined,

@@ -37,7 +37,8 @@ function component(
   weight: number,
   parts: { label: string; value: number | null; score: number | null; formula: string }[],
 ): ScoreComponent {
-  const known = parts.filter((p) => p.score != null);
+  // Non-finite part scores are treated as "no data" — NaN must never reach the DB.
+  const known = parts.filter((p) => p.score != null && Number.isFinite(p.score));
   const score =
     known.length === 0
       ? 0
@@ -218,10 +219,13 @@ export function computeScores(
   // Confidence: 1 minus penalty per missing input group (cap at 0.9 penalty).
   const confidence = Math.max(0.1, 1 - Math.min(0.9, f.dataGaps.length * 0.12));
 
+  // Last line of defense: the three persisted floats must be finite.
+  const safe = (v: number, fallback: number): number => (Number.isFinite(v) ? v : fallback);
+
   return {
-    opportunityScore,
-    riskScore,
-    confidence,
+    opportunityScore: safe(opportunityScore, 0),
+    riskScore: safe(riskScore, 100),
+    confidence: safe(confidence, 0.1),
     momentum,
     liquidity,
     holderQuality,

@@ -6,7 +6,7 @@ import { Card, DataModeBadge, Empty, ScoreBar, StatusBadge, fmtUsd, timeAgo } fr
 export const dynamic = "force-dynamic";
 
 export default async function Overview() {
-  const [lastScan, topOpps, openPositions, notifications, todayClosed, sources] =
+  const [lastScan, topOpps, openPositions, notifications, todayClosed, sources, recentOpps] =
     await Promise.all([
       prisma.auditLog.findFirst({ where: { action: "scan.cycle" }, orderBy: { createdAt: "desc" } }),
       prisma.opportunity.findMany({
@@ -25,6 +25,11 @@ export default async function Overview() {
         where: { closedAt: { gte: startOfToday() } },
       }),
       prisma.sourceHealth.findMany(),
+      prisma.opportunity.findMany({
+        where: { updatedAt: { gte: new Date(Date.now() - 24 * 3600_000) } },
+        select: { status: true, rejections: true },
+        take: 1000,
+      }),
     ]);
 
   const scanInfo = lastScan?.details ? JSON.parse(lastScan.details) : null;
@@ -39,12 +44,89 @@ export default async function Overview() {
   // not recomputed here; the scanner stores it per opportunity in scores.
   const solRegime = topOpps[0] ? safeRegime(topOpps[0].scores) : null;
 
+  // "Что делать сейчас": actionable summary of the last 24h.
+  const ready = topOpps.filter((o) => o.status === "READY");
+  const nearest = topOpps.filter((o) => o.status !== "READY").slice(0, 3);
+  const rejCounts = new Map<string, number>();
+  let avoidCount = 0;
+  for (const o of recentOpps) {
+    if (o.status === "AVOID" || o.status === "DATA_UNAVAILABLE") avoidCount++;
+    if (o.rejections) {
+      try {
+        for (const r of JSON.parse(o.rejections) as { rule: string }[]) {
+          rejCounts.set(r.rule, (rejCounts.get(r.rule) ?? 0) + 1);
+        }
+      } catch { /* ignore malformed */ }
+    }
+  }
+  const topRejections = [...rejCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const RU_RULES: Record<string, string> = {
+    "too-new": "слишком молодые (<20 мин)",
+    "insufficient-liquidity": "мало ликвидности",
+    "insufficient-data": "не хватает данных",
+    "holder-concentration": "концентрация у топ-держателей",
+    "slippage-exceeds-limit": "слишком большое проскальзывание",
+    "mint-authority": "не отозван mint authority",
+    "freeze-authority": "не отозван freeze authority",
+    rugged: "признаки rug pull",
+    "suspected-wash-trading": "накрутка объёма",
+    "sell-not-confirmed": "продажа не подтверждается",
+    "critical-contract-risk": "критический риск контракта",
+    "insider-concentration": "инсайдерские кошельки",
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Overview</h1>
         <DataModeBadge mode={config.dataMode} />
       </div>
+
+      {ready.length > 0 ? (
+        <div className="card border-emerald-800/60 bg-emerald-950/20">
+          <h2 className="mb-2 text-sm font-semibold text-emerald-300">
+            ✅ Что делать сейчас: есть {ready.length} готовых сигнала(ов)
+          </h2>
+          <ul className="space-y-1 text-sm">
+            {ready.map((o) => (
+              <li key={o.id}>
+                <Link href={`/opportunity/${o.id}`} className="font-semibold text-emerald-300 hover:underline">
+                  {o.token.symbol}
+                </Link>{" "}
+                — score {o.opportunityScore.toFixed(0)}, risk {o.riskScore.toFixed(0)}. Откройте
+                карточку: там полный план (вход, размер, стоп, фиксация) и кнопка paper-позиции.
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="card">
+          <h2 className="mb-1 text-sm font-semibold text-zinc-300">Что делать сейчас: ничего покупать не нужно</h2>
+          <p className="text-sm text-zinc-400">
+            За последние 24ч проверено {recentOpps.length} токенов, отбраковано {avoidCount}.
+            {topRejections.length > 0 && (
+              <> Главные причины: {topRejections.map(([rule, n]) => `${RU_RULES[rule] ?? rule} (${n})`).join(", ")}.</>
+            )}{" "}
+            Это норма: почти все новые мем-коины — мусор или ловушки, и фильтры должны их резать.
+            Качественный READY-сигнал — редкое событие; когда он появится, здесь будет зелёная
+            карточка с планом действий{config.dataMode === "live" ? " (и придёт уведомление)" : ""}.
+          </p>
+          {nearest.length > 0 && (
+            <p className="mt-2 text-xs text-zinc-500">
+              Ближе всех к сигналу:{" "}
+              {nearest.map((o, i) => (
+                <span key={o.id}>
+                  {i > 0 && " · "}
+                  <Link href={`/opportunity/${o.id}`} className="text-sky-400 hover:underline">
+                    {o.token.symbol}
+                  </Link>{" "}
+                  ({o.opportunityScore.toFixed(0)}/100, {o.status})
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="card">
