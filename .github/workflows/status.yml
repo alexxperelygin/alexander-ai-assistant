@@ -1,0 +1,57 @@
+name: VPS status report
+
+# Каждые 6 часов (и вручную) заходит на VPS по SSH, обновляет код проекта,
+# собирает статус MemeScope и публикует его в status/latest.md.
+# Требуются секреты репозитория (Settings → Secrets and variables → Actions):
+#   VPS_HOST         — IP сервера
+#   VPS_SSH_PASSWORD — пароль root
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vps-status
+  cancel-in-progress: false
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_PASSWORD: ${{ secrets.VPS_SSH_PASSWORD }}
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_SSH_PASSWORD" ]; then
+            echo "::error::Добавьте секреты VPS_HOST и VPS_SSH_PASSWORD в Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+
+      - name: Collect status over SSH
+        env:
+          SSHPASS: ${{ secrets.VPS_SSH_PASSWORD }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
+          mkdir -p status
+          sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" \
+            'git -C /opt/alexander-ai-assistant pull -q origin main || true; cd /opt/alexander-ai-assistant/memescope && npx tsx deploy/status.mts' \
+            > status/latest.md
+          echo "---- отчёт ----"
+          cat status/latest.md
+
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add status/latest.md
+          git commit -m "status: update VPS report [skip ci]" || echo "нет изменений"
+          git pull --rebase origin main
+          git push
