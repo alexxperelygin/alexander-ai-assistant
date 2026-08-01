@@ -1,0 +1,91 @@
+name: VPS ops
+
+# «Пульт управления» сервером: запускается вручную (workflow_dispatch) с
+# выбором задачи. Позволяет обслуживать VPS без захода в терминал:
+#   status   — снять отчёт о состоянии → status/latest.md
+#   update   — обновить код на сервере (installer) и снять отчёт
+#   backtest — запустить backtest (24h и 6h) → status/backtest.md + отчёт
+#   restart  — перезапустить сервисы pm2 и снять отчёт
+# Требуются секреты VPS_HOST и VPS_SSH_PASSWORD (Settings → Secrets → Actions).
+# Запуск доступен только пользователям с правом записи в репозиторий.
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Что сделать на сервере"
+        required: true
+        default: "status"
+        type: choice
+        options: [status, update, backtest, restart]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vps-ops
+  cancel-in-progress: false
+
+jobs:
+  ops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_PASSWORD: ${{ secrets.VPS_SSH_PASSWORD }}
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_SSH_PASSWORD" ]; then
+            echo "::error::Добавьте секреты VPS_HOST и VPS_SSH_PASSWORD в Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+
+      - name: Run task over SSH
+        env:
+          SSHPASS: ${{ secrets.VPS_SSH_PASSWORD }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          TASK: ${{ inputs.task }}
+        run: |
+          sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
+          run_ssh() { sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" "$1"; }
+          mkdir -p status
+
+          case "$TASK" in
+            update)
+              echo "== Обновление кода на сервере =="
+              run_ssh 'git -C /opt/alexander-ai-assistant fetch -q origin main && git -C /opt/alexander-ai-assistant reset -q --hard origin/main && bash /opt/alexander-ai-assistant/memescope/deploy/install.sh' | tail -40
+              ;;
+            backtest)
+              echo "== Backtest 24h и 6h =="
+              {
+                echo "# Backtest ($(date -u +%FT%TZ))"
+                echo ""
+                echo "## Горизонт 24h"
+                run_ssh 'cd /opt/alexander-ai-assistant/memescope && npm run backtest --silent -- --horizon 24h --mode live' || echo "(ошибка запуска)"
+                echo ""
+                echo "## Горизонт 6h"
+                run_ssh 'cd /opt/alexander-ai-assistant/memescope && npm run backtest --silent -- --horizon 6h --mode live' || echo "(ошибка запуска)"
+              } > status/backtest.md
+              cat status/backtest.md
+              ;;
+            restart)
+              echo "== Перезапуск сервисов =="
+              run_ssh 'pm2 restart memescope-web memescope-worker && pm2 status'
+              ;;
+            status) ;; # только отчёт ниже
+          esac
+
+          echo "== Снимаю отчёт =="
+          run_ssh 'git -C /opt/alexander-ai-assistant pull -q origin main >/dev/null 2>&1 || true; cd /opt/alexander-ai-assistant/memescope && npx tsx deploy/status.mts' > status/latest.md
+          cat status/latest.md
+
+      - name: Commit reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add status/
+          git commit -m "status: ${{ inputs.task }} report [skip ci]" || echo "нет изменений"
+          git pull --rebase origin main
+          git push
