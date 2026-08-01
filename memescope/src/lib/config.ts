@@ -4,7 +4,9 @@ export const config = {
   dataMode: (process.env.DATA_MODE === "mock" ? "mock" : "live") as DataMode,
   scanIntervalSec: intEnv("SCAN_INTERVAL_SEC", 60),
   monitorIntervalSec: intEnv("MONITOR_INTERVAL_SEC", 30),
-  maxCandidatesPerCycle: intEnv("MAX_CANDIDATES_PER_CYCLE", 8),
+  // 30/cycle is safe: the cheap DexScreener screen (250ms throttle) filters
+  // most tokens out before the scarce RugCheck/Jupiter budget is touched.
+  maxCandidatesPerCycle: intEnv("MAX_CANDIDATES_PER_CYCLE", 30),
   solanaRpcUrl: process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com",
   birdeyeApiKey: process.env.BIRDEYE_API_KEY || null,
   heliusApiKey: process.env.HELIUS_API_KEY || null,

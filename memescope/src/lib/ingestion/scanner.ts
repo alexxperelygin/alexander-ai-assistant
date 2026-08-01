@@ -198,6 +198,13 @@ async function evaluateToken(
     }
   }
 
+  // Budget funnel: RugCheck (~0.5 rps) and Jupiter (~1 rps) are the scarce
+  // resources while DexScreener is cheap. A token that fails the liquidity
+  // gate is AVOID regardless of its risk report, so we only spend the scarce
+  // budget on tokens that could actually become signals.
+  const passesLiquidityGate =
+    snapshot?.liquidityUsd != null && snapshot.liquidityUsd >= settings.minLiquidityUsd;
+
   // Risk report (cached).
   let risk: ContractRiskReport | null = null;
   const cached = await prisma.riskReport.findFirst({
@@ -221,7 +228,7 @@ async function evaluateToken(
     };
   } else {
     try {
-      risk = await providers.risk.getRiskReport(mint);
+      risk = passesLiquidityGate ? await providers.risk.getRiskReport(mint) : null;
     } catch {
       risk = null;
     }
