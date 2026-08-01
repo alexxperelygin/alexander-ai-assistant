@@ -18,6 +18,11 @@ on:
         default: "status"
         type: choice
         options: [status, update, backtest, restart]
+  # Альтернативный способ запуска (для интеграций без права actions:write):
+  # закоммитить нужную задачу первой строкой в ops/command.txt.
+  push:
+    branches: [main]
+    paths: ["ops/command.txt"]
 
 permissions:
   contents: write
@@ -42,11 +47,25 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve task
+        id: task
+        env:
+          INPUT_TASK: ${{ inputs.task }}
+        run: |
+          if [ -n "$INPUT_TASK" ]; then
+            TASK="$INPUT_TASK"
+          else
+            TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
+          fi
+          case "$TASK" in status|update|backtest|restart) ;; *) TASK=status ;; esac
+          echo "task=$TASK" >> "$GITHUB_OUTPUT"
+          echo "Задача: $TASK"
+
       - name: Run task over SSH
         env:
           SSHPASS: ${{ secrets.VPS_SSH_PASSWORD }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
-          TASK: ${{ inputs.task }}
+          TASK: ${{ steps.task.outputs.task }}
         run: |
           sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
           run_ssh() { sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" "$1"; }
@@ -86,6 +105,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add status/
-          git commit -m "status: ${{ inputs.task }} report [skip ci]" || echo "нет изменений"
+          git commit -m "status: ${{ steps.task.outputs.task }} report [skip ci]" || echo "нет изменений"
           git pull --rebase origin main
           git push
