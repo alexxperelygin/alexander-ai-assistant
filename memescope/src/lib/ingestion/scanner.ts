@@ -18,7 +18,10 @@ import type { ContractRiskReport, MarketSnapshot, OpportunityStatus } from "../t
 // Every persisted record carries source/dataMode/freshness provenance.
 
 const RISK_REPORT_TTL_MS = 10 * 60 * 1000;
-const TERMINAL: OpportunityStatus[] = ["EXIT", "INVALIDATED", "AVOID"];
+// Only truly finished lifecycles are terminal. AVOID is deliberately NOT here:
+// early rejections (too-new, thin liquidity, no data) are transient and the
+// token must be re-checked as it matures.
+const TERMINAL: OpportunityStatus[] = ["EXIT", "INVALIDATED"];
 
 export async function scanOnce(now = new Date()): Promise<{ discovered: number; evaluated: number }> {
   const providers = getProviders();
@@ -52,39 +55,66 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
     solChange24hPct = null; // regime unknown → score component reports "нет данных"
   }
 
-  // --- 2. Candidate batch: youngest fresh tokens + stale non-terminal opps ---
+  // --- 2. Candidate batch ---
+  // Evaluation budget is scarce (rate limits) while discovery floods tens of
+  // thousands of tokens per day, so selection matters more than throughput:
+  //  a) tokens younger than minTokenAgeMin are NOT evaluated at all — they can
+  //     only auto-AVOID ("too-new") and would burn the whole budget;
+  //  b) AVOID is NOT terminal: most early rejections (too-new, thin liquidity,
+  //     missing data) are transient, so rejected tokens re-enter the queue
+  //     least-recently-checked first;
+  //  c) slots per cycle: promising (READY/CANDIDATE/WATCH) refresh first, the
+  //     rest split between never-evaluated tokens and AVOID re-checks.
   const cutoff = new Date(now.getTime() - settings.maxTokenAgeMin * 60_000);
-  const candidates = await prisma.token.findMany({
-    where: {
-      OR: [{ pairCreatedAt: { gte: cutoff } }, { pairCreatedAt: null, firstSeenAt: { gte: cutoff } }],
-      mint: { not: SOL_MINT },
-    },
-    include: { opportunities: { orderBy: { updatedAt: "desc" }, take: 1 } },
-    orderBy: { firstSeenAt: "desc" },
-    take: 100,
+  const minAgeCutoff = new Date(now.getTime() - settings.minTokenAgeMin * 60_000);
+  const ageWindow = {
+    mint: { not: SOL_MINT },
+    OR: [
+      { pairCreatedAt: { gte: cutoff, lte: minAgeCutoff } },
+      { pairCreatedAt: null, firstSeenAt: { gte: cutoff, lte: minAgeCutoff } },
+    ],
+  };
+  const slots = config.maxCandidatesPerCycle;
+
+  const promising = await prisma.opportunity.findMany({
+    where: { status: { in: ["READY", "CANDIDATE", "WATCH"] }, token: ageWindow },
+    orderBy: { updatedAt: "asc" },
+    take: slots,
+    include: { token: true },
   });
-  const batch = candidates
-    .filter((t) => {
-      const st = t.opportunities[0]?.status as OpportunityStatus | undefined;
-      return !st || !TERMINAL.includes(st);
-    })
-    .sort((a, b) => {
-      // Promising tokens refresh first, brand-new second, the rest by staleness.
-      const prio = (t: (typeof candidates)[number]): number => {
-        const st = t.opportunities[0]?.status;
-        if (st === "READY" || st === "CANDIDATE") return 0;
-        if (!st) return 1;
-        return 2;
-      };
-      const au = a.opportunities[0]?.updatedAt?.getTime() ?? 0;
-      const bu = b.opportunities[0]?.updatedAt?.getTime() ?? 0;
-      return prio(a) - prio(b) || au - bu;
-    })
-    .slice(0, config.maxCandidatesPerCycle);
+  const fresh = await prisma.token.findMany({
+    where: { ...ageWindow, opportunities: { none: {} } },
+    orderBy: { firstSeenAt: "desc" }, // just crossed min age — hottest first
+    take: slots,
+  });
+  const recheck = await prisma.opportunity.findMany({
+    where: { status: { in: ["AVOID", "DATA_UNAVAILABLE", "HOLD", "BUY", "TAKE_PROFIT"] }, token: ageWindow },
+    orderBy: { updatedAt: "asc" }, // least recently re-checked first
+    take: slots,
+    include: { token: true },
+  });
+
+  type Candidate = { token: (typeof fresh)[number]; lastStatus?: OpportunityStatus };
+  const seen = new Set<string>();
+  const batch: Candidate[] = [];
+  const push = (token: (typeof fresh)[number], lastStatus?: OpportunityStatus) => {
+    if (batch.length < slots && !seen.has(token.id) && !TERMINAL.includes(lastStatus as OpportunityStatus)) {
+      seen.add(token.id);
+      batch.push({ token, lastStatus });
+    }
+  };
+  for (const o of promising) push(o.token, o.status as OpportunityStatus);
+  // Interleave never-evaluated tokens and AVOID re-checks for the rest.
+  for (let i = 0; batch.length < slots && (i < fresh.length || i < recheck.length); i++) {
+    const f = fresh[i];
+    if (f) push(f);
+    const r = recheck[i];
+    if (r) push(r.token, r.status as OpportunityStatus);
+  }
 
   // --- 3-5. Evaluate ---
   let evaluated = 0;
-  for (const token of batch) {
+  for (const { token } of batch) {
     try {
       await evaluateToken(token.id, token.mint, token.symbol, token.dex, token.pairCreatedAt, {
         solChange24hPct,
