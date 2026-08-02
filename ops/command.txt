@@ -1,2 +1,2 @@
-restart
-run: 5
+update
+run: 6

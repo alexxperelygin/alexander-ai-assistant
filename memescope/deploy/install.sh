@@ -93,8 +93,10 @@ else
 fi
 pm2 delete memescope-web >/dev/null 2>&1 || true
 pm2 delete memescope-worker >/dev/null 2>&1 || true
-PORT=$WEB_PORT pm2 start npm --name memescope-web --cwd "$APP" -- start
-pm2 start npm --name memescope-worker --cwd "$APP" -- run worker
+# max-memory-restart страхует от утечек/OOM: pm2 мягко перезапустит процесс
+# до того, как это грубо сделает ядро (и заодно от подвисших состояний).
+PORT=$WEB_PORT pm2 start npm --name memescope-web --cwd "$APP" --max-memory-restart 500M -- start
+pm2 start npm --name memescope-worker --cwd "$APP" --max-memory-restart 700M --restart-delay 5000 -- run worker
 pm2 save
 pm2 startup systemd -u root --hp /root >/dev/null || true
 pm2 save >/dev/null
