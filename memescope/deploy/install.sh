@@ -29,8 +29,14 @@ HAD_NGINX=0; command -v nginx >/dev/null && HAD_NGINX=1
 
 say "1/8 Системные пакеты"
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
-apt-get install -y curl git nginx apache2-utils openssl ca-certificates iproute2 >/dev/null
+# На общем сервере могут быть сломанные сторонние apt-репозитории (например,
+# зеркало docker с битыми индексами). Это не должно валить установку MemeScope:
+# терпим ошибку apt update и проверяем фактическое наличие нужных бинарников.
+apt-get update -y || echo "⚠ apt update завершился с ошибками (вероятно, сторонний репозиторий) — продолжаю"
+apt-get install -y curl git nginx apache2-utils openssl ca-certificates iproute2 >/dev/null || true
+for bin in curl git nginx htpasswd openssl ss; do
+  command -v "$bin" >/dev/null || { echo "Не удалось установить '$bin' — прерываюсь"; exit 1; }
+done
 
 say "2/8 Swap (если мало RAM)"
 TOTAL_MB=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)

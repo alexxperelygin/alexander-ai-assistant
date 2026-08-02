@@ -74,7 +74,15 @@ jobs:
           case "$TASK" in
             update)
               echo "== Обновление кода на сервере =="
-              run_ssh 'git -C /opt/alexander-ai-assistant fetch -q origin main && git -C /opt/alexander-ai-assistant reset -q --hard origin/main && bash /opt/alexander-ai-assistant/memescope/deploy/install.sh' | tail -40
+              # ВАЖНО: без пайпа сразу за ssh — `| tail` маскировал код ошибки,
+              # и провалившиеся деплои выглядели успешными.
+              if ! run_ssh 'git -C /opt/alexander-ai-assistant fetch -q origin main && git -C /opt/alexander-ai-assistant reset -q --hard origin/main && bash /opt/alexander-ai-assistant/memescope/deploy/install.sh' > /tmp/update.log 2>&1; then
+                tail -60 /tmp/update.log
+                echo "::error::Установщик на сервере завершился с ошибкой"
+                exit 1
+              fi
+              tail -40 /tmp/update.log
+              grep -q "ГОТОВО" /tmp/update.log || { echo "::error::Маркер ГОТОВО не найден — установка не дошла до конца"; exit 1; }
               ;;
             backtest)
               echo "== Backtest 24h и 6h =="
