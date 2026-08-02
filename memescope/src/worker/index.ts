@@ -10,16 +10,42 @@ import { monitorPositionsOnce } from "../lib/monitor/positions";
 
 let stopping = false;
 
+// Watchdog: a cycle that runs this long is considered hung (observed in prod:
+// worker silently stalled ~hourly with no logged error). We exit(1) so pm2
+// restarts the process with a clean slate instead of staying wedged forever.
+const CYCLE_TIMEOUT_MS = 10 * 60_000;
+
+async function withTimeout(fn: () => Promise<void>, name: string): Promise<void> {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    await Promise.race([
+      fn(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`WATCHDOG: ${name} cycle exceeded ${CYCLE_TIMEOUT_MS / 60000} min`)),
+          CYCLE_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function loop(name: string, intervalSec: number, fn: () => Promise<void>): Promise<void> {
   while (!stopping) {
     const started = Date.now();
     try {
-      await fn();
+      await withTimeout(fn, name);
     } catch (err) {
       console.error(`[${name}] cycle failed:`, err);
       await prisma.auditLog.create({
         data: { actor: "worker", action: `${name}.cycle.error`, details: String(err) },
       }).catch(() => {});
+      if (String(err).includes("WATCHDOG")) {
+        // Hung cycle: restart the whole process (pm2 brings us back).
+        process.exit(1);
+      }
     }
     const elapsed = Date.now() - started;
     const wait = Math.max(1000, intervalSec * 1000 - elapsed);
