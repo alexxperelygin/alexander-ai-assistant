@@ -39,13 +39,20 @@ async function loop(name: string, intervalSec: number, fn: () => Promise<void>):
       await withTimeout(fn, name);
     } catch (err) {
       console.error(`[${name}] cycle failed:`, err);
+      if (String(err).includes("WATCHDOG")) {
+        // Hung cycle: restart the whole process (pm2 brings us back).
+        // The DB itself may be what's wedged, so never await it here —
+        // best-effort audit write with a hard exit either way.
+        setTimeout(() => process.exit(1), 3000).unref();
+        prisma.auditLog
+          .create({ data: { actor: "worker", action: `${name}.cycle.error`, details: String(err) } })
+          .catch(() => {})
+          .finally(() => process.exit(1));
+        return;
+      }
       await prisma.auditLog.create({
         data: { actor: "worker", action: `${name}.cycle.error`, details: String(err) },
       }).catch(() => {});
-      if (String(err).includes("WATCHDOG")) {
-        // Hung cycle: restart the whole process (pm2 brings us back).
-        process.exit(1);
-      }
     }
     const elapsed = Date.now() - started;
     const wait = Math.max(1000, intervalSec * 1000 - elapsed);

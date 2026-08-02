@@ -30,6 +30,10 @@ model Token {
   riskReports   RiskReport[]
   opportunities Opportunity[]
   positions     Position[]
+
+  // Candidate-selection queries filter/order by these on 100k+ rows.
+  @@index([firstSeenAt])
+  @@index([pairCreatedAt])
 }
 
 // One observation of market state. Every row records provenance:
@@ -111,6 +115,10 @@ model Opportunity {
   positions Position[]
 
   @@index([status, updatedAt])
+  // SQLite does not auto-index FKs; without this, `opportunities: none`
+  // relation filters degrade to a full scan per token (200k × 115k rows —
+  // the production hang that kept scan cycles from ever completing).
+  @@index([tokenId])
 }
 
 // Append-only signal/state-transition history for every opportunity.
