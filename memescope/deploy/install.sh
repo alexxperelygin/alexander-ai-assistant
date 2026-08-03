@@ -79,7 +79,10 @@ npm install --no-audit --no-fund
 # Миграция старого дефолта: пропускная способность сканера 8 → 30 за цикл
 # (дешёвый DexScreener-скрининг фильтрует токены до трат RugCheck/Jupiter).
 sed -i 's/^MAX_CANDIDATES_PER_CYCLE=8$/MAX_CANDIDATES_PER_CYCLE=30/' .env || true
-npx prisma db push --skip-generate >/dev/null
+# SQLite однописательный: работающий worker держит блокировку, и db push
+# падает с 'database is locked'. Останавливаем сервисы перед миграцией схемы.
+pm2 stop memescope-web memescope-worker >/dev/null 2>&1 || true
+npx prisma db push --skip-generate
 npx prisma generate >/dev/null
 NODE_OPTIONS=--max-old-space-size=1536 npm run build
 
