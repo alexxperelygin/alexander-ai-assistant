@@ -19,6 +19,8 @@ export const READY_SCORE = 65;
 export const CANDIDATE_SCORE = 50;
 export const WATCH_SCORE = 35;
 export const MIN_CONFIDENCE_FOR_READY = 0.6;
+/** Points below the entry threshold a status is retained (anti-flapping). */
+export const HYSTERESIS_POINTS = 5;
 
 export function decideStatus(args: {
   features: FeatureVector;
@@ -68,14 +70,24 @@ export function decideStatus(args: {
     };
   }
 
-  if (s >= READY_SCORE && scores.confidence >= MIN_CONFIDENCE_FOR_READY) {
+  // Hysteresis: a token already in a status keeps it until the score falls a
+  // few points BELOW the entry threshold. Without this, borderline tokens
+  // flapped READY↔CANDIDATE every cycle, flooding signal history with
+  // duplicate transitions (observed in prod: 34 events from ~5 tokens).
+  const readyGate =
+    READY_SCORE - (args.previousStatus === "READY" ? HYSTERESIS_POINTS : 0);
+  const candidateGate =
+    CANDIDATE_SCORE -
+    (args.previousStatus === "CANDIDATE" || args.previousStatus === "READY" ? HYSTERESIS_POINTS : 0);
+
+  if (s >= readyGate && scores.confidence >= MIN_CONFIDENCE_FOR_READY) {
     reasons.push(
-      `Score ≥ ${READY_SCORE} и confidence ≥ ${MIN_CONFIDENCE_FOR_READY * 100}% — сигнал готов; подтверждение покупки остаётся за пользователем.`,
+      `Score ≥ ${readyGate} и confidence ≥ ${MIN_CONFIDENCE_FOR_READY * 100}% — сигнал готов; подтверждение покупки остаётся за пользователем.`,
     );
     return { status: "READY", reasons };
   }
-  if (s >= CANDIDATE_SCORE) {
-    reasons.push(`Score в диапазоне ${CANDIDATE_SCORE}–${READY_SCORE} — кандидат, ждём подтверждения momentum/данных.`);
+  if (s >= candidateGate) {
+    reasons.push(`Score в диапазоне ${candidateGate}–${READY_SCORE} — кандидат, ждём подтверждения momentum/данных.`);
     return { status: "CANDIDATE", reasons };
   }
   if (s >= WATCH_SCORE) {

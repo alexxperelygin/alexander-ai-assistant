@@ -46,7 +46,18 @@ export async function runBacktest(params: BacktestParams = DEFAULT_BACKTEST_PARA
       include: { opportunity: { include: { token: true } } },
       orderBy: { createdAt: "asc" },
     });
-    const filtered = events.filter((e) => e.opportunity.dataMode === params.dataMode);
+    const modeEvents = events.filter((e) => e.opportunity.dataMode === params.dataMode);
+
+    // Deduplicate: borderline tokens can emit repeated READY transitions;
+    // counting each repeat as an independent trade would double-weight one
+    // token's outcome. Keep the first signal per token per 6-hour window.
+    const lastKept = new Map<string, number>();
+    const filtered = modeEvents.filter((ev) => {
+      const prev = lastKept.get(ev.opportunity.tokenId);
+      if (prev != null && ev.createdAt.getTime() - prev < 6 * 3600_000) return false;
+      lastKept.set(ev.opportunity.tokenId, ev.createdAt.getTime());
+      return true;
+    });
 
     const strategyOutcomes: SignalOutcome[] = [];
     for (const ev of filtered) {
@@ -60,15 +71,19 @@ export async function runBacktest(params: BacktestParams = DEFAULT_BACKTEST_PARA
     // strategy the scoring must beat to prove selection adds value.
     const baselineOutcomes = await baselineAllTokens(params);
 
-    const insufficient = strategyOutcomes.length < MIN_SIGNALS_FOR_METRICS;
     const strategy = aggregate(strategyOutcomes, params.horizon);
     const baseline = aggregate(baselineOutcomes, params.horizon);
+
+    // The gate must count MEASURABLE outcomes at this horizon, not raw
+    // signals: 34 signals with 2 evaluable outcomes is still NO_DATA, and an
+    // "edge" verdict on n=2 would be an overclaim.
+    const insufficient = strategy.evaluable < MIN_SIGNALS_FOR_METRICS;
 
     const from = filtered[0]?.createdAt ?? null;
     const to = filtered[filtered.length - 1]?.createdAt ?? null;
 
     const verdict = insufficient
-      ? `NO_DATA: только ${strategyOutcomes.length} сигналов (< ${MIN_SIGNALS_FOR_METRICS}). Выводов о преимуществе сделать нельзя.`
+      ? `NO_DATA: сигналов ${strategyOutcomes.length}, но измеримых исходов на горизонте ${params.horizon} только ${strategy.evaluable} (< ${MIN_SIGNALS_FOR_METRICS}). Выводов о преимуществе сделать нельзя.`
       : edgeVerdict(strategy, baseline);
 
     const done = await prisma.backtestRun.update({
