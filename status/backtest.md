@@ -1,25 +1,25 @@
-# Backtest (2026-08-03T03:04:34Z)
+# Backtest (2026-08-03T20:39:45Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
-Status: DONE
-NO EDGE: expectancy -10.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+Status: NO_DATA
+NO_DATA: сигналов 23, но измеримых исходов на горизонте 24h только 7 (< 20). Выводов о преимуществе сделать нельзя.
 {
   "strategy": {
-    "signals": 34,
+    "signals": 23,
     "horizon": "24h",
-    "evaluable": 3,
-    "winRate": 0.3333333333333333,
-    "expectancy": -0.10801158061839837,
-    "medianReturn": -0.11502849024247752,
-    "profitFactor": 0.07609995508289824,
-    "maxDrawdown": 0.3055602221799515,
+    "evaluable": 7,
+    "winRate": 0.42857142857142855,
+    "expectancy": 0.05674718682299979,
+    "medianReturn": -0.030245455462505788,
+    "profitFactor": 1.8627328846095874,
+    "maxDrawdown": 0.30550896216476187,
     "rugRate": 0,
-    "unclosablePct": 0.4411764705882353,
+    "unclosablePct": 0.2608695652173913,
     "byMonth": {
       "2026-08": {
-        "n": 3,
-        "meanReturn": -0.10801158061839837
+        "n": 7,
+        "meanReturn": 0.05674718682299979
       }
     }
   },
@@ -36,29 +36,29 @@ NO EDGE: expectancy -10.8% ≤ 0 после издержек. Сигналы в 
     "unclosablePct": 1,
     "byMonth": {}
   },
-  "verdict": "NO EDGE: expectancy -10.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO_DATA: сигналов 23, но измеримых исходов на горизонте 24h только 7 (< 20). Выводов о преимуществе сделать нельзя."
 }
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
-Status: DONE
-PRELIMINARY EDGE: expectancy 0.3% > baseline 0.0%. Требуется больше данных и out-of-sample подтверждение прежде чем доверять.
+Status: NO_DATA
+NO_DATA: сигналов 23, но измеримых исходов на горизонте 6h только 7 (< 20). Выводов о преимуществе сделать нельзя.
 {
   "strategy": {
-    "signals": 34,
+    "signals": 23,
     "horizon": "6h",
-    "evaluable": 2,
-    "winRate": 0.5,
-    "expectancy": 0.0025872596342169096,
-    "medianReturn": 0.0025872596342169096,
-    "profitFactor": 1.1535076677339824,
-    "maxDrawdown": 0.03370853941576968,
+    "evaluable": 7,
+    "winRate": 0.5714285714285714,
+    "expectancy": -0.004429086457719508,
+    "medianReturn": 0.001535072626832168,
+    "profitFactor": 0.9344153303894144,
+    "maxDrawdown": 0.363325881568356,
     "rugRate": 0,
-    "unclosablePct": 0.4411764705882353,
+    "unclosablePct": 0.2608695652173913,
     "byMonth": {
       "2026-08": {
-        "n": 2,
-        "meanReturn": 0.0025872596342169096
+        "n": 7,
+        "meanReturn": -0.004429086457719508
       }
     }
   },
@@ -75,5 +75,5 @@ PRELIMINARY EDGE: expectancy 0.3% > baseline 0.0%. Требуется больш
     "unclosablePct": 1,
     "byMonth": {}
   },
-  "verdict": "PRELIMINARY EDGE: expectancy 0.3% > baseline 0.0%. Требуется больше данных и out-of-sample подтверждение прежде чем доверять."
+  "verdict": "NO_DATA: сигналов 23, но измеримых исходов на горизонте 6h только 7 (< 20). Выводов о преимуществе сделать нельзя."
 }
