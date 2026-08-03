@@ -1,42 +1,42 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-03T03:04:45.530Z (UTC)
+Сгенерирован: 2026-08-03T03:08:12.733Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 204660; снапшотов за 24ч: 7466
+- Токенов в базе: 204720; снапшотов за 24ч: 7514
 - Ошибок в audit log за 24ч: 0
 
 ## Статусы возможностей
-- AVOID: 114113
-- DATA_UNAVAILABLE: 2730
-- WATCH: 12
-- CANDIDATE: 6
-- READY: 2
+- AVOID: 114103
+- DATA_UNAVAILABLE: 2760
+- WATCH: 9
+- CANDIDATE: 8
+- READY: 1
 
 ## Топ-5 по score (не отбракованные)
-- CATE: READY, score 69.0, risk 6.6, conf 100% (обновлено 0 мин назад)
-- Jimothy: READY, score 65.1, risk 6.6, conf 100% (обновлено 1 мин назад)
-- TripleT: CANDIDATE, score 64.5, risk 0.6, conf 100% (обновлено 1 мин назад)
-- TNOS: CANDIDATE, score 57.9, risk 9.0, conf 88% (обновлено 0 мин назад)
-- USUR: CANDIDATE, score 56.8, risk 10.0, conf 100% (обновлено 0 мин назад)
+- CATE: READY, score 71.8, risk 0.0, conf 100% (обновлено 1 мин назад)
+- TripleT: CANDIDATE, score 63.9, risk 1.0, conf 100% (обновлено 1 мин назад)
+- Jimothy: CANDIDATE, score 63.5, risk 6.7, conf 100% (обновлено 1 мин назад)
+- USUR: CANDIDATE, score 56.7, risk 10.2, conf 100% (обновлено 1 мин назад)
+- USUR: CANDIDATE, score 54.1, risk 7.4, conf 100% (обновлено 0 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- CATE — 2026-08-03T02:51:41.332Z (13 мин назад)
-- TripleT — 2026-08-03T02:51:34.735Z (13 мин назад)
-- Jimothy — 2026-08-03T02:51:31.434Z (13 мин назад)
-- Jimothy — 2026-08-03T02:48:31.275Z (16 мин назад)
-- Jimothy — 2026-08-03T02:45:31.259Z (19 мин назад)
+- CATE — 2026-08-03T02:51:41.332Z (17 мин назад)
+- TripleT — 2026-08-03T02:51:34.735Z (17 мин назад)
+- Jimothy — 2026-08-03T02:51:31.434Z (17 мин назад)
+- Jimothy — 2026-08-03T02:48:31.275Z (20 мин назад)
+- Jimothy — 2026-08-03T02:45:31.259Z (23 мин назад)
 
 ## Позиции
 - Открытых: 0; всего: 0; realized P&L: $0.00
 
 ## Последний backtest
-- DONE (0 мин назад): PRELIMINARY EDGE: expectancy 0.3% > baseline 0.0%. Требуется больше данных и out-of-sample подтверждение прежде чем доверять.
+- DONE (4 мин назад): PRELIMINARY EDGE: expectancy 0.3% > baseline 0.0%. Требуется больше данных и out-of-sample подтверждение прежде чем доверять.
 
 ## Источники данных
-- dexscreener: ok (ok 135279 / err 4, последний успех 0 мин назад)
-- geckoterminal: ok (ok 14643 / err 1, последний успех 1 мин назад)
-- jupiter: ok (ok 41409 / err 431, последний успех 0 мин назад)
-- rugcheck: ok (ok 115252 / err 370, последний успех 1 мин назад)
+- dexscreener: ok (ok 135370 / err 4, последний успех 0 мин назад)
+- geckoterminal: ok (ok 14647 / err 1, последний успех 0 мин назад)
+- jupiter: ok (ok 41570 / err 431, последний успех 0 мин назад)
+- rugcheck: ok (ok 115263 / err 370, последний успех 0 мин назад)
 
