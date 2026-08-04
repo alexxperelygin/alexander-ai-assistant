@@ -7,6 +7,7 @@ import { computeScores } from "../scoring/engine";
 import { buildTradePlan, computePositionSizeUsd, decideStatus } from "../strategy/lifecycle";
 import { getRiskSettings } from "../settings";
 import { notify } from "../notify/notifier";
+import { openPosition } from "../paper/portfolio";
 import type { ContractRiskReport, MarketSnapshot, OpportunityStatus } from "../types";
 
 // One full scan cycle:
@@ -349,6 +350,35 @@ async function evaluateToken(
           `Это исследовательский сигнал, не гарантия прибыли. Покупку подтверждаете вы.`,
         ].filter(Boolean).join("\n"),
       );
+
+      // Auto paper-trade every READY signal (simulation only, no real funds):
+      // this builds the execution-quality statistics (fills, stops, TPs, P&L)
+      // that gate any future decision about live trading. All risk limits in
+      // openPosition (exposure cap, daily loss, cooldown) still apply.
+      if (settings.paperTradingEnabled && plan && snapshot?.priceUsd != null) {
+        const openPos = await prisma.position.findFirst({
+          where: { tokenId, status: { in: ["OPEN", "PARTIAL_EXIT"] } },
+        });
+        if (!openPos) {
+          try {
+            await openPosition({
+              tokenId,
+              opportunityId: opp.id,
+              mode: "paper",
+              priceUsd: snapshot.priceUsd,
+              sizeUsd: plan.positionSizeUsd,
+              liquidityUsd: snapshot.liquidityUsd ?? null,
+              observedImpactPct: sellQuote?.priceImpactPct ?? null,
+              plan,
+            });
+          } catch (err) {
+            // Risk limits refusing a trade is normal operation — record why.
+            await prisma.auditLog.create({
+              data: { actor: "worker", action: "paper.autoopen.skipped", details: JSON.stringify({ mint, reason: String(err) }) },
+            }).catch(() => {});
+          }
+        }
+      }
     }
   }
 }
