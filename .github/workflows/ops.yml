@@ -17,7 +17,7 @@ on:
         required: true
         default: "status"
         type: choice
-        options: [status, update, backtest, restart]
+        options: [status, update, backtest, restart, domain]
   # Альтернативный способ запуска (для интеграций без права actions:write):
   # закоммитить нужную задачу первой строкой в ops/command.txt.
   push:
@@ -57,7 +57,7 @@ jobs:
           else
             TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
           fi
-          case "$TASK" in status|update|backtest|restart) ;; *) TASK=status ;; esac
+          case "$TASK" in status|update|backtest|restart|domain) ;; *) TASK=status ;; esac
           echo "task=$TASK" >> "$GITHUB_OUTPUT"
           echo "Задача: $TASK"
 
@@ -100,6 +100,16 @@ jobs:
             restart)
               echo "== Перезапуск сервисов =="
               run_ssh 'pm2 restart memescope-web memescope-worker && pm2 status'
+              ;;
+            domain)
+              echo "== Подключение домена =="
+              if ! run_ssh 'git -C /opt/alexander-ai-assistant pull -q origin main; bash /opt/alexander-ai-assistant/memescope/deploy/setup-domain.sh' > /tmp/domain.log 2>&1; then
+                tail -40 /tmp/domain.log
+                echo "::error::Подключение домена не завершилось"
+                exit 1
+              fi
+              tail -30 /tmp/domain.log
+              grep -q "DOMAIN ГОТОВО" /tmp/domain.log || { echo "::error::Маркер DOMAIN ГОТОВО не найден"; exit 1; }
               ;;
             status) ;; # только отчёт ниже
           esac
