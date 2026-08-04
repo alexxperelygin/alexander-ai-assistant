@@ -85,6 +85,25 @@ lines.push(``);
 lines.push(`## Позиции`);
 lines.push(`- Открытых: ${open.length}; всего: ${positions.length}; realized P&L: $${realized.toFixed(2)}`);
 lines.push(``);
+lines.push(`## Последние позиции (детально)`);
+const recentPositions = await prisma.position.findMany({
+  orderBy: { openedAt: "desc" },
+  take: 10,
+  include: {
+    token: true,
+    events: { orderBy: { createdAt: "desc" }, take: 2 },
+  },
+});
+if (recentPositions.length === 0) lines.push(`- нет`);
+for (const p of recentPositions) {
+  lines.push(
+    `- ${p.token.symbol} [${p.mode}/${p.status}] вход $${p.entryPriceUsd.toPrecision(4)} × ${p.quantity.toFixed(0)} = $${p.costUsd.toFixed(2)}, ` +
+      `остаток ${((p.remainingQty / p.quantity) * 100).toFixed(0)}%, realized $${p.realizedPnlUsd.toFixed(2)}` +
+      (p.closeReason ? `, закрыта: ${p.closeReason}` : ""),
+  );
+  for (const e of p.events) lines.push(`    · ${e.createdAt.toISOString().slice(11, 19)} [${e.kind}] ${e.message.slice(0, 140)}`);
+}
+lines.push(``);
 lines.push(`## Последний backtest`);
 if (lastBacktest) {
   lines.push(`- ${lastBacktest.status} (${ago(lastBacktest.createdAt)}): ${lastBacktest.notes ?? ""}`);
