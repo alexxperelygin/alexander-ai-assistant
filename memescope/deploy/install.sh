@@ -20,6 +20,15 @@ APP="$APP_DIR/memescope"
 say() { echo -e "\n\033[1;32m==> $*\033[0m"; }
 port_busy() { ss -ltn 2>/dev/null | awk '{print $4}' | grep -Eq "[:.]$1\$"; }
 pick_port() { local p=$1; while port_busy "$p"; do p=$((p+1)); done; echo "$p"; }
+# Порт занят ЧУЖИМ процессом (не нашим nginx). На общем сервере владельца
+# 443 и 8443 держит docker-proxy, поэтому «свободен» проверяется по владельцу:
+# наш собственный nginx на порту — это норма, чужой сервис — нет.
+port_foreign() {
+  local line
+  line=$(ss -ltnp 2>/dev/null | awk -v p="[:.]$1\$" '$4 ~ p' | head -1)
+  [ -n "$line" ] && ! echo "$line" | grep -q '"nginx"'
+}
+pick_own_port() { local p=$1; while port_foreign "$p"; do p=$((p + 1)); done; echo "$p"; }
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Запустите от root."; exit 1
@@ -145,7 +154,11 @@ fi
 DOMAIN_NAME="aurahrt.com"
 HOLDER443=$(ss -ltnp 2>/dev/null | awk '$4 ~ /:443$/ {print $0}' | head -1)
 if [ -n "$HOLDER443" ] && ! echo "$HOLDER443" | grep -q '"nginx"'; then
-  echo "⚠ порт 443 занят другим приложением, https переносится на 8443:"
+  # Свободный порт под https подбирается, а не задаётся: 8443 у владельца тоже
+  # занят docker'ом, и любое фиксированное число рискует так же конфликтовать.
+  SSL_PORT=$(pick_own_port "$(cat /etc/nginx/.memescope-ssl-port 2>/dev/null || echo 8443)")
+  echo "$SSL_PORT" > /etc/nginx/.memescope-ssl-port
+  echo "⚠ порт 443 занят другим приложением, https переносится на $SSL_PORT:"
   echo "  $HOLDER443"
   command -v docker >/dev/null && docker ps --format '  docker: {{.Names}} → {{.Ports}}' 2>/dev/null | head -5 || true
   CERT_DIR="/etc/letsencrypt/live/$DOMAIN_NAME"
@@ -163,7 +176,7 @@ if [ -n "$HOLDER443" ] && ! echo "$HOLDER443" | grep -q '"nginx"'; then
     echo "}"
     if [ -f "$CERT_DIR/fullchain.pem" ]; then
       echo "server {"
-      echo "  listen 8443 ssl;"
+      echo "  listen $SSL_PORT ssl;"
       echo "  server_name $DOMAIN_NAME www.$DOMAIN_NAME;"
       echo "  ssl_certificate $CERT_DIR/fullchain.pem;"
       echo "  ssl_certificate_key $CERT_DIR/privkey.pem;"
@@ -179,7 +192,7 @@ if [ -n "$HOLDER443" ] && ! echo "$HOLDER443" | grep -q '"nginx"'; then
   } > /etc/nginx/sites-available/memescope-domain
   ln -sf /etc/nginx/sites-available/memescope-domain /etc/nginx/sites-enabled/memescope-domain
   if command -v ufw >/dev/null && ufw status 2>/dev/null | grep -q "Status: active"; then
-    ufw allow 8443/tcp >/dev/null 2>&1 || true
+    ufw allow "$SSL_PORT"/tcp >/dev/null 2>&1 || true
   fi
 fi
 
