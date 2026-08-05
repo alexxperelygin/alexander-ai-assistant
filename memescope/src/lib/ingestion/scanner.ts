@@ -335,7 +335,10 @@ async function evaluateToken(
         fromStatus: prevStatus ?? null,
         toStatus: decision.status,
         reason: decision.reasons.join(" | "),
-        payload: JSON.stringify({ opportunityScore: scores.opportunityScore, riskScore: scores.riskScore, confidence: scores.confidence, plan }),
+        // features are snapshotted here (not just referenced) — Opportunity.featuresRef
+        // is overwritten on every re-evaluation, so past decisions were not
+        // reconstructable for research without this.
+        payload: JSON.stringify({ opportunityScore: scores.opportunityScore, riskScore: scores.riskScore, confidence: scores.confidence, plan, features }),
       },
     });
     if (decision.status === "READY") {

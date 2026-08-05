@@ -17,7 +17,7 @@ on:
         required: true
         default: "status"
         type: choice
-        options: [status, update, backtest, restart, domain]
+        options: [status, update, backtest, restart, domain, research]
   # Альтернативный способ запуска (для интеграций без права actions:write):
   # закоммитить нужную задачу первой строкой в ops/command.txt.
   push:
@@ -57,7 +57,7 @@ jobs:
           else
             TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
           fi
-          case "$TASK" in status|update|backtest|restart|domain) ;; *) TASK=status ;; esac
+          case "$TASK" in status|update|backtest|restart|domain|research) ;; *) TASK=status ;; esac
           echo "task=$TASK" >> "$GITHUB_OUTPUT"
           echo "Задача: $TASK"
 
@@ -110,6 +110,15 @@ jobs:
               fi
               tail -30 /tmp/domain.log
               grep -q "DOMAIN ГОТОВО" /tmp/domain.log || { echo "::error::Маркер DOMAIN ГОТОВО не найден"; exit 1; }
+              ;;
+            research)
+              echo "== Исследование edge =="
+              if ! run_ssh 'git -C /opt/alexander-ai-assistant pull -q origin main; cd /opt/alexander-ai-assistant/memescope && NODE_OPTIONS=--max-old-space-size=1200 npx tsx deploy/research.mts' > status/research.md 2>/tmp/research.err; then
+                tail -30 /tmp/research.err
+                echo "::error::Исследование не завершилось"
+                exit 1
+              fi
+              head -60 status/research.md
               ;;
             status) ;; # только отчёт ниже
           esac
