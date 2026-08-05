@@ -209,6 +209,34 @@ log(`**Coverage** — доля наблюдений правила с измер
 log(`coverage сильно выше базовой линии, его результат завышен выживаемостью:`);
 log(`измеряются только «дожившие» токены. Это главный риск ложного edge.`);
 log();
+log(`Дополнительно снимаются две методические ловушки:`);
+log(`* **дедупликация по токенам** — пампящий токен даёт десятки наблюдений подряд,`);
+log(`  и все они «выигрышные»; это раздувает мнимое преимущество. Берётся первое`);
+log(`  подходящее наблюдение на токен, то есть одна сделка = один токен;`);
+log(`* **train/test по времени** — правила подбираются на первых 70% окна,`);
+log(`  проверяются на последних 30%. Если на test преимущество исчезает — это была подгонка.`);
+log();
+
+const times = observations.map((o) => o.entry.fetchedAt.getTime()).sort((a, b) => a - b);
+const splitAt = times.length ? (times[Math.floor(times.length * 0.7)] as number) : 0;
+
+/** Одно наблюдение на токен: убирает автокорреляцию внутри одного движения. */
+function dedupByToken(obs: Obs[]): Obs[] {
+  const seen = new Set<string>();
+  const res: Obs[] = [];
+  for (const o of obs) {
+    if (seen.has(o.entry.tokenId)) continue;
+    seen.add(o.entry.tokenId);
+    res.push(o);
+  }
+  return res;
+}
+
+function statLine(obs: Obs[]): { n: number; med: number | null; win: number | null } {
+  const xs = obs.map((o) => o.ret[MAIN_H]).filter((r): r is number => r != null);
+  return { n: xs.length, med: median(xs), win: winRate(xs) };
+}
+
 log(`| Правило | Всего | Измеримо | Coverage | Медиана | Винз. среднее | Прибыльных |`);
 log(`|---|---|---|---|---|---|---|`);
 
@@ -238,6 +266,23 @@ for (const rule of rules) {
 }
 log();
 log(`⚠ — coverage существенно выше базового: результат вероятно завышен выживаемостью.`);
+log();
+
+// ---------- 4b. Строгая проверка: 1 токен = 1 сделка, train/test ----------
+log(`### Строгая проверка (одно наблюдение на токен, разделение по времени)`);
+log();
+log(`| Правило | TRAIN n | TRAIN медиана | TRAIN win | TEST n | TEST медиана | TEST win |`);
+log(`|---|---|---|---|---|---|---|`);
+for (const rule of rules) {
+  const matched = observations.filter((o) => rule.ok(o.entry));
+  const tr = dedupByToken(matched.filter((o) => o.entry.fetchedAt.getTime() <= splitAt));
+  const te = dedupByToken(matched.filter((o) => o.entry.fetchedAt.getTime() > splitAt));
+  const a = statLine(tr), b = statLine(te);
+  log(`| ${rule.name} | ${a.n} | **${pct(a.med)}** | ${pct(a.win, 0)} | ${b.n} | **${pct(b.med)}** | ${pct(b.win, 0)} |`);
+}
+log();
+log(`Доверять можно только правилу, у которого преимущество сохранилось на TEST`);
+log(`при достаточном n. Расхождение TRAIN/TEST = подгонка под историю.`);
 log();
 
 // ---------- 5. Вывод ----------
