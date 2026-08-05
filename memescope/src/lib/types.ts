@@ -183,7 +183,13 @@ export const DEFAULT_RISK_SETTINGS: RiskSettings = {
   cooldownMinutes: 120,
   maxSlippagePct: 3,
   maxPositionPctOfLiquidity: 1,
-  minLiquidityUsd: 10_000,
+  // Raised 10k → 50k on evidence, not intuition. Once follow-up scanning made
+  // outcomes measurable for dying tokens too, the unbiased 6h baseline for a
+  // freshly scanned token turned out to be a median of −93.7% (13% profitable):
+  // most new meme coins are micro-cap traps. Requiring >$50k liquidity moves
+  // that median to −1.3%, i.e. the floor is what separates a coin flip from a
+  // near-certain loss. Adjustable in Settings.
+  minLiquidityUsd: 50_000,
   minTokenAgeMin: 20,
   maxTokenAgeMin: 7 * 24 * 60,
   signalsPaused: false,
