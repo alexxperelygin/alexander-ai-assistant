@@ -1,20 +1,28 @@
-// Исследование edge на всех накопленных данных (запускается на сервере через
-// ops-задачу "research", результат публикуется в status/research.md).
+// Исследование edge на всех накопленных данных (ops-задача "research",
+// результат публикуется в status/research.md).
 //
-// Ключевая идея: не ограничиваться 20 READY-сигналами. Таблица снапшотов
-// хранит рыночное состояние тысяч токенов во множестве моментов времени —
-// значит, можно построить полноценную выборку наблюдений «признаки в момент T →
-// чистый результат через 6ч/24ч после издержек» и проверить, есть ли в данных
-// вообще предсказательная сила, до всякого скоринга.
+// Идея: не ограничиваться десятками READY-сигналов. Таблица снапшотов хранит
+// рыночное состояние тысяч токенов во множестве моментов, значит можно
+// построить выборку «признаки в момент T → чистый результат через 1ч/6ч/24ч
+// после издержек» и проверить, есть ли в данных предсказательная сила вообще.
 //
-// Честность: издержки считаются той же моделью simulateFill, что и в проде;
-// исход берётся только по наблюдениям СТРОГО после T и не позже дедлайна
-// горизонта, с требованием наблюдения во второй половине окна (иначе null).
+// Методическая честность (v2, после первого прогона):
+//  * СРЕДНЕЕ на мем-коинах бессмысленно: одно наблюдение с ×1000 перекрывает
+//    тысячи обычных. Основная метрика — МЕДИАНА и доля прибыльных; среднее
+//    приводится только винзоризованным (обрезка хвостов по 1-му и 99-му перцентилю).
+//  * Выбросы часто не рынок, а данные (смена пула у токена, копеечная цена,
+//    сбой источника) — extreme-наблюдения выводятся отдельно для диагностики.
+//  * Главная ловушка — systematic bias: измеримы только токены, которые
+//    сканер продолжал опрашивать, а он приоритизирует «интересные». Поэтому
+//    для каждого правила печатается COVERAGE — доля наблюдений с измеримым
+//    исходом. Высокий coverage у правила при низком у базы = результат
+//    правила завышен выживаемостью, а не предсказанием.
 import { prisma } from "../src/lib/db";
 import { simulateFill } from "../src/lib/paper/execution";
 
 const POSITION_USD = 50;
 const HORIZONS: Record<string, number> = { "1h": 60, "6h": 360, "24h": 1440 };
+const MAIN_H = "6h";
 
 interface Snap {
   tokenId: string;
@@ -31,7 +39,6 @@ interface Snap {
   fdvUsd: number | null;
 }
 
-/** Чистая доходность после издержек входа и выхода, либо null если неизмеримо. */
 function netReturn(entry: Snap, exit: Snap): number | null {
   const buy = simulateFill({
     sideUsd: POSITION_USD, priceUsd: entry.priceUsd,
@@ -44,27 +51,34 @@ function netReturn(entry: Snap, exit: Snap): number | null {
     liquidityUsd: exit.liquidityUsd, direction: "sell",
   });
   if (!sell.executed) return null;
-  const proceeds = buy.quantity * sell.effectivePriceUsd - sell.feesUsd;
-  return proceeds / POSITION_USD - 1;
+  return (buy.quantity * sell.effectivePriceUsd - sell.feesUsd) / POSITION_USD - 1;
 }
 
-function pct(v: number | null | undefined, d = 1): string {
-  return v == null || !Number.isFinite(v) ? "—" : `${(v * 100).toFixed(d)}%`;
+const pct = (v: number | null | undefined, d = 1): string =>
+  v == null || !Number.isFinite(v) ? "—" : `${(v * 100).toFixed(d)}%`;
+const mean = (xs: number[]): number | null =>
+  xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+function quantile(sorted: number[], q: number): number {
+  if (!sorted.length) return 0;
+  const i = Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))));
+  return sorted[i] as number;
 }
-function mean(xs: number[]): number | null {
-  return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
-}
-function median(xs: number[]): number | null {
-  if (!xs.length) return null;
+const median = (xs: number[]): number | null =>
+  xs.length ? quantile([...xs].sort((a, b) => a - b), 0.5) : null;
+/** Среднее после обрезки хвостов — устойчиво к единичным ×1000. */
+function winsorMean(xs: number[]): number | null {
+  if (xs.length < 20) return mean(xs);
   const s = [...xs].sort((a, b) => a - b);
-  const m = Math.floor(s.length / 2);
-  return s.length % 2 ? (s[m] as number) : ((s[m - 1] as number) + (s[m] as number)) / 2;
+  const lo = quantile(s, 0.01), hi = quantile(s, 0.99);
+  return mean(s.map((v) => Math.min(hi, Math.max(lo, v))));
 }
+const winRate = (xs: number[]): number | null =>
+  xs.length ? xs.filter((r) => r > 0).length / xs.length : null;
 
 const out: string[] = [];
 const log = (s = "") => out.push(s);
 
-// ---------- 1. Загрузка данных ----------
+// ---------- Загрузка ----------
 const since = new Date(Date.now() - 7 * 24 * 3600_000);
 const rows = await prisma.tokenSnapshot.findMany({
   where: { dataMode: "live", fetchedAt: { gte: since }, priceUsd: { gt: 0 } },
@@ -83,25 +97,30 @@ for (const r of rows) {
   const arr = byToken.get(s.tokenId);
   if (arr) arr.push(s); else byToken.set(s.tokenId, [s]);
 }
-const multi = [...byToken.values()].filter((a) => a.length >= 2);
 
 log(`# Исследование edge — ${new Date().toISOString()}`);
 log();
-log(`Окно: последние 7 дней. Снапшотов: ${rows.length.toLocaleString("ru")}, токенов: ${byToken.size.toLocaleString("ru")}, ` +
-    `из них с ≥2 наблюдениями (измеримые): ${multi.length.toLocaleString("ru")}.`);
+log(`Окно: 7 дней. Снапшотов: ${rows.length.toLocaleString("ru")}, токенов: ${byToken.size.toLocaleString("ru")}.`);
+log();
+log(`> Основная метрика — **медиана** и **доля прибыльных**. Среднее по мем-коинам`);
+log(`> нерепрезентативно (единичные ×1000 перекрывают тысячи наблюдений), поэтому`);
+log(`> приводится винзоризованное среднее (хвосты обрезаны по 1%/99%).`);
 log();
 
-// ---------- 2. Построение наблюдений ----------
-interface Obs {
-  entry: Snap;
-  ret: Record<string, number | null>;
-}
+// ---------- Наблюдения ----------
+interface Obs { entry: Snap; ret: Record<string, number | null>; }
 const observations: Obs[] = [];
-for (const series of multi) {
+for (const series of byToken.values()) {
+  if (series.length < 2) {
+    // Токен без последующих наблюдений: исход неизмерим, но он ВАЖЕН для
+    // оценки систематической ошибки — учитываем как непокрытый.
+    const only = series[0];
+    if (only) observations.push({ entry: only, ret: { "1h": null, "6h": null, "24h": null } });
+    continue;
+  }
   for (let i = 0; i < series.length; i++) {
     const entry = series[i] as Snap;
     const ret: Record<string, number | null> = {};
-    let any = false;
     for (const [key, minutes] of Object.entries(HORIZONS)) {
       const deadline = entry.fetchedAt.getTime() + minutes * 60_000;
       const halfway = entry.fetchedAt.getTime() + (minutes * 60_000) / 2;
@@ -111,83 +130,52 @@ for (const series of multi) {
         if (t > deadline) break;
         if (t >= halfway) exit = series[j] as Snap;
       }
-      const r = exit ? netReturn(entry, exit) : null;
-      ret[key] = r;
-      if (r != null) any = true;
+      ret[key] = exit ? netReturn(entry, exit) : null;
     }
-    if (any) observations.push({ entry, ret });
+    observations.push({ entry, ret });
   }
 }
 
-log(`## 1. Базовая линия рынка (все наблюдения, не только сигналы)`);
+// ---------- 1. Базовая линия ----------
+log(`## 1. Базовая линия рынка`);
 log();
-log(`Измеримых наблюдений: ${observations.length.toLocaleString("ru")}.`);
+log(`Всего наблюдений: ${observations.length.toLocaleString("ru")}.`);
 log();
-log(`| Горизонт | N | Средняя чистая | Медиана | Доля прибыльных |`);
-log(`|---|---|---|---|---|`);
+log(`| Горизонт | Измеримо | Coverage | Медиана | Винз. среднее | Прибыльных |`);
+log(`|---|---|---|---|---|---|`);
 for (const h of Object.keys(HORIZONS)) {
   const xs = observations.map((o) => o.ret[h]).filter((r): r is number => r != null);
-  const wins = xs.filter((r) => r > 0).length;
-  log(`| ${h} | ${xs.length} | ${pct(mean(xs))} | ${pct(median(xs))} | ${xs.length ? pct(wins / xs.length, 0) : "—"} |`);
+  log(`| ${h} | ${xs.length} | ${pct(xs.length / observations.length, 0)} | **${pct(median(xs))}** | ${pct(winsorMean(xs))} | ${pct(winRate(xs), 0)} |`);
 }
 log();
-log(`Это ответ на главный вопрос: сколько теряет «слепая» покупка случайного ` +
-    `просканированного токена после издержек. С этим и надо сравнивать стратегию.`);
+
+// ---------- 2. Диагностика выбросов ----------
+const withMain = observations.filter((o) => o.ret[MAIN_H] != null);
+const extremes = [...withMain].sort((a, b) => (b.ret[MAIN_H] as number) - (a.ret[MAIN_H] as number)).slice(0, 5);
+log(`## 2. Диагностика экстремумов (топ-5 по ${MAIN_H})`);
+log();
+log(`Проверка, рынок это или мусор в данных (смена пула/сбой источника).`);
+log();
+for (const e of extremes) {
+  log(`- +${((e.ret[MAIN_H] as number) * 100).toFixed(0)}%: цена входа $${e.entry.priceUsd.toPrecision(3)}, ` +
+      `ликв $${Math.round(e.entry.liquidityUsd ?? 0).toLocaleString("ru")}, Δ1ч ${e.entry.priceChange1h ?? "—"}%, Δ24ч ${e.entry.priceChange24h ?? "—"}%`);
+}
 log();
 
-// ---------- 3. Предсказательная сила признаков ----------
-log(`## 2. Предсказательная сила признаков (горизонт 6ч)`);
+// ---------- 3. Признаки по квинтилям ----------
+log(`## 3. Предсказательная сила признаков (${MAIN_H}, медианы по квинтилям)`);
 log();
-log(`Наблюдения делятся на 5 равных групп по значению признака (Q1 — низшие 20%, Q5 — высшие).`);
-log(`Если признак предсказывает, средняя доходность по группам должна монотонно меняться.`);
-log();
-
 const feats: { name: string; get: (s: Snap) => number | null }[] = [
-  { name: "liquidityUsd", get: (s) => s.liquidityUsd },
-  { name: "volume24hUsd", get: (s) => s.volume24hUsd },
-  { name: "priceChange1h %", get: (s) => s.priceChange1h },
-  { name: "priceChange24h %", get: (s) => s.priceChange24h },
-  { name: "buy/sell ratio 1h", get: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : null) },
-  { name: "txns 1h", get: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h + s.sells1h : null) },
-  { name: "vol/liq (24h)", get: (s) => (s.volume24hUsd != null && s.liquidityUsd ? s.volume24hUsd / s.liquidityUsd : null) },
+  { name: "ликвидность $", get: (s) => s.liquidityUsd },
+  { name: "объём 24ч $", get: (s) => s.volume24hUsd },
+  { name: "Δ цены 1ч %", get: (s) => s.priceChange1h },
+  { name: "Δ цены 24ч %", get: (s) => s.priceChange24h },
+  { name: "buy/sell 1ч", get: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : null) },
+  { name: "сделок 1ч", get: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h + s.sells1h : null) },
+  { name: "оборот vol/liq", get: (s) => (s.volume24hUsd != null && s.liquidityUsd ? s.volume24hUsd / s.liquidityUsd : null) },
   { name: "fdv/liq", get: (s) => (s.fdvUsd != null && s.liquidityUsd ? s.fdvUsd / s.liquidityUsd : null) },
-  { name: "vol accel (5m×12/1h)", get: (s) => (s.volume5mUsd != null && s.volume1hUsd ? (s.volume5mUsd * 12) / s.volume1hUsd : null) },
+  { name: "ускорение объёма", get: (s) => (s.volume5mUsd != null && s.volume1hUsd ? (s.volume5mUsd * 12) / s.volume1hUsd : null) },
 ];
-
-const H = "6h";
-for (const f of feats) {
-  const pairs = observations
-    .map((o) => ({ v: f.get(o.entry), r: o.ret[H] }))
-    .filter((p): p is { v: number; r: number } => p.v != null && Number.isFinite(p.v) && p.r != null);
-  if (pairs.length < 100) {
-    log(`**${f.name}**: мало данных (${pairs.length})`);
-    log();
-    continue;
-  }
-  pairs.sort((a, b) => a.v - b.v);
-  const q = Math.floor(pairs.length / 5);
-  const cells: string[] = [];
-  for (let k = 0; k < 5; k++) {
-    const slice = pairs.slice(k * q, k === 4 ? pairs.length : (k + 1) * q);
-    const m = mean(slice.map((p) => p.r));
-    const lo = slice[0]?.v ?? 0;
-    const hi = slice[slice.length - 1]?.v ?? 0;
-    cells.push(`Q${k + 1} [${fmtNum(lo)}..${fmtNum(hi)}]: **${pct(m)}**`);
-  }
-  // Корреляция Пирсона как сводный показатель (на рангах — устойчивее к выбросам).
-  const n = pairs.length;
-  const ranksV = new Map<number, number>();
-  pairs.forEach((p, i) => ranksV.set(i, i));
-  const byRet = [...pairs].map((p, i) => ({ i, r: p.r })).sort((a, b) => a.r - b.r);
-  const ranksR = new Array(n).fill(0);
-  byRet.forEach((x, rank) => { ranksR[x.i] = rank; });
-  let sumd2 = 0;
-  for (let i = 0; i < n; i++) sumd2 += (i - ranksR[i]) ** 2;
-  const rho = 1 - (6 * sumd2) / (n * (n * n - 1));
-  log(`**${f.name}** (N=${n}, ранговая корреляция с исходом: ${rho.toFixed(3)})`);
-  log(cells.join(" · "));
-  log();
-}
 
 function fmtNum(v: number): string {
   if (Math.abs(v) >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
@@ -196,48 +184,70 @@ function fmtNum(v: number): string {
   return v.toFixed(2);
 }
 
-// ---------- 4. Проверка правил отбора ----------
-log(`## 3. Проверка правил отбора (горизонт 6ч)`);
-log();
-log(`Что было бы, если покупать только наблюдения, проходящие фильтр.`);
-log();
-log(`| Правило | N | Средняя чистая | Медиана | Прибыльных |`);
-log(`|---|---|---|---|---|`);
-
-const rules: { name: string; ok: (s: Snap) => boolean }[] = [
-  { name: "все наблюдения (baseline)", ok: () => true },
-  { name: "ликвидность > $50k", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 },
-  { name: "ликвидность > $200k", ok: (s) => (s.liquidityUsd ?? 0) > 200_000 },
-  { name: "Δ1ч < 0 (покупка на откате)", ok: (s) => (s.priceChange1h ?? 0) < 0 },
-  { name: "Δ1ч > +20% (покупка на росте)", ok: (s) => (s.priceChange1h ?? 0) > 20 },
-  { name: "Δ24ч < 0 (упавшие за сутки)", ok: (s) => (s.priceChange24h ?? 0) < 0 },
-  { name: "Δ24ч > +100%", ok: (s) => (s.priceChange24h ?? 0) > 100 },
-  { name: "buy/sell > 1.5", ok: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 0) > 1.5 },
-  { name: "buy/sell < 1.0 (продавцы)", ok: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 99) < 1.0 },
-  { name: "txns 1h > 500", ok: (s) => ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 },
-  { name: "vol/liq 24h в [1..10]", ok: (s) => { const v = s.volume24hUsd != null && s.liquidityUsd ? s.volume24hUsd / s.liquidityUsd : -1; return v >= 1 && v <= 10; } },
-  { name: "ликв>50k И Δ1ч<0", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.priceChange1h ?? 0) < 0 },
-  { name: "ликв>50k И Δ1ч>20%", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.priceChange1h ?? 0) > 20 },
-];
-
-for (const rule of rules) {
-  const xs = observations
-    .filter((o) => rule.ok(o.entry))
-    .map((o) => o.ret[H])
-    .filter((r): r is number => r != null);
-  const wins = xs.filter((r) => r > 0).length;
-  log(`| ${rule.name} | ${xs.length} | **${pct(mean(xs))}** | ${pct(median(xs))} | ${xs.length ? pct(wins / xs.length, 0) : "—"} |`);
+log(`| Признак | Q1 (низ) | Q2 | Q3 | Q4 | Q5 (верх) |`);
+log(`|---|---|---|---|---|---|`);
+for (const f of feats) {
+  const pairs = withMain
+    .map((o) => ({ v: f.get(o.entry), r: o.ret[MAIN_H] as number }))
+    .filter((p): p is { v: number; r: number } => p.v != null && Number.isFinite(p.v));
+  if (pairs.length < 500) { log(`| ${f.name} | мало данных (${pairs.length}) | | | | |`); continue; }
+  pairs.sort((a, b) => a.v - b.v);
+  const q = Math.floor(pairs.length / 5);
+  const cells = [] as string[];
+  for (let k = 0; k < 5; k++) {
+    const slice = pairs.slice(k * q, k === 4 ? pairs.length : (k + 1) * q);
+    cells.push(`${pct(median(slice.map((p) => p.r)))}<br><sub>${fmtNum(slice[0]?.v ?? 0)}–${fmtNum(slice[slice.length - 1]?.v ?? 0)}</sub>`);
+  }
+  log(`| ${f.name} | ${cells.join(" | ")} |`);
 }
 log();
 
-// ---------- 5. Итог ----------
-const baseXs = observations.map((o) => o.ret[H]).filter((r): r is number => r != null);
-const baseMean = mean(baseXs);
-log(`## 4. Вывод`);
+// ---------- 4. Правила отбора ----------
+log(`## 4. Правила отбора (${MAIN_H})`);
 log();
-log(`Средняя чистая доходность произвольного наблюдения на 6ч: **${pct(baseMean)}** ` +
-    `(N=${baseXs.length}). Любое правило отбора имеет смысл только если оно устойчиво ` +
-    `лучше этой цифры на большой выборке.`);
+log(`**Coverage** — доля наблюдений правила с измеримым исходом. Если у правила`);
+log(`coverage сильно выше базовой линии, его результат завышен выживаемостью:`);
+log(`измеряются только «дожившие» токены. Это главный риск ложного edge.`);
+log();
+log(`| Правило | Всего | Измеримо | Coverage | Медиана | Винз. среднее | Прибыльных |`);
+log(`|---|---|---|---|---|---|---|`);
+
+const rules: { name: string; ok: (s: Snap) => boolean }[] = [
+  { name: "все (базовая линия)", ok: () => true },
+  { name: "ликвидность > $50k", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 },
+  { name: "ликвидность > $200k", ok: (s) => (s.liquidityUsd ?? 0) > 200_000 },
+  { name: "Δ1ч < 0 (откат)", ok: (s) => (s.priceChange1h ?? 0) < 0 },
+  { name: "Δ1ч > +20% (рост)", ok: (s) => (s.priceChange1h ?? 0) > 20 },
+  { name: "Δ24ч < 0", ok: (s) => (s.priceChange24h ?? 0) < 0 },
+  { name: "Δ24ч > +100%", ok: (s) => (s.priceChange24h ?? 0) > 100 },
+  { name: "buy/sell > 1.5", ok: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 0) > 1.5 },
+  { name: "buy/sell < 1.0", ok: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 99) < 1.0 },
+  { name: "сделок 1ч > 500", ok: (s) => ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 },
+  { name: "сделок 1ч > 2000", ok: (s) => ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 2000 },
+  { name: "ликв>50k И Δ1ч>20%", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.priceChange1h ?? 0) > 20 },
+  { name: "ликв>50k И сделок>500 И buy/sell>1.5", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 && (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 0) > 1.5 },
+];
+
+const baseCoverage = withMain.length / observations.length;
+for (const rule of rules) {
+  const all = observations.filter((o) => rule.ok(o.entry));
+  const xs = all.map((o) => o.ret[MAIN_H]).filter((r): r is number => r != null);
+  const cov = all.length ? xs.length / all.length : 0;
+  const flag = cov > baseCoverage * 1.3 ? " ⚠" : "";
+  log(`| ${rule.name}${flag} | ${all.length} | ${xs.length} | ${pct(cov, 0)} | **${pct(median(xs))}** | ${pct(winsorMean(xs))} | ${pct(winRate(xs), 0)} |`);
+}
+log();
+log(`⚠ — coverage существенно выше базового: результат вероятно завышен выживаемостью.`);
+log();
+
+// ---------- 5. Вывод ----------
+const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
+log(`## 5. Итог`);
+log();
+log(`Базовая линия ${MAIN_H}: медиана **${pct(median(baseXs))}**, прибыльных ${pct(winRate(baseXs), 0)}, ` +
+    `coverage ${pct(baseCoverage, 0)} (N=${baseXs.length}).`);
+log();
+log(`Правило имеет смысл, только если его медиана устойчиво выше базовой ПРИ сопоставимом coverage.`);
 log();
 
 console.log(out.join("\n"));
