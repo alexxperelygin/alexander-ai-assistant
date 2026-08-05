@@ -76,6 +76,25 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
     ],
   };
   const slots = config.maxCandidatesPerCycle;
+  // d) MEASUREMENT FOLLOW-UPS. Research showed only ~31% of observations ever
+  //    got a forward data point, and barely any token was re-observed within
+  //    6h of its first scan — so most outcomes were unmeasurable and the
+  //    measurable minority was biased toward whatever the scanner happened to
+  //    revisit. A fixed share of every cycle is now reserved for re-scanning
+  //    tokens we already evaluated, oldest-observation-first, which turns the
+  //    snapshot table into a proper panel dataset.
+  const followUpSlots = Math.max(1, Math.floor(slots / 3));
+  const followUpWindowStart = new Date(now.getTime() - 26 * 3600_000);
+  const followUpDue = new Date(now.getTime() - 50 * 60_000);
+  const followUps = await prisma.token.findMany({
+    where: {
+      mint: { not: SOL_MINT },
+      snapshots: { some: { fetchedAt: { gte: followUpWindowStart, lte: followUpDue } } },
+      NOT: { snapshots: { some: { fetchedAt: { gt: followUpDue } } } },
+    },
+    orderBy: { firstSeenAt: "desc" },
+    take: followUpSlots * 2,
+  });
 
   const promising = await prisma.opportunity.findMany({
     where: { status: { in: ["READY", "CANDIDATE", "WATCH"] }, token: ageWindow },
@@ -104,6 +123,9 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
       batch.push({ token, lastStatus });
     }
   };
+  // Follow-ups first, but capped at their reserved share so signal discovery
+  // is never starved by measurement.
+  for (const t of followUps.slice(0, followUpSlots)) push(t);
   for (const o of promising) push(o.token, o.status as OpportunityStatus);
   // Interleave never-evaluated tokens and AVOID re-checks for the rest.
   for (let i = 0; batch.length < slots && (i < fresh.length || i < recheck.length); i++) {
