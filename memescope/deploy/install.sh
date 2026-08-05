@@ -140,7 +140,27 @@ if [ "$HAD_NGINX" -eq 0 ] && port_busy 80 && ! systemctl is-active -q nginx; the
 fi
 nginx -t
 systemctl enable nginx >/dev/null 2>&1 || true
-systemctl restart nginx || systemctl start nginx
+# Конфиг может быть валиден (`nginx -t` не биндит порты), а старт всё равно
+# падает — почти всегда порт держит осиротевший мастер-процесс nginx, не
+# управляемый systemd (частый побочный эффект certbot/ручных запусков).
+# Поэтому: обычный restart → при неудаче показать причину, снять сирот и
+# повторить → только потом падать.
+if ! systemctl restart nginx; then
+  echo "⚠ nginx не стартовал, диагностика:"
+  systemctl status nginx --no-pager -l 2>&1 | tail -15 || true
+  journalctl -u nginx --no-pager -n 20 2>&1 | tail -20 || true
+  ss -ltnp 2>/dev/null | grep -E ':(80|443|'"$NGINX_PORT"')\b' || true
+  echo "→ снимаю осиротевшие процессы nginx и пробую снова"
+  systemctl stop nginx >/dev/null 2>&1 || true
+  pkill -x nginx >/dev/null 2>&1 || true
+  sleep 2
+  if ! systemctl start nginx; then
+    echo "nginx не поднимается — прерываю деплой"
+    journalctl -u nginx --no-pager -n 30 2>&1 | tail -30 || true
+    exit 1
+  fi
+  echo "✓ nginx поднят после снятия сирот"
+fi
 
 say "8/8 Файрвол (только если уже был включён)"
 if command -v ufw >/dev/null && ufw status 2>/dev/null | grep -q "Status: active"; then
