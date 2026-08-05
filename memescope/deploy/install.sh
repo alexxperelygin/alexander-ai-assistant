@@ -138,6 +138,51 @@ ln -sf /etc/nginx/sites-available/memescope /etc/nginx/sites-enabled/memescope
 if [ "$HAD_NGINX" -eq 0 ] && port_busy 80 && ! systemctl is-active -q nginx; then
   rm -f /etc/nginx/sites-enabled/default
 fi
+# Порт 443 на этом сервере принадлежит ДРУГОМУ приложению пользователя
+# (docker-proxy). Забирать его нельзя — это сломает чужой сервис, поэтому наш
+# domain-vhost, которому certbot добавил `listen 443 ssl`, пересобирается без
+# 443: http на :80 плюс https на :8443, если сертификат уже выпущен.
+DOMAIN_NAME="aurahrt.com"
+HOLDER443=$(ss -ltnp 2>/dev/null | awk '$4 ~ /:443$/ {print $0}' | head -1)
+if [ -n "$HOLDER443" ] && ! echo "$HOLDER443" | grep -q '"nginx"'; then
+  echo "⚠ порт 443 занят другим приложением, https переносится на 8443:"
+  echo "  $HOLDER443"
+  command -v docker >/dev/null && docker ps --format '  docker: {{.Names}} → {{.Ports}}' 2>/dev/null | head -5 || true
+  CERT_DIR="/etc/letsencrypt/live/$DOMAIN_NAME"
+  {
+    echo "server {"
+    echo "  listen 80;"
+    echo "  server_name $DOMAIN_NAME www.$DOMAIN_NAME;"
+    echo "  location / {"
+    echo "    auth_basic \"MemeScope\";"
+    echo "    auth_basic_user_file /etc/nginx/.htpasswd-memescope;"
+    echo "    proxy_pass http://127.0.0.1:$WEB_PORT;"
+    echo "    proxy_set_header Host \$host;"
+    echo "    proxy_set_header X-Real-IP \$remote_addr;"
+    echo "  }"
+    echo "}"
+    if [ -f "$CERT_DIR/fullchain.pem" ]; then
+      echo "server {"
+      echo "  listen 8443 ssl;"
+      echo "  server_name $DOMAIN_NAME www.$DOMAIN_NAME;"
+      echo "  ssl_certificate $CERT_DIR/fullchain.pem;"
+      echo "  ssl_certificate_key $CERT_DIR/privkey.pem;"
+      echo "  location / {"
+      echo "    auth_basic \"MemeScope\";"
+      echo "    auth_basic_user_file /etc/nginx/.htpasswd-memescope;"
+      echo "    proxy_pass http://127.0.0.1:$WEB_PORT;"
+      echo "    proxy_set_header Host \$host;"
+      echo "    proxy_set_header X-Real-IP \$remote_addr;"
+      echo "  }"
+      echo "}"
+    fi
+  } > /etc/nginx/sites-available/memescope-domain
+  ln -sf /etc/nginx/sites-available/memescope-domain /etc/nginx/sites-enabled/memescope-domain
+  if command -v ufw >/dev/null && ufw status 2>/dev/null | grep -q "Status: active"; then
+    ufw allow 8443/tcp >/dev/null 2>&1 || true
+  fi
+fi
+
 nginx -t
 systemctl enable nginx >/dev/null 2>&1 || true
 # Конфиг может быть валиден (`nginx -t` не биндит порты), а старт всё равно
