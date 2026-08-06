@@ -63,6 +63,21 @@ lines.push(`- Worker: ${workerOk ? "✅ работает" : "🔴 НЕ РАБО�
 lines.push(`- Токенов в базе: ${tokenCount}; снапшотов за 24ч: ${snaps24h}`);
 lines.push(`- Ошибок в audit log за 24ч: ${errors24h}`);
 lines.push(``);
+
+// Разбивка по сетям: подтверждает, что мультичейн-сканирование реально
+// доходит до базы, а не молча падает на одной сети.
+const since24h = new Date(Date.now() - 24 * 3600_000);
+const chainGroups = await prisma.token.groupBy({
+  by: ["chain"],
+  where: { firstSeenAt: { gte: since24h } },
+  _count: { _all: true },
+});
+lines.push(`## Новые токены за 24ч по сетям`);
+if (chainGroups.length === 0) lines.push(`- (нет новых токенов)`);
+for (const g of chainGroups.sort((a, b) => b._count._all - a._count._all)) {
+  lines.push(`- ${g.chain}: ${g._count._all}`);
+}
+lines.push(``);
 lines.push(`## Статусы возможностей`);
 for (const g of oppsByStatus.sort((a, b) => b._count._all - a._count._all)) {
   lines.push(`- ${g.status}: ${g._count._all}`);
