@@ -64,6 +64,7 @@ confidence       = max(0.1, 1 − 0.12 × |dataGaps|)   (cap штрафа 0.9)
 | holder-concentration | top-10 > 60% supply |
 | insider-concentration | инсайдеры > 30% |
 | insufficient-liquidity | liq < minLiquidityUsd (настройка) |
+| liquidity-draining | ликвидность упала > 5% с прошлого наблюдения (разрыв ≤ 2ч); подтверждено данными, см. ADR-12 |
 | slippage-exceeds-limit | ожидаемый impact продажи > maxSlippagePct |
 | too-new | возраст < minTokenAgeMin (окно снайперов/мгновенных ругов) |
 | suspected-wash-trading | vol/liq > 50 при почти идеальной симметрии buy/sell |
