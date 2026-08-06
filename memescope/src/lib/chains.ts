@@ -47,6 +47,14 @@ export const CHAINS: Record<string, ChainConfig> = {
     id: "arbitrum", label: "Arbitrum", geckoNetwork: "arbitrum", goplusChainId: "42161",
     hasRiskProvider: true, hasRouteProvider: false,
   },
+  // L2 от Robinhood. Проверено на живых данных 6 августа: ~20 новых пулов в
+  // минуту и мем-токены с оборотом $10–20M за сутки, то есть это не витрина, а
+  // работающий рынок. GeckoTerminal и DexScreener индексируют её как
+  // "robinhood", GoPlus знает как сеть 4663.
+  robinhood: {
+    id: "robinhood", label: "Robinhood Chain", geckoNetwork: "robinhood", goplusChainId: "4663",
+    hasRiskProvider: true, hasRouteProvider: false,
+  },
 };
 
 export const DEFAULT_CHAIN = "solana";

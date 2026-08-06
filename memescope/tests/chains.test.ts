@@ -21,6 +21,13 @@ describe("chain registry", () => {
     expect(chainCanSignal("does-not-exist")).toBe(false);
   });
 
+  it("covers Robinhood Chain end to end", () => {
+    const rh = chainConfig("robinhood");
+    expect(rh?.geckoNetwork).toBe("robinhood");
+    expect(rh?.goplusChainId).toBe("4663");
+    expect(chainCanSignal("robinhood")).toBe(true);
+  });
+
   it("maps chains to their GeckoTerminal network id", () => {
     expect(chainConfig("ethereum")?.geckoNetwork).toBe("eth");
     expect(chainConfig("solana")?.geckoNetwork).toBe("solana");
