@@ -36,6 +36,16 @@ const MIGRATIONS: { key: string; apply: (s: RiskSettings) => RiskSettings | null
     apply: (s) =>
       s.minLiquidityUsd < 50_000 ? { ...s, minLiquidityUsd: 50_000 } : null,
   },
+  {
+    // В БД лежали 20% риска на сделку и позиция $100, хотя модель риска и
+    // документация описывали 1% и $50. Расхождение нашлось, когда действующие
+    // пороги вывели в отчёт; владелец подтвердил возврат к 1%.
+    key: "migration:risk-1pct",
+    apply: (s) =>
+      s.maxRiskPerTradePct > 1 || s.maxPositionUsd > 50
+        ? { ...s, maxRiskPerTradePct: 1, maxPositionUsd: 50 }
+        : null,
+  },
 ];
 
 export async function applySettingsMigrations(): Promise<string[]> {
