@@ -44,6 +44,8 @@ interface Snap {
   priceChange1h: number | null;
   priceChange24h: number | null;
   fdvUsd: number | null;
+  /** Изменение ликвидности к предыдущему снапшоту, % (вычисляется при загрузке). */
+  liqTrendPct?: number | null;
 }
 
 function netReturn(entry: Snap, exit: Snap): number | null {
@@ -103,6 +105,19 @@ for (const r of rows) {
   const s = r as unknown as Snap;
   const arr = byToken.get(s.tokenId);
   if (arr) arr.push(s); else byToken.set(s.tokenId, [s]);
+}
+
+// Динамика ликвидности на момент входа: уходящая ликвидность — главный признак
+// готовящегося ругпулла, и она доступна ДО решения (сравнение с предыдущим
+// собственным наблюдением, без заглядывания вперёд). Предыдущий снапшот
+// учитывается, только если он не старше 2 часов, иначе «тренд» бессмыслен.
+for (const series of byToken.values()) {
+  for (let i = 1; i < series.length; i++) {
+    const cur = series[i] as Snap, prev = series[i - 1] as Snap;
+    const gapMin = (cur.fetchedAt.getTime() - prev.fetchedAt.getTime()) / 60_000;
+    if (gapMin > 120 || !prev.liquidityUsd || cur.liquidityUsd == null) continue;
+    cur.liqTrendPct = ((cur.liquidityUsd - prev.liquidityUsd) / prev.liquidityUsd) * 100;
+  }
 }
 
 log(`# Исследование edge — ${new Date().toISOString()}`);
@@ -226,6 +241,7 @@ const feats: { name: string; get: (s: Snap) => number | null }[] = [
   { name: "оборот vol/liq", get: (s) => (s.volume24hUsd != null && s.liquidityUsd ? s.volume24hUsd / s.liquidityUsd : null) },
   { name: "fdv/liq", get: (s) => (s.fdvUsd != null && s.liquidityUsd ? s.fdvUsd / s.liquidityUsd : null) },
   { name: "ускорение объёма", get: (s) => (s.volume5mUsd != null && s.volume1hUsd ? (s.volume5mUsd * 12) / s.volume1hUsd : null) },
+  { name: "Δ ликвидности %", get: (s) => s.liqTrendPct ?? null },
 ];
 
 function fmtNum(v: number): string {
@@ -303,6 +319,9 @@ const rules: { name: string; ok: (s: Snap) => boolean }[] = [
   { name: "buy/sell < 1.0", ok: (s) => (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 99) < 1.0 },
   { name: "сделок 1ч > 500", ok: (s) => ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 },
   { name: "сделок 1ч > 2000", ok: (s) => ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 2000 },
+  { name: "ликвидность растёт (Δликв > 0)", ok: (s) => (s.liqTrendPct ?? -1) > 0 },
+  { name: "ликвидность утекает (Δликв < −5%)", ok: (s) => (s.liqTrendPct ?? 1) < -5 },
+  { name: "ликв>50k И Δликв > −2%", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.liqTrendPct ?? -99) > -2 },
   { name: "ликв>50k И Δ1ч>20%", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.priceChange1h ?? 0) > 20 },
   { name: "ликв>50k И сделок>500 И buy/sell>1.5", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 && (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 0) > 1.5 },
 ];
