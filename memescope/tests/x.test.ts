@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summarize } from "../src/lib/providers/x";
+import { budgetBlock, summarize } from "../src/lib/providers/x";
 
 const now = new Date("2026-08-06T00:00:00Z");
 const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000).toISOString();
@@ -74,5 +74,27 @@ describe("X social summary", () => {
     expect(s.postsRead).toBe(0);
     expect(s.reach).toBe(0);
     expect(s.freshAccountShare).toBeNull();
+  });
+});
+
+describe("X spend limits", () => {
+  it("allows a read while both budgets have room", () => {
+    expect(budgetBlock(100, 10, 10)).toBeNull();
+  });
+
+  it("stops on the daily cap before the month is anywhere near spent", () => {
+    // Именно этот случай защищает баланс при оплате по факту: месяц ещё пуст,
+    // но что-то читает без остановки.
+    const blocked = budgetBlock(500, 400, 10);
+    expect(blocked).toContain("дневной");
+  });
+
+  it("stops on the monthly cap", () => {
+    expect(budgetBlock(9000, 0, 10)).toContain("месячный");
+  });
+
+  it("counts the planned read, not just what is already spent", () => {
+    // 8995 прочитано, потолок 9000: запрос на 10 постов не должен пройти.
+    expect(budgetBlock(8995, 0, 10)).not.toBeNull();
   });
 });

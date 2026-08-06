@@ -23,6 +23,13 @@ const SEARCH_URL = "https://api.x.com/2/tweets/search/recent";
 
 /** Сколько постов в месяц разрешено прочитать (запас к тарифу). */
 const MONTHLY_POST_BUDGET = Number(process.env.X_MONTHLY_POST_BUDGET ?? 9000);
+/**
+ * Дневной потолок. При оплате по факту (pay-per-use) месячного лимита мало:
+ * ошибка в логике или всплеск кандидатов способны выжечь весь баланс за сутки,
+ * и узнаем мы об этом уже по нулю на счету. Дневной предел ограничивает цену
+ * любой такой ошибки одним днём.
+ */
+const DAILY_POST_BUDGET = Number(process.env.X_DAILY_POST_BUDGET ?? 400);
 /** Сколько постов максимум за один запрос. */
 const MAX_RESULTS = Number(process.env.X_MAX_RESULTS ?? 10);
 
@@ -94,14 +101,38 @@ export function summarize(res: XResponse, now: Date): Omit<SocialStats, "source"
   };
 }
 
-/** Сколько постов уже прочитано в текущем календарном месяце. */
-export async function postsReadThisMonth(now = new Date()): Promise<number> {
-  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+async function postsReadSince(from: Date): Promise<number> {
   const agg = await prisma.socialSnapshot.aggregate({
-    where: { source: "x", fetchedAt: { gte: monthStart } },
+    where: { source: "x", fetchedAt: { gte: from } },
     _sum: { postsRead: true },
   });
   return agg._sum.postsRead ?? 0;
+}
+
+/** Сколько постов уже прочитано в текущем календарном месяце. */
+export async function postsReadThisMonth(now = new Date()): Promise<number> {
+  return postsReadSince(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)));
+}
+
+/** Сколько постов прочитано за последние сутки. */
+export async function postsReadToday(now = new Date()): Promise<number> {
+  return postsReadSince(new Date(now.getTime() - 24 * 3600_000));
+}
+
+/**
+ * Проверка обоих лимитов. Возвращает текст причины отказа или null, если можно
+ * читать. Вынесено отдельно, чтобы проверяться тестом без платного ключа.
+ */
+export function budgetBlock(
+  spentMonth: number,
+  spentDay: number,
+  planned: number,
+): string | null {
+  if (spentMonth + planned > MONTHLY_POST_BUDGET)
+    return `месячный бюджет X исчерпан: прочитано ${spentMonth} из ${MONTHLY_POST_BUDGET}`;
+  if (spentDay + planned > DAILY_POST_BUDGET)
+    return `дневной бюджет X исчерпан: прочитано ${spentDay} из ${DAILY_POST_BUDGET} за сутки`;
+  return null;
 }
 
 export class XSocial implements SocialProvider {
@@ -115,10 +146,14 @@ export class XSocial implements SocialProvider {
     const token = process.env.X_BEARER_TOKEN;
     if (!token) return null;
 
-    const spent = await postsReadThisMonth(now);
-    if (spent + MAX_RESULTS > MONTHLY_POST_BUDGET) {
-      // Лимит почти исчерпан. Молча читать дальше нельзя: у платного тарифа
-      // перерасход означает либо счёт, либо блокировку до конца месяца.
+    const blocked = budgetBlock(
+      await postsReadThisMonth(now),
+      await postsReadToday(now),
+      MAX_RESULTS,
+    );
+    if (blocked) {
+      // Молча читать дальше нельзя: при оплате по факту это прямой расход
+      // баланса, а при тарифном плане — блокировка до конца периода.
       return {
         source: this.name,
         dataMode: "live",
@@ -130,7 +165,7 @@ export class XSocial implements SocialProvider {
         engagement: null,
         freshAccountShare: null,
         medianAuthorAgeDays: null,
-        errors: [`месячный бюджет X исчерпан: прочитано ${spent} из ${MONTHLY_POST_BUDGET}`],
+        errors: [blocked],
       };
     }
 
