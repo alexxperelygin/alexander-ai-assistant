@@ -117,9 +117,15 @@ function edgeVerdict(
   if (s.expectancy == null) return "NO_DATA: нет измеримых исходов на выбранном горизонте.";
   if (s.expectancy <= 0)
     return `NO EDGE: expectancy ${(s.expectancy * 100).toFixed(1)}% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.`;
+  // Базовая линия покрывается хуже стратегии: сканер доопрашивает свои сигналы
+  // чаще, чем случайные токены, поэтому измеримых исходов у неё в разы меньше.
+  // Сравнивать положительный результат стратегии с базой из единиц наблюдений
+  // нельзя — это сравнение с шумом, и именно так рождается ложный edge.
+  if (b.evaluable < MIN_SIGNALS_FOR_METRICS)
+    return `NO_DATA для сравнения: у стратегии expectancy ${(s.expectancy * 100).toFixed(1)}%, но базовая линия измерима лишь на ${b.evaluable} исходах (< ${MIN_SIGNALS_FOR_METRICS}). Без сопоставимой базы заявлять преимущество нельзя.`;
   if (b.expectancy != null && s.expectancy <= b.expectancy)
     return `NO EDGE vs baseline: стратегия ${(s.expectancy * 100).toFixed(1)}% не лучше наивной покупки всего подряд ${(b.expectancy * 100).toFixed(1)}%. Отбор не добавляет ценности.`;
-  return `PRELIMINARY EDGE: expectancy ${(s.expectancy * 100).toFixed(1)}% > baseline ${((b.expectancy ?? 0) * 100).toFixed(1)}%. Требуется больше данных и out-of-sample подтверждение прежде чем доверять.`;
+  return `PRELIMINARY EDGE: expectancy ${(s.expectancy * 100).toFixed(1)}% > baseline ${((b.expectancy ?? 0) * 100).toFixed(1)}% (база: ${b.evaluable} исходов). Требуется больше данных и out-of-sample подтверждение прежде чем доверять.`;
 }
 
 async function toSignalRecord(

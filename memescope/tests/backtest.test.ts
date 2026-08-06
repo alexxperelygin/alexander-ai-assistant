@@ -106,3 +106,28 @@ describe("aggregate", () => {
     expect(m.medianReturn).toBeNull();
   });
 });
+
+describe("edge verdict guards", () => {
+  // Проверяем через runBacktest-независимую логику: базовая линия покрывается
+  // хуже стратегии, поэтому положительный результат нельзя объявлять
+  // преимуществом, сравнив его с горсткой наблюдений.
+  it("keeps rug rate out of the denominator it cannot measure", () => {
+    const m = aggregate(
+      [
+        { id: "a", symbol: "A", at: min(0), netReturns: { "1h": 0.1 }, rugged: false, unclosable: false, rugMeasurable: false },
+        { id: "b", symbol: "B", at: min(1), netReturns: { "1h": 0.1 }, rugged: true, unclosable: false, rugMeasurable: true },
+      ],
+      "1h",
+    );
+    expect(m.rugRate).toBe(1);
+    expect(m.rugMeasurable).toBe(1);
+  });
+
+  it("reports no rug rate at all when nothing was measurable", () => {
+    const m = aggregate(
+      [{ id: "a", symbol: "A", at: min(0), netReturns: { "1h": 0.1 }, rugged: false, unclosable: false, rugMeasurable: false }],
+      "1h",
+    );
+    expect(m.rugRate).toBeNull();
+  });
+});
