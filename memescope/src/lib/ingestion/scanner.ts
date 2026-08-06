@@ -103,11 +103,16 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
     take: slots,
     include: { token: true },
   });
-  const fresh = await prisma.token.findMany({
+  // Никогда не оценённые токены. Берём с запасом и раскладываем по сетям
+  // по очереди: за цикл discovery приносит ~20 пулов из КАЖДОЙ сети, поэтому
+  // простая сортировка «сначала свежие» отдала бы почти весь бюджет EVM-сетям
+  // и обескровила Solana — единственную сеть с полной проверкой выхода.
+  const freshPool = await prisma.token.findMany({
     where: { ...ageWindow, opportunities: { none: {} } },
     orderBy: { firstSeenAt: "desc" }, // just crossed min age — hottest first
-    take: slots,
+    take: slots * 4,
   });
+  const fresh = roundRobinByChain(freshPool, slots);
   const recheck = await prisma.opportunity.findMany({
     where: { status: { in: ["AVOID", "DATA_UNAVAILABLE", "HOLD", "BUY", "TAKE_PROFIT"] }, token: ageWindow },
     orderBy: { updatedAt: "asc" }, // least recently re-checked first
@@ -157,6 +162,37 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
     data: { actor: "worker", action: "scan.cycle", details: JSON.stringify({ discovered, evaluated, dataMode: providers.dataMode }) },
   });
   return { discovered, evaluated };
+}
+
+/**
+ * Раскладывает токены по сетям по очереди: первый из каждой сети, потом второй
+ * из каждой и так далее. Порядок внутри сети сохраняется, поэтому «сначала
+ * свежие» продолжает работать — меняется только то, что ни одна сеть не может
+ * забрать весь бюджет цикла.
+ */
+export function roundRobinByChain<T extends { chain: string }>(tokens: T[], limit: number): T[] {
+  const queues = new Map<string, T[]>();
+  for (const t of tokens) {
+    const q = queues.get(t.chain);
+    if (q) q.push(t);
+    else queues.set(t.chain, [t]);
+  }
+  const out: T[] = [];
+  let round = 0;
+  while (out.length < limit) {
+    let added = false;
+    for (const q of queues.values()) {
+      const item = q[round];
+      if (item) {
+        out.push(item);
+        added = true;
+        if (out.length >= limit) break;
+      }
+    }
+    if (!added) break;
+    round++;
+  }
+  return out;
 }
 
 async function evaluateToken(
