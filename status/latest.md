@@ -1,32 +1,39 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-06T05:15:52.914Z (UTC)
+Сгенерирован: 2026-08-06T05:17:27.073Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 262904; снапшотов за 24ч: 39107
+- Токенов в базе: 262944; снапшотов за 24ч: 39112
 - Ошибок в audit log за 24ч: 0
+
+## Новые токены за 24ч по сетям
+- solana: 19050
+- bsc: 22
+- ethereum: 20
+- arbitrum: 17
+- base: 14
 
 ## Статусы возможностей
 - AVOID: 103671
-- DATA_UNAVAILABLE: 28142
-- CANDIDATE: 21
+- DATA_UNAVAILABLE: 28144
+- CANDIDATE: 20
 - WATCH: 4
-- READY: 2
+- READY: 3
 
 ## Топ-5 по score (не отбракованные)
-- USOS: READY, score 66.4, risk 1.9, conf 100% (обновлено 1 мин назад)
+- USOS: READY, score 67.6, risk 0.6, conf 100% (обновлено 1 мин назад)
+- SAAS: READY, score 66.9, risk 0.7, conf 100% (обновлено 1 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 2.9 ч назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 16.9 ч назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 3.0 дн назад)
-- SAAS: CANDIDATE, score 63.1, risk 2.0, conf 100% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- USOS — 2026-08-06T05:08:00.776Z (8 мин назад)
-- USOS — 2026-08-06T05:04:01.673Z (12 мин назад)
-- USOS — 2026-08-06T05:01:58.513Z (14 мин назад)
-- USOS — 2026-08-06T04:53:53.318Z (22 мин назад)
-- SOLdiers — 2026-08-06T04:41:31.352Z (34 мин назад)
+- SAAS — 2026-08-06T05:16:25.125Z (1 мин назад)
+- USOS — 2026-08-06T05:08:00.776Z (9 мин назад)
+- USOS — 2026-08-06T05:04:01.673Z (13 мин назад)
+- USOS — 2026-08-06T05:01:58.513Z (15 мин назад)
+- USOS — 2026-08-06T04:53:53.318Z (24 мин назад)
 
 ## Позиции
 - Открытых: 4; всего: 12; realized P&L: $-376.98
@@ -64,13 +71,13 @@
 - DONE (4.6 ч назад): NO EDGE: expectancy -21.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 277644 / err 10, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 0 мин назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 0 / err 1, последний успех —)
-- geckoterminal:base: ok (ok 1 / err 0, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 1 / err 0, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 1 / err 0, последний успех 0 мин назад)
-- geckoterminal:solana: ok (ok 1 / err 0, последний успех 0 мин назад)
-- jupiter: ok (ok 269633 / err 595, последний успех 1 мин назад)
-- rugcheck: ok (ok 124470 / err 378, последний успех 5 мин назад)
+- dexscreener: ok (ok 277698 / err 10, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 2 мин назад)
+- geckoterminal:arbitrum: ok (ok 1 / err 1, последний успех 1 мин назад)
+- geckoterminal:base: ok (ok 2 / err 0, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 2 / err 0, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 2 / err 0, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 2 / err 0, последний успех 1 мин назад)
+- jupiter: ok (ok 269713 / err 595, последний успех 0 мин назад)
+- rugcheck: ok (ok 124477 / err 378, последний успех 0 мин назад)
 
