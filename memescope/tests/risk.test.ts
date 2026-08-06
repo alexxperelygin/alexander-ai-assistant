@@ -27,6 +27,7 @@ function features(overrides: Partial<FeatureVector> = {}): FeatureVector {
     rugged: false,
     sellRouteOk: true,
     sellImpactPct: 1,
+    liqTrendPct: 0,
     hasSocials: true,
     dataGaps: [],
     ...overrides,
@@ -67,5 +68,27 @@ describe("hard rejection rules", () => {
   });
   it("rejects when core data is missing", () => {
     expect(rules(features({ priceUsd: null, liquidityUsd: null }))).toContain("insufficient-data");
+  });
+});
+
+describe("liquidity drain rejection", () => {
+  it("blocks entry when liquidity is leaving the pool", () => {
+    const hits = evaluateHardRejections(
+      features({ liqTrendPct: -12 }),
+      null,
+      DEFAULT_RISK_SETTINGS,
+    );
+    expect(hits.map((h) => h.rule)).toContain("liquidity-draining");
+  });
+
+  it("allows normal fluctuation and an unknown trend", () => {
+    for (const liqTrendPct of [-2, 0, 30, null]) {
+      const hits = evaluateHardRejections(
+        features({ liqTrendPct }),
+        null,
+        DEFAULT_RISK_SETTINGS,
+      );
+      expect(hits.map((h) => h.rule)).not.toContain("liquidity-draining");
+    }
   });
 });

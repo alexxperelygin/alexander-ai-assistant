@@ -109,6 +109,8 @@ export interface FeatureVector {
   rugged: boolean | null;
   sellRouteOk: boolean | null;
   sellImpactPct: number | null;
+  /** Изменение ликвидности с предыдущего наблюдения, % (null = не с чем сравнить). */
+  liqTrendPct: number | null;
   hasSocials: boolean;
   dataGaps: string[]; // names of missing inputs
 }

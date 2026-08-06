@@ -27,6 +27,7 @@ function baseFeatures(overrides: Partial<FeatureVector> = {}): FeatureVector {
     rugged: false,
     sellRouteOk: true,
     sellImpactPct: 1.2,
+    liqTrendPct: 0,
     hasSocials: true,
     dataGaps: [],
     ...overrides,

@@ -168,6 +168,14 @@ async function evaluateToken(
   const providers = getProviders();
   const settings = await getRiskSettings();
 
+  // Предыдущее наблюдение — нужно ДО записи нового, чтобы посчитать, куда
+  // движется ликвидность. Это единственный признак ругпулла, доступный заранее.
+  const prevSnapshot = await prisma.tokenSnapshot.findFirst({
+    where: { tokenId, liquidityUsd: { gt: 0 } },
+    orderBy: { fetchedAt: "desc" },
+    select: { fetchedAt: true, liquidityUsd: true },
+  });
+
   // Market snapshot.
   let snapshot: MarketSnapshot | null = null;
   try {
@@ -304,6 +312,8 @@ async function evaluateToken(
     sellQuote,
     pairCreatedAt,
     hasSocials,
+    previousLiquidity: prevSnapshot?.liquidityUsd ?? null,
+    previousLiquidityAt: prevSnapshot?.fetchedAt ?? null,
     now: ctx.now,
   });
   const rejections = evaluateHardRejections(features, risk, settings);

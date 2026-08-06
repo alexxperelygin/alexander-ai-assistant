@@ -74,3 +74,38 @@ describe("non-finite input sanitation", () => {
     expect(f.volAccel).toBeNull();
   });
 });
+
+describe("liquidity trend", () => {
+  const base = {
+    snapshot: {
+      source: "test", dataMode: "live" as const, observedAt: new Date(),
+      priceUsd: 1, liquidityUsd: 90_000, volume24hUsd: 100_000,
+    },
+    risk: null,
+    sellQuote: null,
+    pairCreatedAt: new Date(Date.now() - 3 * 3600_000),
+    hasSocials: false,
+  };
+
+  it("measures the drop against the previous observation", () => {
+    const f = computeFeatures({
+      ...base,
+      previousLiquidity: 100_000,
+      previousLiquidityAt: new Date(Date.now() - 15 * 60_000),
+    });
+    expect(f.liqTrendPct).toBeCloseTo(-10);
+  });
+
+  it("reports no trend when the previous observation is too old", () => {
+    const f = computeFeatures({
+      ...base,
+      previousLiquidity: 100_000,
+      previousLiquidityAt: new Date(Date.now() - 5 * 3600_000),
+    });
+    expect(f.liqTrendPct).toBeNull();
+  });
+
+  it("reports no trend when there is nothing to compare with", () => {
+    expect(computeFeatures(base).liqTrendPct).toBeNull();
+  });
+});

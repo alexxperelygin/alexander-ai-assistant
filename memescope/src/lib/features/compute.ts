@@ -11,8 +11,14 @@ export interface FeatureInputs {
   sellQuote: RouteQuote | null;
   pairCreatedAt: Date | null;
   hasSocials: boolean;
+  /** Ликвидность в предыдущем наблюдении этого же токена (для тренда). */
+  previousLiquidity?: number | null;
+  previousLiquidityAt?: Date | null;
   now?: Date;
 }
+
+/** Дальше этого разрыва предыдущее наблюдение уже не описывает «тренд». */
+const LIQ_TREND_MAX_GAP_MIN = 120;
 
 export function computeFeatures(inp: FeatureInputs): FeatureVector {
   const now = inp.now ?? new Date();
@@ -57,6 +63,20 @@ export function computeFeatures(inp: FeatureInputs): FeatureVector {
   const volume24hUsd = s ? num(s.volume24hUsd, "volume24h") : null;
   const fdvUsd = s?.fdvUsd ?? null;
 
+  // Куда движется ликвидность с прошлого наблюдения. Считается только по
+  // собственным прошлым данным, то есть доступно в момент решения. Слишком
+  // старое предыдущее наблюдение — это не тренд, а шум: тогда null.
+  const prevLiq = inp.previousLiquidity ?? null;
+  const prevGapMin =
+    inp.previousLiquidityAt != null
+      ? (now.getTime() - inp.previousLiquidityAt.getTime()) / 60_000
+      : null;
+  const liqTrendPct =
+    prevLiq != null && prevLiq > 0 && liquidityUsd != null &&
+    prevGapMin != null && prevGapMin >= 0 && prevGapMin <= LIQ_TREND_MAX_GAP_MIN
+      ? ((liquidityUsd - prevLiq) / prevLiq) * 100
+      : null;
+
   const vector: FeatureVector = {
     computedAt: now,
     tokenAgeMin,
@@ -87,6 +107,7 @@ export function computeFeatures(inp: FeatureInputs): FeatureVector {
     rugged: r?.rugged ?? null,
     sellRouteOk: inp.sellQuote ? inp.sellQuote.routeFound : (r?.sellRouteOk ?? null),
     sellImpactPct: inp.sellQuote?.priceImpactPct ?? r?.sellImpactPct ?? null,
+    liqTrendPct,
     hasSocials: inp.hasSocials,
     dataGaps: [...new Set(gaps)],
   };

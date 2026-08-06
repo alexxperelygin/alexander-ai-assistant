@@ -4,6 +4,9 @@ import type { ContractRiskReport, FeatureVector, RejectionHit, RiskSettings } fr
 // Rules are pure functions of (features, risk report, settings) so every
 // decision is reproducible from stored inputs.
 
+/** Порог оттока ликвидности между соседними наблюдениями, при котором вход запрещён. */
+export const LIQ_DRAIN_REJECT_PCT = -5;
+
 export function evaluateHardRejections(
   f: FeatureVector,
   risk: ContractRiskReport | null,
@@ -39,6 +42,17 @@ export function evaluateHardRejections(
     add(
       "insufficient-liquidity",
       `Ликвидность $${Math.round(f.liquidityUsd).toLocaleString()} ниже минимума $${settings.minLiquidityUsd.toLocaleString()}.`,
+    );
+
+  // Уходящая ликвидность — единственный предвестник ругпулла, видимый ДО входа.
+  // На чистых данных 6 августа наблюдения с падением ликвидности >5% между
+  // соседними опросами дали медиану −92.5% и лишь 7% прибыльных (n=127), и
+  // эффект сохранился на train и на test. Правило отбраковочное: оно ничего не
+  // обещает, оно убирает категорию, которая почти всегда теряет почти всё.
+  if (f.liqTrendPct != null && f.liqTrendPct < LIQ_DRAIN_REJECT_PCT)
+    add(
+      "liquidity-draining",
+      `Ликвидность упала на ${Math.abs(f.liqTrendPct).toFixed(1)}% с прошлого наблюдения (порог ${Math.abs(LIQ_DRAIN_REJECT_PCT)}%) — из пула выводят средства.`,
     );
 
   if (f.sellImpactPct != null && f.sellImpactPct > settings.maxSlippagePct)

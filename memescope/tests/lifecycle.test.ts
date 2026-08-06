@@ -10,7 +10,8 @@ function features(): FeatureVector {
     buySellRatio1h: 1.5, txns1h: 400, priceChange1h: 20, priceChange24h: 60,
     volToLiq: 4, fdvToLiq: 11, holders: 1000, top10Pct: 25, lpLockedPct: 100,
     mintAuthorityActive: false, freezeAuthorityActive: false, rugged: false,
-    sellRouteOk: true, sellImpactPct: 1, hasSocials: true, dataGaps: [],
+    sellRouteOk: true, sellImpactPct: 1, liqTrendPct: 0,
+    hasSocials: true, dataGaps: [],
   };
 }
 

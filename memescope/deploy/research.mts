@@ -169,6 +169,16 @@ for (const series of byToken.values()) {
 
 const isUnbiased = (o: Obs) => o.entry.fetchedAt.getTime() >= UNBIASED_FROM.getTime();
 
+// Гигиена данных. В отчёте 6 августа четыре из пяти экстремумов имели Δ1ч,
+// в точности равную Δ24ч, и обе — порядка +130 000%. Это не рынок: так
+// выглядит пара, у которой в источнике меньше часа истории, поэтому оба окна
+// покрывают один и тот же отрезок от стартовой цены. Такие наблюдения
+// одновременно раздувают «моментум-правила» и портят их результат, поэтому
+// исключаются с явным подсчётом, а не молча.
+const isListingArtifact = (s: Snap): boolean =>
+  s.priceChange1h != null && s.priceChange24h != null &&
+  s.priceChange1h === s.priceChange24h && Math.abs(s.priceChange1h) > 1000;
+
 // ---------- 1. Базовая линия ----------
 log(`## 1. Базовая линия рынка`);
 log();
@@ -186,12 +196,18 @@ log();
 // Данные до UNBIASED_FROM собраны сканером, который доопрашивал в основном
 // «интересные» токены, поэтому исход там измерим преимущественно у выживших.
 // Смешивать два режима нельзя: это даёт оптимистичную базовую линию.
-const unbiased = observations.filter(isUnbiased);
-const biased = observations.filter((o) => !isUnbiased(o));
+const artifacts = observations.filter((o) => isListingArtifact(o.entry));
+const clean = observations.filter((o) => !isListingArtifact(o.entry));
+const unbiased = clean.filter(isUnbiased);
+const biased = clean.filter((o) => !isUnbiased(o));
 const covOf = (obs: Obs[]) => (obs.length ? obs.filter((o) => o.ret[MAIN_H] != null).length / obs.length : 0);
 const retsOf = (obs: Obs[]) => obs.map((o) => o.ret[MAIN_H]).filter((r): r is number => r != null);
 
 log(`## 1b. Режим измерения`);
+log();
+log(`Отброшено как артефакт листинга (Δ1ч в точности равна Δ24ч и обе > 1000%): ` +
+    `**${artifacts.length.toLocaleString("ru")}** наблюдений из ${observations.length.toLocaleString("ru")}. ` +
+    `У такой пары в источнике меньше часа истории, «рост» — это разница со стартовой ценой, а не моментум.`);
 log();
 log(`Граница чистых данных: **${UNBIASED_FROM.toISOString()}** — момент, с которого`);
 log(`сканер доопрашивает и «неинтересные» токены. До неё исход измерим почти`);
