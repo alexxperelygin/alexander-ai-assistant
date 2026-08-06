@@ -18,6 +18,57 @@ export async function getRiskSettings(): Promise<RiskSettings> {
   }
 }
 
+/**
+ * Разовые миграции сохранённых настроек.
+ *
+ * Ловушка, из-за которой это появилось: сохранённая в БД настройка ПЕРЕКРЫВАЕТ
+ * значение по умолчанию. Порог ликвидности был поднят 10k → 50k по результатам
+ * исследования, но на сервере уже лежала запись с 10 000 — и новый порог
+ * молча не действовал, хотя в коде и документации стоял. Правки дефолтов
+ * недостаточно: нужно менять сохранённое значение явно и под запись в журнал.
+ *
+ * Каждая миграция помечается ключом и применяется один раз, чтобы не затирать
+ * осознанные изменения владельца в Settings.
+ */
+const MIGRATIONS: { key: string; apply: (s: RiskSettings) => RiskSettings | null }[] = [
+  {
+    key: "migration:min-liquidity-50k",
+    apply: (s) =>
+      s.minLiquidityUsd < 50_000 ? { ...s, minLiquidityUsd: 50_000 } : null,
+  },
+];
+
+export async function applySettingsMigrations(): Promise<string[]> {
+  const applied: string[] = [];
+  for (const m of MIGRATIONS) {
+    const done = await prisma.setting.findUnique({ where: { key: m.key } });
+    if (done) continue;
+    const current = await getRiskSettings();
+    const next = m.apply(current);
+    if (next) {
+      await prisma.setting.upsert({
+        where: { key: KEY },
+        create: { key: KEY, value: JSON.stringify(next) },
+        update: { value: JSON.stringify(next) },
+      });
+      await prisma.auditLog.create({
+        data: {
+          actor: "system",
+          action: "settings.migration",
+          details: JSON.stringify({ migration: m.key, from: current, to: next }),
+        },
+      });
+      applied.push(m.key);
+    }
+    await prisma.setting.upsert({
+      where: { key: m.key },
+      create: { key: m.key, value: new Date().toISOString() },
+      update: { value: new Date().toISOString() },
+    });
+  }
+  return applied;
+}
+
 export async function saveRiskSettings(next: RiskSettings): Promise<void> {
   next.liveTradingEnabled = false; // stage-1 invariant
   await prisma.setting.upsert({

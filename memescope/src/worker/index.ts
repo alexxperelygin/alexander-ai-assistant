@@ -1,6 +1,7 @@
 import { config } from "../lib/config";
 import { prisma } from "../lib/db";
 import { scanOnce } from "../lib/ingestion/scanner";
+import { applySettingsMigrations } from "../lib/settings";
 import { monitorPositionsOnce } from "../lib/monitor/positions";
 
 // 24/7 worker: scan loop + position-monitor loop. Designed to run as a
@@ -70,6 +71,11 @@ async function main(): Promise<void> {
   await prisma.auditLog.create({
     data: { actor: "worker", action: "worker.start", details: JSON.stringify({ dataMode: config.dataMode }) },
   });
+
+  // Сохранённые настройки перекрывают значения по умолчанию, поэтому
+  // обоснованные исследованием пороги нужно доносить до БД явно.
+  const migrated = await applySettingsMigrations();
+  if (migrated.length) console.log(`[settings] применены миграции: ${migrated.join(", ")}`);
 
   await Promise.all([
     loop("scan", config.scanIntervalSec, async () => {

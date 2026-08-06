@@ -8,16 +8,27 @@ const lastCallAt = new Map<string, number>();
 export interface HttpOpts {
   source: string; // health-tracking key, e.g. "dexscreener"
   minIntervalMs?: number; // simple throttle between calls to this source
+  /**
+   * Ключ ограничения скорости, если он ШИРЕ ключа здоровья. У GeckoTerminal
+   * лимит общий на весь API, а здоровье полезно видеть по каждой сети
+   * отдельно: без этого шесть сетей стартовали каждая со своим счётчиком,
+   * запросы уходили залпом и API отвечал 429 всем, кроме первых.
+   */
+  throttleKey?: string;
   timeoutMs?: number;
 }
 
 export async function fetchJson<T>(url: string, opts: HttpOpts): Promise<T> {
   const { source, minIntervalMs = 0, timeoutMs = 10_000 } = opts;
+  const throttleKey = opts.throttleKey ?? source;
 
-  const last = lastCallAt.get(source) ?? 0;
-  const wait = last + minIntervalMs - Date.now();
+  // Резервируем слот СРАЗУ, до ожидания: иначе параллельные вызовы прочитают
+  // одно и то же время и уйдут одновременно, то есть тем же залпом.
+  const last = lastCallAt.get(throttleKey) ?? 0;
+  const slot = Math.max(Date.now(), last + minIntervalMs);
+  lastCallAt.set(throttleKey, slot);
+  const wait = slot - Date.now();
   if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  lastCallAt.set(source, Date.now());
 
   const started = Date.now();
   try {

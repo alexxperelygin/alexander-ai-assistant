@@ -41,7 +41,12 @@ export class GeckoTerminalDiscovery implements DiscoveryProvider {
   private async discoverOnChain(chainId: string, geckoNetwork: string): Promise<DiscoveredToken[]> {
     const json = await fetchJson<{ data: GtPool[] }>(
       `https://api.geckoterminal.com/api/v2/networks/${geckoNetwork}/new_pools?page=1`,
-      { source: `${this.name}:${geckoNetwork}`, minIntervalMs: 2100 },
+      {
+        source: `${this.name}:${geckoNetwork}`,
+        // Лимит GeckoTerminal — общий на весь API, а не на сеть.
+        throttleKey: this.name,
+        minIntervalMs: 2500,
+      },
     );
     const out: DiscoveredToken[] = [];
     const prefix = `${geckoNetwork}_`;
