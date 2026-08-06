@@ -92,14 +92,20 @@ sed -i 's/^MAX_CANDIDATES_PER_CYCLE=8$/MAX_CANDIDATES_PER_CYCLE=30/' .env || tru
 # Платный ключ X кладётся отдельным файлом (режим 600, вне репозитория) — так он
 # не проходит через чат, не попадает в git и не светится в списке процессов.
 # Здесь только переносим его в .env; само значение нигде не печатается.
-SECRET_X="/opt/memescope-secrets/x_bearer"
-if [ -s "$SECRET_X" ]; then
-  sed -i '/^X_BEARER_TOKEN=/d' .env
-  printf 'X_BEARER_TOKEN=%s\n' "$(cat "$SECRET_X")" >> .env
-  say "   ключ X подключён (значение не выводится)"
-else
-  say "   ключ X не задан — социальные данные не собираются"
-fi
+apply_secret() { # $1 = имя файла с секретом, $2 = переменная в .env
+  local file="/opt/memescope-secrets/$1"
+  if [ -s "$file" ]; then
+    sed -i "/^$2=/d" .env
+    printf '%s=%s\n' "$2" "$(cat "$file")" >> .env
+    say "   ключ $2 подключён (значение не выводится)"
+  else
+    say "   ключ $2 не задан — источник не используется"
+  fi
+}
+apply_secret x_bearer X_BEARER_TOKEN
+apply_secret reddit_client_id REDDIT_CLIENT_ID
+apply_secret reddit_client_secret REDDIT_CLIENT_SECRET
+apply_secret neynar_api_key NEYNAR_API_KEY
 # SQLite однописательный: работающий worker держит блокировку, и db push
 # падает с 'database is locked'. Останавливаем сервисы перед миграцией схемы.
 pm2 stop memescope-web memescope-worker >/dev/null 2>&1 || true

@@ -67,6 +67,9 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           TASK: ${{ steps.task.outputs.task }}
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          NEYNAR_API_KEY: ${{ secrets.NEYNAR_API_KEY }}
         run: |
           sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
           run_ssh() { sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" "$1"; }
@@ -77,11 +80,16 @@ jobs:
               echo "== Обновление кода на сервере =="
               # Платный ключ X передаётся по stdin в файл с режимом 600.
               # Не через аргументы команды: они видны в списке процессов сервера.
-              if [ -n "${X_BEARER_TOKEN:-}" ]; then
-                printf '%s' "$X_BEARER_TOKEN" | sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" \
-                  'install -d -m 700 /opt/memescope-secrets && cat > /opt/memescope-secrets/x_bearer && chmod 600 /opt/memescope-secrets/x_bearer'
-                echo "Ключ X передан на сервер (значение не печатается)."
-              fi
+              send_secret() { # $1 = значение, $2 = имя файла на сервере
+                [ -n "$1" ] || return 0
+                printf '%s' "$1" | sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" \
+                  "install -d -m 700 /opt/memescope-secrets && cat > /opt/memescope-secrets/$2 && chmod 600 /opt/memescope-secrets/$2"
+                echo "Секрет $2 передан на сервер (значение не печатается)."
+              }
+              send_secret "${X_BEARER_TOKEN:-}" x_bearer
+              send_secret "${REDDIT_CLIENT_ID:-}" reddit_client_id
+              send_secret "${REDDIT_CLIENT_SECRET:-}" reddit_client_secret
+              send_secret "${NEYNAR_API_KEY:-}" neynar_api_key
               # ВАЖНО: без пайпа сразу за ssh — `| tail` маскировал код ошибки,
               # и провалившиеся деплои выглядели успешными.
               if ! run_ssh 'git -C /opt/alexander-ai-assistant fetch -q origin main && git -C /opt/alexander-ai-assistant reset -q --hard origin/main && bash /opt/alexander-ai-assistant/memescope/deploy/install.sh' > /tmp/update.log 2>&1; then

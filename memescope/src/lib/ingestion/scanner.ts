@@ -408,50 +408,51 @@ async function evaluateToken(
     ? await prisma.opportunity.update({ where: { id: existing.id }, data })
     : await prisma.opportunity.create({ data: { tokenId, ...data } });
 
-  // Социальный срез — платный и с месячной квотой, поэтому снимается ТОЛЬКО с
-  // токенов, уже прошедших отбор (десятки в день), и не чаще раза в час на
-  // токен. Ошибка источника не должна ронять оценку токена.
   // Кого опрашивать. Сначала стояло «только READY и CANDIDATE» — по расходу это
   // безопасно, но для ИССЛЕДОВАНИЯ бесполезно: у горстки лучших по score
   // токенов почти нет разброса ни в соцактивности, ни в исходах, а без
-  // разброса предсказательную силу измерить нечем. К тому же таких оценок
-  // выходило ~10 в сутки — к дедлайну не набралось бы и сотни наблюдений.
-  // Опрашиваем всех, кто прошёл порог ликвидности: это осмысленная вселенная
-  // (её же видит стратегия), в ней есть и удачные, и провальные исходы.
-  // Расход по-прежнему ограничен дневным и месячным потолками в самом
-  // провайдере, поэтому расширение выборки не может выжечь баланс.
-  if (providers.social && passesLiquidityGate && decision.status !== "DATA_UNAVAILABLE") {
-    const lastSocial = await prisma.socialSnapshot.findFirst({
-      where: { tokenId, source: providers.social.name },
-      orderBy: { fetchedAt: "desc" },
-      select: { fetchedAt: true },
-    });
-    const dueAt = ctx.now.getTime() - SOCIAL_MIN_INTERVAL_MS;
-    if (!lastSocial || lastSocial.fetchedAt.getTime() < dueAt) {
+  // разброса предсказательную силу измерить нечем. Опрашиваем всех, кто прошёл
+  // порог ликвидности: это осмысленная вселенная (её же видит стратегия), в
+  // ней есть и удачные, и провальные исходы. Расход ограничен потолками внутри
+  // самих провайдеров.
+  if (passesLiquidityGate && decision.status !== "DATA_UNAVAILABLE") {
+    for (const social of providers.socials) {
+      const lastSocial = await prisma.socialSnapshot.findFirst({
+        where: { tokenId, source: social.name },
+        orderBy: { fetchedAt: "desc" },
+        select: { fetchedAt: true },
+      });
+      const dueAt = ctx.now.getTime() - SOCIAL_MIN_INTERVAL_MS;
+      if (lastSocial && lastSocial.fetchedAt.getTime() >= dueAt) continue;
       try {
         // Ищем по адресу контракта: тикеры совпадают у сотен токенов, адрес — нет.
-        const stats = await providers.social.getSocialStats(mint, 60, ctx.now);
-        if (stats) {
-          await prisma.socialSnapshot.create({
-            data: {
-              tokenId,
-              source: stats.source,
-              dataMode: stats.dataMode,
-              windowMin: stats.windowMin,
-              postsRead: stats.postsRead,
-              mentions: stats.mentions,
-              uniqueAuthors: stats.uniqueAuthors,
-              reach: stats.reach,
-              engagement: stats.engagement,
-              freshAccountShare: stats.freshAccountShare,
-              medianAuthorAgeDays: stats.medianAuthorAgeDays,
-              errors: stats.errors?.length ? JSON.stringify(stats.errors) : null,
-            },
-          });
-        }
+        const stats = await social.getSocialStats(mint, 60, ctx.now);
+        if (!stats) continue;
+        await prisma.socialSnapshot.create({
+          data: {
+            tokenId,
+            source: stats.source,
+            dataMode: stats.dataMode,
+            windowMin: stats.windowMin,
+            postsRead: stats.postsRead,
+            mentions: stats.mentions,
+            uniqueAuthors: stats.uniqueAuthors,
+            reach: stats.reach,
+            engagement: stats.engagement,
+            freshAccountShare: stats.freshAccountShare,
+            medianAuthorAgeDays: stats.medianAuthorAgeDays,
+            errors: stats.errors?.length ? JSON.stringify(stats.errors) : null,
+          },
+        });
       } catch (err) {
+        // Сбой одного источника не должен ни ронять оценку токена, ни мешать
+        // остальным источникам.
         await prisma.auditLog.create({
-          data: { actor: "worker", action: "social.error", details: JSON.stringify({ mint, error: String(err) }) },
+          data: {
+            actor: "worker",
+            action: "social.error",
+            details: JSON.stringify({ mint, source: social.name, error: String(err) }),
+          },
         }).catch(() => {});
       }
     }

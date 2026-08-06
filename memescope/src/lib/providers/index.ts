@@ -14,6 +14,8 @@ import { GoPlusRisk } from "./goplus";
 import { chainConfig, DEFAULT_CHAIN } from "../chains";
 import { JupiterRoutes } from "./jupiter";
 import { XSocial } from "./x";
+import { RedditSocial } from "./reddit";
+import { FarcasterSocial } from "./farcaster";
 import { MockProvider } from "./mock";
 
 export interface ProviderSet {
@@ -22,8 +24,8 @@ export interface ProviderSet {
   market: MarketDataProvider;
   risk: RiskProvider;
   routes: RouteProvider;
-  /** null, если платный ключ не настроен — тогда социальных данных просто нет. */
-  social: SocialProvider | null;
+  /** Только настроенные источники. Пустой список = социальных данных нет. */
+  socials: SocialProvider[];
 }
 
 /**
@@ -48,15 +50,19 @@ class ChainRoutedRisk implements RiskProvider {
 export function getProviders(): ProviderSet {
   if (config.dataMode === "mock") {
     const mock = new MockProvider();
-    return { dataMode: "mock", discovery: mock, market: mock, risk: mock, routes: mock, social: null };
+    return { dataMode: "mock", discovery: mock, market: mock, risk: mock, routes: mock, socials: [] };
   }
-  const x = new XSocial();
+  // Каждый источник включается своим ключом независимо: отсутствие одного не
+  // мешает остальным.
+  const socials = [new XSocial(), new RedditSocial(), new FarcasterSocial()].filter((p) =>
+    p.isConfigured(),
+  );
   return {
     dataMode: "live",
     discovery: new GeckoTerminalDiscovery(),
     market: new DexScreenerMarketData(),
     risk: new ChainRoutedRisk(),
     routes: new JupiterRoutes(),
-    social: x.isConfigured() ? x : null,
+    socials,
   };
 }
