@@ -61,21 +61,39 @@ describe("evaluateSignal", () => {
     const out = evaluateSignal(sig, []);
     expect(out.unclosable).toBe(true);
   });
+
+  it("does not claim 'no rug' when the rug test could not run", () => {
+    // Ни одного наблюдения после сигнала — про ликвидность ничего не известно.
+    // Такой сигнал не должен улучшать rug rate, он должен выпадать из знаменателя.
+    const noData = evaluateSignal(sig, []);
+    expect(noData.rugged).toBe(false);
+    expect(noData.rugMeasurable).toBe(false);
+
+    // Наблюдение есть, но без данных о ликвидности — тоже не измеримо.
+    const noLiquidity = evaluateSignal(sig, pts([40, 1.1, null]));
+    expect(noLiquidity.rugMeasurable).toBe(false);
+
+    const measured = evaluateSignal(sig, pts([40, 0.05, 5_000]));
+    expect(measured.rugMeasurable).toBe(true);
+  });
 });
 
 describe("aggregate", () => {
   it("computes win rate, expectancy and drawdown over outcomes", () => {
     const outcomes = [
-      { id: "a", symbol: "A", at: min(0), netReturns: { "1h": 0.5 }, rugged: false, unclosable: false },
-      { id: "b", symbol: "B", at: min(1), netReturns: { "1h": -0.5 }, rugged: true, unclosable: false },
-      { id: "c", symbol: "C", at: min(2), netReturns: { "1h": null }, rugged: false, unclosable: true },
+      { id: "a", symbol: "A", at: min(0), netReturns: { "1h": 0.5 }, rugged: false, unclosable: false, rugMeasurable: true },
+      { id: "b", symbol: "B", at: min(1), netReturns: { "1h": -0.5 }, rugged: true, unclosable: false, rugMeasurable: true },
+      { id: "c", symbol: "C", at: min(2), netReturns: { "1h": null }, rugged: false, unclosable: true, rugMeasurable: false },
     ];
     const m = aggregate(outcomes, "1h");
     expect(m.signals).toBe(3);
     expect(m.evaluable).toBe(2);
     expect(m.winRate).toBeCloseTo(0.5);
     expect(m.expectancy).toBeCloseTo(0);
-    expect(m.rugRate).toBeCloseTo(1 / 3);
+    // Токен без наблюдений после сигнала не «не ругнулся» — он просто не измерен,
+    // поэтому в знаменателе только 2 измеримых.
+    expect(m.rugRate).toBeCloseTo(1 / 2);
+    expect(m.rugMeasurable).toBe(2);
     expect(m.unclosablePct).toBeCloseTo(1 / 3);
     // Equity: 1 → 1.5 → 0.75; peak 1.5, dd = 50%.
     expect(m.maxDrawdown).toBeCloseTo(0.5);

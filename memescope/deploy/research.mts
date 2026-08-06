@@ -24,6 +24,13 @@ const POSITION_USD = 50;
 const HORIZONS: Record<string, number> = { "1h": 60, "6h": 360, "24h": 1440 };
 const MAIN_H = "6h";
 
+// Момент, с которого сканер начал целенаправленно доопрашивать «неинтересные»
+// токены (follow-up-слоты, деплой 5 августа ~08:45 UTC). До него исход был
+// измерим почти только у выживших — любая метрика на тех данных завышена
+// выживаемостью. Всё, что раньше этой границы, считается СМЕЩЁННЫМ режимом
+// и выводится отдельно, а не смешивается с чистыми данными.
+const UNBIASED_FROM = new Date(process.env.UNBIASED_FROM ?? "2026-08-05T09:00:00Z");
+
 interface Snap {
   tokenId: string;
   fetchedAt: Date;
@@ -108,19 +115,25 @@ log(`> приводится винзоризованное среднее (хв�
 log();
 
 // ---------- Наблюдения ----------
-interface Obs { entry: Snap; ret: Record<string, number | null>; }
+interface Obs {
+  entry: Snap;
+  ret: Record<string, number | null>;
+  /** Ликвидность на выходе MAIN_H упала ниже 20% от входной. null = не измерено. */
+  rug: boolean | null;
+}
 const observations: Obs[] = [];
 for (const series of byToken.values()) {
   if (series.length < 2) {
     // Токен без последующих наблюдений: исход неизмерим, но он ВАЖЕН для
     // оценки систематической ошибки — учитываем как непокрытый.
     const only = series[0];
-    if (only) observations.push({ entry: only, ret: { "1h": null, "6h": null, "24h": null } });
+    if (only) observations.push({ entry: only, ret: { "1h": null, "6h": null, "24h": null }, rug: null });
     continue;
   }
   for (let i = 0; i < series.length; i++) {
     const entry = series[i] as Snap;
     const ret: Record<string, number | null> = {};
+    let rug: boolean | null = null;
     for (const [key, minutes] of Object.entries(HORIZONS)) {
       const deadline = entry.fetchedAt.getTime() + minutes * 60_000;
       const halfway = entry.fetchedAt.getTime() + (minutes * 60_000) / 2;
@@ -131,10 +144,15 @@ for (const series of byToken.values()) {
         if (t >= halfway) exit = series[j] as Snap;
       }
       ret[key] = exit ? netReturn(entry, exit) : null;
+      if (key === MAIN_H && exit && exit.liquidityUsd != null && entry.liquidityUsd != null) {
+        rug = exit.liquidityUsd < entry.liquidityUsd * 0.2;
+      }
     }
-    observations.push({ entry, ret });
+    observations.push({ entry, ret, rug });
   }
 }
+
+const isUnbiased = (o: Obs) => o.entry.fetchedAt.getTime() >= UNBIASED_FROM.getTime();
 
 // ---------- 1. Базовая линия ----------
 log(`## 1. Базовая линия рынка`);
@@ -149,8 +167,41 @@ for (const h of Object.keys(HORIZONS)) {
 }
 log();
 
+// ---------- 1b. Режим измерения ----------
+// Данные до UNBIASED_FROM собраны сканером, который доопрашивал в основном
+// «интересные» токены, поэтому исход там измерим преимущественно у выживших.
+// Смешивать два режима нельзя: это даёт оптимистичную базовую линию.
+const unbiased = observations.filter(isUnbiased);
+const biased = observations.filter((o) => !isUnbiased(o));
+const covOf = (obs: Obs[]) => (obs.length ? obs.filter((o) => o.ret[MAIN_H] != null).length / obs.length : 0);
+const retsOf = (obs: Obs[]) => obs.map((o) => o.ret[MAIN_H]).filter((r): r is number => r != null);
+
+log(`## 1b. Режим измерения`);
+log();
+log(`Граница чистых данных: **${UNBIASED_FROM.toISOString()}** — момент, с которого`);
+log(`сканер доопрашивает и «неинтересные» токены. До неё исход измерим почти`);
+log(`только у выживших, и любая метрика завышена.`);
+log();
+log(`| Режим | Наблюдений | Coverage ${MAIN_H} | Медиана | Прибыльных |`);
+log(`|---|---|---|---|---|`);
+for (const [name, obs] of [["смещённый (до)", biased], ["чистый (после)", unbiased]] as const) {
+  const xs = retsOf(obs);
+  log(`| ${name} | ${obs.length.toLocaleString("ru")} | ${pct(covOf(obs), 0)} | **${pct(median(xs))}** | ${pct(winRate(xs), 0)} |`);
+}
+log();
+
+// Дальнейший анализ идёт по чистому режиму, если его уже достаточно.
+const MIN_CLEAN = 5_000;
+const useClean = unbiased.length >= MIN_CLEAN;
+const sample = useClean ? unbiased : observations;
+log(useClean
+  ? `Разделы 2–5 считаются **только по чистому режиму** (${sample.length.toLocaleString("ru")} наблюдений).`
+  : `Чистых наблюдений пока ${unbiased.length.toLocaleString("ru")} (< ${MIN_CLEAN.toLocaleString("ru")}), ` +
+    `поэтому разделы 2–5 считаются по всему окну и **завышены выживаемостью**.`);
+log();
+
 // ---------- 2. Диагностика выбросов ----------
-const withMain = observations.filter((o) => o.ret[MAIN_H] != null);
+const withMain = sample.filter((o) => o.ret[MAIN_H] != null);
 const extremes = [...withMain].sort((a, b) => (b.ret[MAIN_H] as number) - (a.ret[MAIN_H] as number)).slice(0, 5);
 log(`## 2. Диагностика экстремумов (топ-5 по ${MAIN_H})`);
 log();
@@ -217,7 +268,7 @@ log(`* **train/test по времени** — правила подбирают�
 log(`  проверяются на последних 30%. Если на test преимущество исчезает — это была подгонка.`);
 log();
 
-const times = observations.map((o) => o.entry.fetchedAt.getTime()).sort((a, b) => a - b);
+const times = sample.map((o) => o.entry.fetchedAt.getTime()).sort((a, b) => a - b);
 const splitAt = times.length ? (times[Math.floor(times.length * 0.7)] as number) : 0;
 
 /** Одно наблюдение на токен: убирает автокорреляцию внутри одного движения. */
@@ -237,8 +288,8 @@ function statLine(obs: Obs[]): { n: number; med: number | null; win: number | nu
   return { n: xs.length, med: median(xs), win: winRate(xs) };
 }
 
-log(`| Правило | Всего | Измеримо | Coverage | Медиана | Винз. среднее | Прибыльных |`);
-log(`|---|---|---|---|---|---|---|`);
+log(`| Правило | Всего | Измеримо | Coverage | Медиана | Винз. среднее | Прибыльных | Rug |`);
+log(`|---|---|---|---|---|---|---|---|`);
 
 const rules: { name: string; ok: (s: Snap) => boolean }[] = [
   { name: "все (базовая линия)", ok: () => true },
@@ -256,13 +307,19 @@ const rules: { name: string; ok: (s: Snap) => boolean }[] = [
   { name: "ликв>50k И сделок>500 И buy/sell>1.5", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 && (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 0) > 1.5 },
 ];
 
-const baseCoverage = withMain.length / observations.length;
+/** Доля наблюдений, где ликвидность к MAIN_H обвалилась ниже 20% входной. */
+const rugRate = (obs: Obs[]): number | null => {
+  const known = obs.filter((o) => o.rug != null);
+  return known.length ? known.filter((o) => o.rug).length / known.length : null;
+};
+
+const baseCoverage = withMain.length / sample.length;
 for (const rule of rules) {
-  const all = observations.filter((o) => rule.ok(o.entry));
+  const all = sample.filter((o) => rule.ok(o.entry));
   const xs = all.map((o) => o.ret[MAIN_H]).filter((r): r is number => r != null);
   const cov = all.length ? xs.length / all.length : 0;
   const flag = cov > baseCoverage * 1.3 ? " ⚠" : "";
-  log(`| ${rule.name}${flag} | ${all.length} | ${xs.length} | ${pct(cov, 0)} | **${pct(median(xs))}** | ${pct(winsorMean(xs))} | ${pct(winRate(xs), 0)} |`);
+  log(`| ${rule.name}${flag} | ${all.length} | ${xs.length} | ${pct(cov, 0)} | **${pct(median(xs))}** | ${pct(winsorMean(xs))} | ${pct(winRate(xs), 0)} | ${pct(rugRate(all), 0)} |`);
 }
 log();
 log(`⚠ — coverage существенно выше базового: результат вероятно завышен выживаемостью.`);
@@ -274,7 +331,7 @@ log();
 log(`| Правило | TRAIN n | TRAIN медиана | TRAIN win | TEST n | TEST медиана | TEST win |`);
 log(`|---|---|---|---|---|---|---|`);
 for (const rule of rules) {
-  const matched = observations.filter((o) => rule.ok(o.entry));
+  const matched = sample.filter((o) => rule.ok(o.entry));
   const tr = dedupByToken(matched.filter((o) => o.entry.fetchedAt.getTime() <= splitAt));
   const te = dedupByToken(matched.filter((o) => o.entry.fetchedAt.getTime() > splitAt));
   const a = statLine(tr), b = statLine(te);
@@ -283,6 +340,39 @@ for (const rule of rules) {
 log();
 log(`Доверять можно только правилу, у которого преимущество сохранилось на TEST`);
 log(`при достаточном n. Расхождение TRAIN/TEST = подгонка под историю.`);
+log();
+
+// ---------- 4c. Ругпуллы ----------
+// Rug здесь = ликвидность к концу горизонта упала ниже 20% от входной, то есть
+// выйти по разумной цене было уже нельзя. Ключевой вопрос: рост rug rate в
+// backtest — это ухудшение отбора или мы просто НАЧАЛИ ВИДЕТЬ обвалы, которые
+// раньше не измерялись? Сравнение режимов отвечает на него прямо.
+log(`## 4c. Ругпуллы (ликвидность < 20% входной к ${MAIN_H})`);
+log();
+log(`| Срез | Измеримо | Rug rate |`);
+log(`|---|---|---|`);
+const rugRow = (name: string, obs: Obs[]) => {
+  const known = obs.filter((o) => o.rug != null);
+  log(`| ${name} | ${known.length.toLocaleString("ru")} | **${pct(rugRate(obs), 1)}** |`);
+};
+rugRow("смещённый режим (до границы)", biased);
+rugRow("чистый режим (после границы)", unbiased);
+const liqBuckets: { name: string; lo: number; hi: number }[] = [
+  { name: "ликв < $10k", lo: 0, hi: 10_000 },
+  { name: "$10k–50k", lo: 10_000, hi: 50_000 },
+  { name: "$50k–200k", lo: 50_000, hi: 200_000 },
+  { name: "> $200k", lo: 200_000, hi: Infinity },
+];
+for (const b of liqBuckets) {
+  rugRow(b.name, sample.filter((o) => {
+    const l = o.entry.liquidityUsd;
+    return l != null && l >= b.lo && l < b.hi;
+  }));
+}
+log();
+log(`Если rug rate в чистом режиме заметно выше, чем в смещённом, — обвалы не`);
+log(`участились, а стали измеримыми: раньше умирающие токены просто выпадали из`);
+log(`выборки. Разбивка по ликвидности показывает, где порог реально защищает.`);
 log();
 
 // ---------- 5. Вывод ----------
