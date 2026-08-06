@@ -4,6 +4,8 @@ import { prisma } from "../db";
 // and a naive per-source min-interval throttle so we respect public rate limits.
 
 const lastCallAt = new Map<string, number>();
+/** Пауза перед единственным повтором, если источник не прислал Retry-After. */
+const RETRY_PAUSE_MS = 5_000;
 
 export interface HttpOpts {
   source: string; // health-tracking key, e.g. "dexscreener"
@@ -32,10 +34,25 @@ export async function fetchJson<T>(url: string, opts: HttpOpts): Promise<T> {
 
   const started = Date.now();
   try {
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       signal: AbortSignal.timeout(timeoutMs),
       headers: { accept: "application/json", "user-agent": "memescope-ai-research/0.1" },
     });
+    // 429 — это «слишком часто», а не «нет данных». Один повтор с уважением к
+    // Retry-After возвращает наблюдение вместо дыры в данных. Повтор ровно
+    // один: если источник ограничивает всерьёз, долбиться в него вредно.
+    if (res.status === 429) {
+      const retryAfterSec = Number(res.headers.get("retry-after"));
+      const pause = Number.isFinite(retryAfterSec) && retryAfterSec > 0
+        ? Math.min(30_000, retryAfterSec * 1000)
+        : RETRY_PAUSE_MS;
+      lastCallAt.set(throttleKey, Date.now() + pause);
+      await new Promise((r) => setTimeout(r, pause));
+      res = await fetch(url, {
+        signal: AbortSignal.timeout(timeoutMs),
+        headers: { accept: "application/json", "user-agent": "memescope-ai-research/0.1" },
+      });
+    }
     const latencyMs = Date.now() - started;
     if (!res.ok) {
       await recordHealth(source, { ok: false, latencyMs, error: `HTTP ${res.status} ${url}` });

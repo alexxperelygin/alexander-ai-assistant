@@ -72,6 +72,23 @@ const chainGroups = await prisma.token.groupBy({
   where: { firstSeenAt: { gte: since24h } },
   _count: { _all: true },
 });
+// Действующие настройки риска. Печатаются потому, что сохранённое в БД
+// значение перекрывает значение по умолчанию: без этой строки нельзя отличить
+// «порог поднят» от «порог поднят только в коде».
+const settingsRow = await prisma.setting.findUnique({ where: { key: "riskSettings" } });
+if (settingsRow) {
+  try {
+    const rs = JSON.parse(settingsRow.value) as Record<string, unknown>;
+    lines.push(`## Действующие пороги`);
+    lines.push(`- минимальная ликвидность: $${Number(rs.minLiquidityUsd ?? 0).toLocaleString("ru")}`);
+    lines.push(`- размер позиции ≤ $${rs.maxPositionUsd}; риск на сделку ${rs.maxRiskPerTradePct}%; slippage ≤ ${rs.maxSlippagePct}%`);
+    lines.push(`- возраст токена: ${rs.minTokenAgeMin}–${rs.maxTokenAgeMin} мин; живая торговля: ${rs.liveTradingEnabled ? "🔴 ВКЛЮЧЕНА" : "выключена"}`);
+    lines.push(``);
+  } catch {
+    lines.push(`## Действующие пороги`, `- не удалось прочитать сохранённые настройки`, ``);
+  }
+}
+
 lines.push(`## Новые токены за 24ч по сетям`);
 if (chainGroups.length === 0) lines.push(`- (нет новых токенов)`);
 for (const g of chainGroups.sort((a, b) => b._count._all - a._count._all)) {
