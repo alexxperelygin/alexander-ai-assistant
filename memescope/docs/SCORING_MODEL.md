@@ -64,6 +64,9 @@ confidence       = max(0.1, 1 − 0.12 × |dataGaps|)   (cap штрафа 0.9)
 | holder-concentration | top-10 > 60% supply |
 | insider-concentration | инсайдеры > 30% |
 | insufficient-liquidity | liq < minLiquidityUsd (настройка) |
+| unknown-chain | сеть не входит в реестр `chains.ts` |
+| no-contract-risk-source | для сети нет проверки контракта — только сбор данных |
+| sell-not-verified | сеть без симуляции продажи, и проверка контракта не подтвердила возможность продать |
 | liquidity-draining | ликвидность упала > 5% с прошлого наблюдения (разрыв ≤ 2ч); подтверждено данными, см. ADR-12 |
 | slippage-exceeds-limit | ожидаемый impact продажи > maxSlippagePct |
 | too-new | возраст < minTokenAgeMin (окно снайперов/мгновенных ругов) |

@@ -16,8 +16,8 @@ function healthyFeatures(): FeatureVector {
 
 describe("chain registry", () => {
   it("only lets a chain signal when its contracts can be checked", () => {
-    expect(chainCanSignal("solana")).toBe(true);
-    expect(chainCanSignal("base")).toBe(false);
+    expect(chainCanSignal("solana")).toBe(true);  // RugCheck
+    expect(chainCanSignal("base")).toBe(true);    // GoPlus
     expect(chainCanSignal("does-not-exist")).toBe(false);
   });
 
@@ -35,12 +35,6 @@ describe("chain registry", () => {
 });
 
 describe("signal gating by chain", () => {
-  it("blocks a signal on a chain with no contract-risk source", () => {
-    const rules = evaluateHardRejections(healthyFeatures(), null, DEFAULT_RISK_SETTINGS, {
-      chain: "base",
-    }).map((r) => r.rule);
-    expect(rules).toContain("no-contract-risk-source");
-  });
 
   it("does not block an otherwise healthy Solana token", () => {
     const rules = evaluateHardRejections(healthyFeatures(), null, DEFAULT_RISK_SETTINGS, {
@@ -55,5 +49,33 @@ describe("signal gating by chain", () => {
       chain: "bitcoin",
     }).map((r) => r.rule);
     expect(rules).toContain("unknown-chain");
+  });
+});
+
+describe("chains without a route simulator", () => {
+  it("refuses to signal unless the contract check confirmed sellability", () => {
+    // Base не симулирует продажу: подтверждение может дать только проверка контракта.
+    const unconfirmed = evaluateHardRejections(
+      { ...healthyFeatures(), sellRouteOk: null },
+      null,
+      DEFAULT_RISK_SETTINGS,
+      { chain: "base" },
+    ).map((r) => r.rule);
+    expect(unconfirmed).toContain("sell-not-verified");
+
+    const confirmed = evaluateHardRejections(
+      { ...healthyFeatures(), sellRouteOk: true },
+      null,
+      DEFAULT_RISK_SETTINGS,
+      { chain: "base" },
+    ).map((r) => r.rule);
+    expect(confirmed).not.toContain("sell-not-verified");
+  });
+
+  it("no longer blocks EVM chains for lack of a contract-risk source", () => {
+    const rules = evaluateHardRejections(healthyFeatures(), null, DEFAULT_RISK_SETTINGS, {
+      chain: "base",
+    }).map((r) => r.rule);
+    expect(rules).not.toContain("no-contract-risk-source");
   });
 });

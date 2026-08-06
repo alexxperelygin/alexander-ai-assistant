@@ -20,6 +20,8 @@ export interface ChainConfig {
   geckoNetwork: string;
   /** Есть ли источник контрактных рисков (mint/freeze authority, honeypot, LP). */
   hasRiskProvider: boolean;
+  /** Числовой id сети в GoPlus Security (только EVM). */
+  goplusChainId?: string;
   /** Есть ли агрегатор для симуляции продажи. */
   hasRouteProvider: boolean;
 }
@@ -30,20 +32,20 @@ export const CHAINS: Record<string, ChainConfig> = {
     hasRiskProvider: true, hasRouteProvider: true,
   },
   base: {
-    id: "base", label: "Base", geckoNetwork: "base",
-    hasRiskProvider: false, hasRouteProvider: false,
+    id: "base", label: "Base", geckoNetwork: "base", goplusChainId: "8453",
+    hasRiskProvider: true, hasRouteProvider: false,
   },
   bsc: {
-    id: "bsc", label: "BNB Chain", geckoNetwork: "bsc",
-    hasRiskProvider: false, hasRouteProvider: false,
+    id: "bsc", label: "BNB Chain", geckoNetwork: "bsc", goplusChainId: "56",
+    hasRiskProvider: true, hasRouteProvider: false,
   },
   ethereum: {
-    id: "ethereum", label: "Ethereum", geckoNetwork: "eth",
-    hasRiskProvider: false, hasRouteProvider: false,
+    id: "ethereum", label: "Ethereum", geckoNetwork: "eth", goplusChainId: "1",
+    hasRiskProvider: true, hasRouteProvider: false,
   },
   arbitrum: {
-    id: "arbitrum", label: "Arbitrum", geckoNetwork: "arbitrum",
-    hasRiskProvider: false, hasRouteProvider: false,
+    id: "arbitrum", label: "Arbitrum", geckoNetwork: "arbitrum", goplusChainId: "42161",
+    hasRiskProvider: true, hasRouteProvider: false,
   },
 };
 

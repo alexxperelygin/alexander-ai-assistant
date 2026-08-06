@@ -22,7 +22,7 @@ export interface MarketDataProvider {
 
 export interface RiskProvider {
   readonly name: string;
-  getRiskReport(mint: string): Promise<ContractRiskReport | null>;
+  getRiskReport(mint: string, chain?: string): Promise<ContractRiskReport | null>;
 }
 
 export interface RouteProvider {

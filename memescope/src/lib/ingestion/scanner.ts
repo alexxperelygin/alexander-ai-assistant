@@ -268,7 +268,7 @@ async function evaluateToken(
       // отсутствие проверки честно фиксируется правилом no-contract-risk-source.
       risk =
         passesLiquidityGate && chainCfg?.hasRiskProvider
-          ? await providers.risk.getRiskReport(mint)
+          ? await providers.risk.getRiskReport(mint, chain)
           : null;
     } catch {
       risk = null;
