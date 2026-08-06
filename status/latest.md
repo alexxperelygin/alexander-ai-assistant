@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-06T08:59:35.461Z (UTC)
+Сгенерирован: 2026-08-06T09:04:55.717Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 266649; снапшотов за 24ч: 39444
+- Токенов в базе: 266779; снапшотов за 24ч: 39439
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,51 +13,51 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 19222
-- robinhood: 370
-- bsc: 368
-- base: 100
+- solana: 19245
+- robinhood: 415
+- bsc: 373
+- base: 103
 - ethereum: 48
 - arbitrum: 19
 
 ## Статусы возможностей
-- AVOID: 103694
-- DATA_UNAVAILABLE: 28420
-- CANDIDATE: 14
-- WATCH: 6
+- AVOID: 103691
+- DATA_UNAVAILABLE: 28443
+- CANDIDATE: 13
+- WATCH: 7
 - READY: 3
 
 ## Топ-5 по score (не отбракованные)
-- USOS: READY, score 67.3, risk 0.2, conf 100% (обновлено 1 мин назад)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 6.6 ч назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 20.6 ч назад)
+- USOS: READY, score 66.8, risk 1.6, conf 100% (обновлено 1 мин назад)
+- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 6.7 ч назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 20.8 ч назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 3.1 дн назад)
-- GOAP: CANDIDATE, score 62.9, risk 1.2, conf 100% (обновлено 0 мин назад)
+- SAAS: READY, score 63.2, risk 1.6, conf 100% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- USOS — 2026-08-06T08:48:52.332Z (11 мин назад)
-- SAAS — 2026-08-06T08:48:49.032Z (11 мин назад)
-- SOLdiers — 2026-08-06T08:09:48.592Z (50 мин назад)
-- SOLdiers — 2026-08-06T07:39:48.318Z (1.3 ч назад)
-- 2027 — 2026-08-06T07:39:08.463Z (1.3 ч назад)
+- USOS — 2026-08-06T08:48:52.332Z (16 мин назад)
+- SAAS — 2026-08-06T08:48:49.032Z (16 мин назад)
+- SOLdiers — 2026-08-06T08:09:48.592Z (55 мин назад)
+- SOLdiers — 2026-08-06T07:39:48.318Z (1.4 ч назад)
+- 2027 — 2026-08-06T07:39:08.463Z (1.4 ч назад)
 
 ## X (соцданные)
-- запросов за 24ч: 18; постов прочитано за 24ч: 25; за месяц: 25
-- последний: NILF (6 мин назад) — упоминаний 0, авторов 0, охват 0, свежих аккаунтов —
+- запросов за 24ч: 20; постов прочитано за 24ч: 25; за месяц: 25
+- последний: bStocks (2 мин назад) — упоминаний 0, авторов 0, охват 0, свежих аккаунтов —
 
 ## Последние переходы статусов
-- CRASHOUT: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- Koo: — → AVOID (1 мин назад) — [insufficient-liquidity] Ликвидность $17,888 ниже минимума $50,000.
+- COKX: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- MarsCoin: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- WEAK AF: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
 - ultramegamayh: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- PHONE⁠BODY: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- BRADY⁠: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- GOHK: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- REX: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- BELLOUMI: — → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
-- FINE: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- MEOW: — → AVOID (2 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- DEXPAIDOG: — → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
+- MMC: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- AAPLon: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- USON: CANDIDATE → AVOID (1 мин назад) — [liquidity-draining] Ликвидность упала на 15.0% с прошлого наблюдения (порог 5%) — из пула выводят средства. | [slippage-exceeds-l
 - DTMMGA: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- LILY: — → AVOID (2 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- Grock: — → AVOID (2 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- PsyopRacc: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- bStocks: — → WATCH (2 мин назад) — Opportunity Score 32.8/100, Risk 16.1/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
 
 ## Позиции
 - Открытых: 5; всего: 13; realized P&L: $-376.98
@@ -92,18 +92,18 @@
     · 10:33:54 [NOTE] Unrealized P&L -25% (цена $0.0000146700)
 
 ## Последний backtest
-- DONE (20 мин назад): NO EDGE: expectancy -15.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (25 мин назад): NO EDGE: expectancy -15.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 286161 / err 10, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 3.7 ч назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 28 / err 193, последний успех 9 мин назад)
-- geckoterminal:base: ok (ok 217 / err 5, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 214 / err 7, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 189 / err 32, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 33 / err 174, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 222 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 104 / err 0, последний успех 5 мин назад)
-- jupiter: ok (ok 278966 / err 601, последний успех 0 мин назад)
-- rugcheck: ok (ok 124820 / err 378, последний успех 3 мин назад)
+- dexscreener: ok (ok 286378 / err 10, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 3.8 ч назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 28 / err 199, последний успех 14 мин назад)
+- geckoterminal:base: ok (ok 222 / err 5, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 220 / err 7, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 195 / err 32, последний успех 0 мин назад)
+- geckoterminal:robinhood: ok (ok 39 / err 174, последний успех 0 мин назад)
+- geckoterminal:solana: ok (ok 227 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 107 / err 0, последний успех 2 мин назад)
+- jupiter: ok (ok 279105 / err 602, последний успех 0 мин назад)
+- rugcheck: ok (ok 124827 / err 378, последний успех 0 мин назад)
 
