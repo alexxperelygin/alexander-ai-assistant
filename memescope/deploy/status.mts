@@ -105,6 +105,37 @@ const recentEvents = await prisma.signalEvent.findMany({
   take: 12,
   include: { opportunity: { include: { token: true } } },
 });
+// Расход платного источника. Без этого невозможно понять, работает ли ключ и
+// во сколько обходятся сутки: у pay-per-use цена ошибки — прямой расход баланса.
+const daySocial = await prisma.socialSnapshot.aggregate({
+  where: { source: "x", fetchedAt: { gte: since24h } },
+  _sum: { postsRead: true },
+  _count: { _all: true },
+});
+const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
+const monthSocial = await prisma.socialSnapshot.aggregate({
+  where: { source: "x", fetchedAt: { gte: monthStart } },
+  _sum: { postsRead: true },
+});
+const lastSocial = await prisma.socialSnapshot.findFirst({
+  where: { source: "x" },
+  orderBy: { fetchedAt: "desc" },
+  include: { token: true },
+});
+lines.push(`## X (соцданные)`);
+if (!lastSocial) {
+  lines.push(`- снимков нет (ключ не задан или ни один токен ещё не дошёл до CANDIDATE/READY)`);
+} else {
+  lines.push(`- запросов за 24ч: ${daySocial._count._all}; постов прочитано за 24ч: ${daySocial._sum.postsRead ?? 0}; за месяц: ${monthSocial._sum.postsRead ?? 0}`);
+  const errs = lastSocial.errors ? ` — ${lastSocial.errors}` : "";
+  lines.push(`- последний: ${lastSocial.token.symbol} (${ago(lastSocial.fetchedAt)}) — упоминаний ${lastSocial.mentions ?? "—"}, авторов ${lastSocial.uniqueAuthors ?? "—"}, охват ${lastSocial.reach ?? "—"}, свежих аккаунтов ${lastSocial.freshAccountShare == null ? "—" : `${Math.round(lastSocial.freshAccountShare * 100)}%`}${errs}`);
+}
+const socialErrors = await prisma.auditLog.count({
+  where: { action: "social.error", createdAt: { gte: since24h } },
+});
+if (socialErrors > 0) lines.push(`- 🔴 ошибок обращения к X за 24ч: ${socialErrors}`);
+lines.push(``);
+
 lines.push(`## Последние переходы статусов`);
 if (recentEvents.length === 0) lines.push(`- (переходов нет)`);
 for (const e of recentEvents) {
