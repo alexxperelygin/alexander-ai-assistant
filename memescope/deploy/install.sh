@@ -91,7 +91,25 @@ sed -i 's/^MAX_CANDIDATES_PER_CYCLE=8$/MAX_CANDIDATES_PER_CYCLE=30/' .env || tru
 # SQLite однописательный: работающий worker держит блокировку, и db push
 # падает с 'database is locked'. Останавливаем сервисы перед миграцией схемы.
 pm2 stop memescope-web memescope-worker >/dev/null 2>&1 || true
-npx prisma db push --skip-generate
+# Обычный push. Prisma останавливается и требует подтверждения, если изменение
+# схемы МОЖЕТ стоить данных — например при добавлении уникального ключа.
+if ! npx prisma db push --skip-generate > /tmp/dbpush.log 2>&1; then
+  cat /tmp/dbpush.log
+  # Подтверждаем автоматически только безопасный случай: добавление уникального
+  # ключа (падает, если есть дубликаты, но ничего не удаляет). Любое упоминание
+  # удаления таблицы/колонки — останавливаемся, это должен решать человек.
+  if grep -qiE "will be dropped|dropped and recreated|column .* will be" /tmp/dbpush.log; then
+    echo "ОСТАНОВЛЕНО: изменение схемы удаляет данные — требуется ручное решение."
+    exit 1
+  fi
+  if grep -qi "unique constraint covering the columns" /tmp/dbpush.log; then
+    echo "Добавляется уникальный ключ — данные не удаляются, подтверждаю."
+    npx prisma db push --skip-generate --accept-data-loss
+  else
+    echo "ОСТАНОВЛЕНО: неизвестное предупреждение схемы, см. лог выше."
+    exit 1
+  fi
+fi
 npx prisma generate >/dev/null
 NODE_OPTIONS=--max-old-space-size=1536 npm run build
 

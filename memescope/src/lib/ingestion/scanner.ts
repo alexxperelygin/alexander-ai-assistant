@@ -1,5 +1,6 @@
 import { prisma } from "../db";
 import { config, SOL_MINT } from "../config";
+import { chainConfig, DEFAULT_CHAIN } from "../chains";
 import { getProviders } from "../providers";
 import { computeFeatures } from "../features/compute";
 import { evaluateHardRejections } from "../risk/engine";
@@ -34,7 +35,7 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
     const tokens = await providers.discovery.discoverNewTokens();
     for (const t of tokens) {
       await prisma.token.upsert({
-        where: { mint: t.mint },
+        where: { chain_mint: { chain: t.chain, mint: t.mint } },
         create: {
           chain: t.chain, mint: t.mint, symbol: t.symbol, name: t.name,
           pairAddress: t.pairAddress, dex: t.dex, pairCreatedAt: t.pairCreatedAt,
@@ -50,7 +51,7 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
   // --- SOL market regime (cached per cycle) ---
   let solChange24hPct: number | null = null;
   try {
-    const solSnap = await providers.market.getMarketSnapshot(SOL_MINT);
+    const solSnap = await providers.market.getMarketSnapshot(SOL_MINT, "solana");
     solChange24hPct = solSnap?.priceChange24h ?? null;
   } catch {
     solChange24hPct = null; // regime unknown → score component reports "нет данных"
@@ -140,6 +141,7 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
   for (const { token } of batch) {
     try {
       await evaluateToken(token.id, token.mint, token.symbol, token.dex, token.pairCreatedAt, {
+        chain: token.chain,
         solChange24hPct,
         now,
       });
@@ -163,8 +165,10 @@ async function evaluateToken(
   symbol: string,
   dex: string | null,
   pairCreatedAt: Date | null,
-  ctx: { solChange24hPct: number | null; now: Date },
+  ctx: { chain: string; solChange24hPct: number | null; now: Date },
 ): Promise<void> {
+  const chain = ctx.chain || DEFAULT_CHAIN;
+  const chainCfg = chainConfig(chain);
   const providers = getProviders();
   const settings = await getRiskSettings();
 
@@ -179,7 +183,7 @@ async function evaluateToken(
   // Market snapshot.
   let snapshot: MarketSnapshot | null = null;
   try {
-    snapshot = await providers.market.getMarketSnapshot(mint);
+    snapshot = await providers.market.getMarketSnapshot(mint, chain);
   } catch {
     snapshot = null;
   }
@@ -259,7 +263,13 @@ async function evaluateToken(
     };
   } else {
     try {
-      risk = passesLiquidityGate ? await providers.risk.getRiskReport(mint) : null;
+      // RugCheck и Jupiter существуют только для Solana. Для остальных сетей
+      // источника контрактных рисков пока нет — вызывать его бессмысленно, а
+      // отсутствие проверки честно фиксируется правилом no-contract-risk-source.
+      risk =
+        passesLiquidityGate && chainCfg?.hasRiskProvider
+          ? await providers.risk.getRiskReport(mint)
+          : null;
     } catch {
       risk = null;
     }
@@ -270,6 +280,7 @@ async function evaluateToken(
   const positionUsd = computePositionSizeUsd(settings, snapshot?.liquidityUsd ?? null);
   let sellQuote = null;
   const worthQuoting =
+    (chainCfg?.hasRouteProvider ?? false) &&
     snapshot?.liquidityUsd != null &&
     snapshot.liquidityUsd >= settings.minLiquidityUsd &&
     risk?.riskLevel !== "critical" &&
@@ -316,7 +327,7 @@ async function evaluateToken(
     previousLiquidityAt: prevSnapshot?.fetchedAt ?? null,
     now: ctx.now,
   });
-  const rejections = evaluateHardRejections(features, risk, settings);
+  const rejections = evaluateHardRejections(features, risk, settings, { chain });
   const scores = computeScores(features, risk, {
     positionUsd,
     solChange24hPct: ctx.solChange24hPct,

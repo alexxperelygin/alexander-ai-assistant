@@ -1,4 +1,5 @@
 import type { ContractRiskReport, FeatureVector, RejectionHit, RiskSettings } from "../types";
+import { chainConfig, DEFAULT_CHAIN } from "../chains";
 
 // Hard rejection rules. Any hit forbids BUY/READY regardless of score.
 // Rules are pure functions of (features, risk report, settings) so every
@@ -11,9 +12,25 @@ export function evaluateHardRejections(
   f: FeatureVector,
   risk: ContractRiskReport | null,
   settings: RiskSettings,
+  ctx: { chain?: string } = {},
 ): RejectionHit[] {
   const hits: RejectionHit[] = [];
   const add = (rule: string, description: string) => hits.push({ rule, description });
+
+  // Сеть без источника контрактных рисков даёт данные для исследования, но не
+  // может выдать торговый сигнал. Купить токен, у которого не проверены ни
+  // права на эмиссию, ни возможность продать, — это ровно тот риск, ради
+  // снятия которого система и писалась. Снимается добавлением risk-провайдера
+  // для сети (см. chains.ts), а не ослаблением правила.
+  const chain = ctx.chain ?? DEFAULT_CHAIN;
+  const cfg = chainConfig(chain);
+  if (!cfg)
+    add("unknown-chain", `Сеть "${chain}" не входит в реестр поддерживаемых.`);
+  else if (!cfg.hasRiskProvider)
+    add(
+      "no-contract-risk-source",
+      `Для сети ${cfg.label} нет источника проверки контракта (эмиссия, заморозка, honeypot). Данные собираются для исследования, торговый сигнал не выдаётся.`,
+    );
 
   if (f.rugged === true) add("rugged", "Источник риска пометил токен как rug pull.");
 

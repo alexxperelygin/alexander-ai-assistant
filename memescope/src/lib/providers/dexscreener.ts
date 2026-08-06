@@ -24,12 +24,12 @@ interface DsPair {
 export class DexScreenerMarketData implements MarketDataProvider {
   readonly name = "dexscreener";
 
-  async getMarketSnapshot(mint: string): Promise<MarketSnapshot | null> {
+  async getMarketSnapshot(mint: string, chain = "solana"): Promise<MarketSnapshot | null> {
     const json = await fetchJson<{ pairs: DsPair[] | null }>(
       `https://api.dexscreener.com/latest/dex/tokens/${mint}`,
       { source: this.name, minIntervalMs: 250 },
     );
-    const pairs = (json.pairs ?? []).filter((p) => p.chainId === "solana");
+    const pairs = (json.pairs ?? []).filter((p) => p.chainId === chain);
     if (pairs.length === 0) return null;
     // Use the deepest pool as the canonical market.
     const best = pairs.reduce((a, b) =>

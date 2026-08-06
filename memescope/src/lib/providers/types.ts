@@ -16,8 +16,8 @@ export interface DiscoveryProvider {
 
 export interface MarketDataProvider {
   readonly name: string;
-  /** Current market state for a token (by mint). Null = token not found. */
-  getMarketSnapshot(mint: string): Promise<MarketSnapshot | null>;
+  /** Current market state for a token (by mint/address on the given chain). Null = not found. */
+  getMarketSnapshot(mint: string, chain?: string): Promise<MarketSnapshot | null>;
 }
 
 export interface RiskProvider {

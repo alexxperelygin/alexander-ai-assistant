@@ -15,7 +15,8 @@ export type OpportunityStatus =
   | "DATA_UNAVAILABLE";
 
 export interface DiscoveredToken {
-  chain: "solana";
+  /** Идентификатор сети из реестра chains.ts (он же chainId в DexScreener). */
+  chain: string;
   mint: string;
   symbol: string;
   name: string;

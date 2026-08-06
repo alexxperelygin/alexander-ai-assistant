@@ -59,7 +59,7 @@ export class MockProvider
   async discoverNewTokens(): Promise<DiscoveredToken[]> {
     const t = this.now();
     return CAST.map((c) => ({
-      chain: "solana" as const,
+      chain: "solana",
       mint: c.mint,
       symbol: c.symbol,
       name: `${c.symbol} (fictional mock token)`,

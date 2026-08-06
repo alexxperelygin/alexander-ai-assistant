@@ -15,7 +15,7 @@ datasource db {
 model Token {
   id            String   @id @default(cuid())
   chain         String   @default("solana")
-  mint          String   @unique
+  mint          String
   symbol        String
   name          String
   pairAddress   String?
@@ -31,9 +31,14 @@ model Token {
   opportunities Opportunity[]
   positions     Position[]
 
+  // Один и тот же адрес контракта встречается в разных EVM-сетях (CREATE2),
+  // поэтому уникален не адрес, а пара (сеть, адрес). Глобальный @unique на mint
+  // склеил бы разные токены Base и BNB в одну запись.
+  @@unique([chain, mint])
   // Candidate-selection queries filter/order by these on 100k+ rows.
   @@index([firstSeenAt])
   @@index([pairCreatedAt])
+  @@index([chain])
 }
 
 // One observation of market state. Every row records provenance:

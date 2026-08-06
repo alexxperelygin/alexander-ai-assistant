@@ -33,6 +33,7 @@ const UNBIASED_FROM = new Date(process.env.UNBIASED_FROM ?? "2026-08-05T09:00:00
 
 interface Snap {
   tokenId: string;
+  chain?: string;
   fetchedAt: Date;
   priceUsd: number;
   liquidityUsd: number | null;
@@ -100,9 +101,15 @@ const rows = await prisma.tokenSnapshot.findMany({
   take: 400_000,
 });
 
+// Сеть хранится у токена, а не у снапшота: подтягиваем отдельно и проставляем,
+// иначе разбивку по сетям не сделать.
+const chainRows = await prisma.token.findMany({ select: { id: true, chain: true } });
+const chainOf = new Map(chainRows.map((t) => [t.id, t.chain]));
+
 const byToken = new Map<string, Snap[]>();
 for (const r of rows) {
   const s = r as unknown as Snap;
+  s.chain = chainOf.get(s.tokenId) ?? "solana";
   const arr = byToken.get(s.tokenId);
   if (arr) arr.push(s); else byToken.set(s.tokenId, [s]);
 }
@@ -229,6 +236,25 @@ log(useClean
   ? `Разделы 2–5 считаются **только по чистому режиму** (${sample.length.toLocaleString("ru")} наблюдений).`
   : `Чистых наблюдений пока ${unbiased.length.toLocaleString("ru")} (< ${MIN_CLEAN.toLocaleString("ru")}), ` +
     `поэтому разделы 2–5 считаются по всему окну и **завышены выживаемостью**.`);
+log();
+
+// ---------- 1c. По сетям ----------
+// Главный вопрос мультичейна: одинаково ли устроен рынок в разных сетях.
+// Если базовая линия и предсказуемость где-то заметно лучше — искать edge
+// нужно там, а не там, где мы начали.
+log(`## 1c. Разбивка по сетям (${MAIN_H})`);
+log();
+log(`| Сеть | Наблюдений | Измеримо | Coverage | Медиана | Прибыльных | Rug |`);
+log(`|---|---|---|---|---|---|---|`);
+const chains = [...new Set(unbiased.map((o) => o.entry.chain ?? "solana"))].sort();
+for (const ch of chains) {
+  const obs = unbiased.filter((o) => (o.entry.chain ?? "solana") === ch);
+  const xs = retsOf(obs);
+  const rugKnown = obs.filter((o) => o.rug != null);
+  const rug = rugKnown.length ? rugKnown.filter((o) => o.rug).length / rugKnown.length : null;
+  log(`| ${ch} | ${obs.length.toLocaleString("ru")} | ${xs.length.toLocaleString("ru")} | ` +
+      `${pct(covOf(obs), 0)} | **${pct(median(xs))}** | ${pct(winRate(xs), 0)} | ${pct(rug, 0)} |`);
+}
 log();
 
 // ---------- 2. Диагностика выбросов ----------
