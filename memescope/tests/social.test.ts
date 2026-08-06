@@ -86,4 +86,25 @@ describe("Farcaster summary", () => {
     expect(s.mentions).toBe(0);
     expect(s.uniqueAuthors).toBe(0);
   });
+
+  it("drops results that do not actually contain the address", () => {
+    // Поиск у Neynar нечёткий и возвращает посты без искомой строки. Считать их
+    // упоминаниями значит измерять чужой поисковый движок, а не внимание рынка.
+    const s = summarizeFarcaster(
+      {
+        result: {
+          casts: [
+            { author: { fid: 1 }, text: "буду брать 0xABC123", timestamp: new Date(minutesAgo(5)).toISOString() },
+            { author: { fid: 2 }, text: "просто болтовня про рынок", timestamp: new Date(minutesAgo(5)).toISOString() },
+          ],
+        },
+      },
+      60,
+      now,
+      "0xabc123",
+    );
+    expect(s.mentions).toBe(1);
+    expect(s.uniqueAuthors).toBe(1);
+    expect(s.postsRead).toBe(2); // прочитано всё, что отдал источник
+  });
 });

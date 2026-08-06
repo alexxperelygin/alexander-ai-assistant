@@ -22,6 +22,7 @@ interface NeynarAuthor {
 
 interface NeynarCast {
   hash?: string;
+  text?: string;
   timestamp?: string;
   author?: NeynarAuthor;
   reactions?: { likes_count?: number; recasts_count?: number };
@@ -37,10 +38,20 @@ export function summarizeFarcaster(
   res: NeynarResponse,
   windowMin: number,
   now: Date,
+  query?: string,
 ): Omit<SocialStats, "source" | "dataMode" | "windowMin"> {
   const all = res.result?.casts ?? [];
+  // Поиск у Neynar нечёткий: по адресу контракта он возвращает и посты, где
+  // этого адреса нет. Первый прогон дал 55 «упоминаний» по одному токену —
+  // столько обсуждений у нового токена не бывает. Поэтому оставляем только те
+  // посты, в тексте которых адрес действительно есть: иначе мы измеряли бы
+  // не внимание к токену, а работу чужого поискового движка.
+  const needle = query?.toLowerCase();
+  const matched = needle
+    ? all.filter((c) => (c.text ?? "").toLowerCase().includes(needle))
+    : all;
   const cutoff = now.getTime() - windowMin * 60_000;
-  const casts = all.filter((c) => {
+  const casts = matched.filter((c) => {
     if (!c.timestamp) return true;
     const t = new Date(c.timestamp).getTime();
     return !Number.isFinite(t) || t >= cutoff;
@@ -86,6 +97,7 @@ export class FarcasterSocial implements SocialProvider {
     if (!key) return null;
 
     const params = new URLSearchParams({ q: query, limit: String(MAX_RESULTS) });
+    // Текст нужен, чтобы отсеять нерелевантную выдачу нечёткого поиска.
     const res = await fetch(`${SEARCH_URL}?${params}`, {
       headers: { api_key: key, "x-api-key": key, accept: "application/json" },
       signal: AbortSignal.timeout(15_000),
@@ -97,7 +109,7 @@ export class FarcasterSocial implements SocialProvider {
       source: this.name,
       dataMode: "live",
       windowMin,
-      ...summarizeFarcaster(json, windowMin, now),
+      ...summarizeFarcaster(json, windowMin, now, query),
     };
   }
 }
