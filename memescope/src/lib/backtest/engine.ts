@@ -63,7 +63,7 @@ export async function runBacktest(params: BacktestParams = DEFAULT_BACKTEST_PARA
     for (const ev of filtered) {
       const rec = await toSignalRecord(ev.id, ev.opportunity.token.symbol, ev.opportunity.tokenId, ev.createdAt, params);
       if (!rec) continue;
-      const forward = await forwardSeries(ev.opportunity.tokenId, ev.createdAt, params.dataMode);
+      const forward = await forwardSeries(ev.opportunity.tokenId, ev.createdAt, params.dataMode, params.horizon);
       strategyOutcomes.push(evaluateSignal(rec, forward));
     }
 
@@ -151,11 +151,22 @@ async function toSignalRecord(
   };
 }
 
-async function forwardSeries(tokenId: string, after: Date, dataMode: string): Promise<PricePoint[]> {
+async function forwardSeries(
+  tokenId: string,
+  after: Date,
+  dataMode: string,
+  horizon: keyof typeof HORIZONS_MIN,
+): Promise<PricePoint[]> {
+  // Тянуть всю будущую историю токена незачем: исход считается на ОДНОМ
+  // горизонте, всё, что позже дедлайна, всё равно отбрасывается. Раньше
+  // выбиралось до 2000 снапшотов на каждый из 2000 токенов базовой линии —
+  // миллионы строк, из-за чего прогон перестал завершаться, когда база
+  // выросла до 275 тысяч токенов.
+  const until = new Date(after.getTime() + (HORIZONS_MIN[horizon] as number) * 60_000);
   const snaps = await prisma.tokenSnapshot.findMany({
-    where: { tokenId, fetchedAt: { gt: after }, dataMode, priceUsd: { gt: 0 } },
+    where: { tokenId, fetchedAt: { gt: after, lte: until }, dataMode, priceUsd: { gt: 0 } },
     orderBy: { fetchedAt: "asc" },
-    take: 2000,
+    take: 300,
   });
   return snaps.map((s) => ({ at: s.fetchedAt, priceUsd: s.priceUsd as number, liquidityUsd: s.liquidityUsd }));
 }
@@ -195,6 +206,7 @@ async function baselineAllTokens(
     where: { firstSeenAt: { gte: windowFrom, lte: windowTo } },
     orderBy: { firstSeenAt: "asc" },
     select: { id: true },
+    take: 100_000, // страховка: окно может охватывать сотни тысяч токенов
   });
   const stride = Math.max(1, Math.ceil(ids.length / BASELINE_SAMPLE));
   const sampled = ids.filter((_, i) => i % stride === 0).map((t) => t.id);
@@ -217,7 +229,7 @@ async function baselineAllTokens(
       entryLiquidityUsd: first.liquidityUsd,
       positionUsd: params.positionUsd,
     };
-    const forward = await forwardSeries(t.id, first.fetchedAt, params.dataMode);
+    const forward = await forwardSeries(t.id, first.fetchedAt, params.dataMode, params.horizon);
     outcomes.push(evaluateSignal(rec, forward));
   }
   return outcomes;

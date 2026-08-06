@@ -34,6 +34,10 @@ concurrency:
 jobs:
   ops:
     runs-on: ubuntu-latest
+    # Без явного предела GitHub ждёт 6 часов, а группа concurrency держит все
+    # остальные задачи в очереди — одно зависание блокирует обслуживание
+    # сервера на полдня. Успешный прогон укладывается в минуту-две.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -106,10 +110,10 @@ jobs:
                 echo "# Backtest ($(date -u +%FT%TZ))"
                 echo ""
                 echo "## Горизонт 24h"
-                run_ssh 'cd /opt/alexander-ai-assistant/memescope && npm run backtest --silent -- --horizon 24h --mode live' || echo "(ошибка запуска)"
+                run_ssh 'cd /opt/alexander-ai-assistant/memescope && timeout 300 npm run backtest --silent -- --horizon 24h --mode live' || echo "(ошибка или таймаут 5 мин)"
                 echo ""
                 echo "## Горизонт 6h"
-                run_ssh 'cd /opt/alexander-ai-assistant/memescope && npm run backtest --silent -- --horizon 6h --mode live' || echo "(ошибка запуска)"
+                run_ssh 'cd /opt/alexander-ai-assistant/memescope && timeout 300 npm run backtest --silent -- --horizon 6h --mode live' || echo "(ошибка или таймаут 5 мин)"
               } > status/backtest.md
               cat status/backtest.md
               ;;
