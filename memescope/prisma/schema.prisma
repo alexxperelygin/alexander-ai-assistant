@@ -28,6 +28,7 @@ model Token {
 
   snapshots     TokenSnapshot[]
   riskReports   RiskReport[]
+  socials       SocialSnapshot[]
   opportunities Opportunity[]
   positions     Position[]
 
@@ -72,6 +73,36 @@ model TokenSnapshot {
   errors         String? // JSON array of field-level errors/gaps
 
   @@index([tokenId, fetchedAt])
+}
+
+// Социальный срез по токену. Отдельная таблица, а не поле в Opportunity:
+// Opportunity перезаписывается на каждой оценке, а для исследования нужна
+// история наблюдений во времени.
+model SocialSnapshot {
+  id          String   @id @default(cuid())
+  tokenId     String
+  token       Token    @relation(fields: [tokenId], references: [id])
+  source      String // x | reddit | farcaster
+  dataMode    String
+  fetchedAt   DateTime @default(now())
+  /** Окно поиска в минутах (сколько назад смотрели). */
+  windowMin   Int
+  /** Сколько постов реально прочитано — расходуется из платного лимита. */
+  postsRead   Int
+  mentions    Int?
+  uniqueAuthors Int?
+  /** Суммарная аудитория авторов (подписчики), грубая оценка охвата. */
+  reach       Int?
+  engagement  Int?
+  /** Доля авторов с аккаунтами моложе 30 дней, 0..1 — прокси накрутки. */
+  freshAccountShare Float?
+  /** Медианный возраст аккаунта автора в днях. */
+  medianAuthorAgeDays Float?
+  raw         String?
+  errors      String?
+
+  @@index([tokenId, fetchedAt])
+  @@index([source, fetchedAt])
 }
 
 model RiskReport {

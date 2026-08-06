@@ -25,6 +25,30 @@ export interface RiskProvider {
   getRiskReport(mint: string, chain?: string): Promise<ContractRiskReport | null>;
 }
 
+/** Социальный срез по токену (упоминания, авторы, охват, признаки накрутки). */
+export interface SocialStats {
+  source: string;
+  dataMode: "live" | "mock";
+  windowMin: number;
+  /** Сколько постов реально прочитано — расход платного лимита. */
+  postsRead: number;
+  mentions: number | null;
+  uniqueAuthors: number | null;
+  reach: number | null;
+  engagement: number | null;
+  freshAccountShare: number | null;
+  medianAuthorAgeDays: number | null;
+  errors?: string[];
+}
+
+export interface SocialProvider {
+  readonly name: string;
+  /** Настроен ли источник (есть ключ). Без ключа система работает как раньше. */
+  isConfigured(): boolean;
+  /** query — обычно адрес контракта: он уникален, в отличие от тикера. */
+  getSocialStats(query: string, windowMin?: number, now?: Date): Promise<SocialStats | null>;
+}
+
 export interface RouteProvider {
   readonly name: string;
   /** Simulated quote through the aggregator; sell direction verifies exit is possible. */

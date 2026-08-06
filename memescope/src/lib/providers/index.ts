@@ -5,6 +5,7 @@ import type {
   MarketDataProvider,
   RiskProvider,
   RouteProvider,
+  SocialProvider,
 } from "./types";
 import { GeckoTerminalDiscovery } from "./geckoterminal";
 import { DexScreenerMarketData } from "./dexscreener";
@@ -12,6 +13,7 @@ import { RugCheckRisk } from "./rugcheck";
 import { GoPlusRisk } from "./goplus";
 import { chainConfig, DEFAULT_CHAIN } from "../chains";
 import { JupiterRoutes } from "./jupiter";
+import { XSocial } from "./x";
 import { MockProvider } from "./mock";
 
 export interface ProviderSet {
@@ -20,6 +22,8 @@ export interface ProviderSet {
   market: MarketDataProvider;
   risk: RiskProvider;
   routes: RouteProvider;
+  /** null, если платный ключ не настроен — тогда социальных данных просто нет. */
+  social: SocialProvider | null;
 }
 
 /**
@@ -44,13 +48,15 @@ class ChainRoutedRisk implements RiskProvider {
 export function getProviders(): ProviderSet {
   if (config.dataMode === "mock") {
     const mock = new MockProvider();
-    return { dataMode: "mock", discovery: mock, market: mock, risk: mock, routes: mock };
+    return { dataMode: "mock", discovery: mock, market: mock, risk: mock, routes: mock, social: null };
   }
+  const x = new XSocial();
   return {
     dataMode: "live",
     discovery: new GeckoTerminalDiscovery(),
     market: new DexScreenerMarketData(),
     risk: new ChainRoutedRisk(),
     routes: new JupiterRoutes(),
+    social: x.isConfigured() ? x : null,
   };
 }
