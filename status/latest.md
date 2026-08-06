@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-06T08:39:53.365Z (UTC)
+Сгенерирован: 2026-08-06T08:42:23.545Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 266251; снапшотов за 24ч: 39531
+- Токенов в базе: 266308; снапшотов за 24ч: 39525
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,51 +13,51 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 19224
-- bsc: 337
-- robinhood: 230
-- base: 95
+- solana: 19239
+- bsc: 339
+- robinhood: 250
+- base: 96
 - ethereum: 45
 - arbitrum: 19
 
 ## Статусы возможностей
 - AVOID: 103693
-- DATA_UNAVAILABLE: 28356
+- DATA_UNAVAILABLE: 28364
 - CANDIDATE: 14
 - WATCH: 7
 - READY: 3
 
 ## Топ-5 по score (не отбракованные)
-- USOS: READY, score 67.1, risk 0.7, conf 100% (обновлено 1 мин назад)
+- USOS: READY, score 67.4, risk 0.5, conf 100% (обновлено 1 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 6.3 ч назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 20.3 ч назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 20.4 ч назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 3.1 дн назад)
-- ANSEM: CANDIDATE, score 62.3, risk 1.6, conf 100% (обновлено 1 мин назад)
+- SAAS: READY, score 62.0, risk 2.0, conf 100% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- SOLdiers — 2026-08-06T08:09:48.592Z (30 мин назад)
-- SOLdiers — 2026-08-06T07:39:48.318Z (1.0 ч назад)
-- 2027 — 2026-08-06T07:39:08.463Z (1.0 ч назад)
+- SOLdiers — 2026-08-06T08:09:48.592Z (33 мин назад)
+- SOLdiers — 2026-08-06T07:39:48.318Z (1.1 ч назад)
+- 2027 — 2026-08-06T07:39:08.463Z (1.1 ч назад)
 - GOAP — 2026-08-06T07:22:24.693Z (1.3 ч назад)
 - ANSEM — 2026-08-06T05:53:44.332Z (2.8 ч назад)
 
 ## X (соцданные)
 - запросов за 24ч: 10; постов прочитано за 24ч: 15; за месяц: 15
-- последний: TTF (29 мин назад) — упоминаний 0, авторов 0, охват 0, свежих аккаунтов —
+- последний: TTF (31 мин назад) — упоминаний 0, авторов 0, охват 0, свежих аккаунтов —
 
 ## Последние переходы статусов
-- MARTIAN: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- SOLZ: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- retire: — → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
-- coonmask: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- CZ Wink⬆️: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- $TRENCHY: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- DATBOI: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- 逆袭生态: — → AVOID (2 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- ROGCOM: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- brAIn: — → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
-- URANUS: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- loyalDoge: — → AVOID (2 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- TODD: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- SOL: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- Twin: — → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
+- Bbonyo: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- BUZ: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- Ebola: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- Singularit: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- ESTO: — → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
+- SOL: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- PUYQ: — → AVOID (2 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- DIAMOND: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- DRFT: — → AVOID (2 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
 
 ## Позиции
 - Открытых: 4; всего: 12; realized P&L: $-376.98
@@ -93,18 +93,18 @@
     · 16:09:55 [NOTE] Unrealized P&L -25% (цена $0.000211900)
 
 ## Последний backtest
-- DONE (0 мин назад): NO EDGE: expectancy -15.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (3 мин назад): NO EDGE: expectancy -15.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 285464 / err 10, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 3.4 ч назад)
-- geckoterminal:arbitrum: ok (ok 22 / err 180, последний успех 0 мин назад)
-- geckoterminal:base: ok (ok 197 / err 5, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 195 / err 7, последний успех 1 мин назад)
-- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 176 / err 26, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 21 / err 168, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 202 / err 0, последний успех 1 мин назад)
-- goplus: ok (ok 95 / err 0, последний успех 2 мин назад)
-- jupiter: ok (ok 278511 / err 601, последний успех 0 мин назад)
-- rugcheck: ok (ok 124799 / err 378, последний успех 4 мин назад)
+- dexscreener: ok (ok 285544 / err 10, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 3.5 ч назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 23 / err 181, последний успех 2 мин назад)
+- geckoterminal:base: ok (ok 200 / err 5, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 197 / err 7, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 177 / err 27, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 22 / err 169, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 205 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 96 / err 0, последний успех 2 мин назад)
+- jupiter: ok (ok 278562 / err 601, последний успех 0 мин назад)
+- rugcheck: ok (ok 124800 / err 378, последний успех 1 мин назад)
 
