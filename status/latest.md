@@ -1,53 +1,56 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-06T05:29:43.208Z (UTC)
+Сгенерирован: 2026-08-06T08:10:28.924Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 263144; снапшотов за 24ч: 39167
+- Токенов в базе: 265540; снапшотов за 24ч: 39622
 - Ошибок в audit log за 24ч: 0
 
 ## Новые токены за 24ч по сетям
-- solana: 19092
-- bsc: 45
-- ethereum: 20
-- base: 18
-- arbitrum: 17
+- solana: 19159
+- bsc: 293
+- base: 86
+- ethereum: 43
+- arbitrum: 18
 
 ## Статусы возможностей
-- AVOID: 103671
-- DATA_UNAVAILABLE: 28164
-- CANDIDATE: 20
-- WATCH: 4
-- READY: 3
+- AVOID: 103703
+- DATA_UNAVAILABLE: 28252
+- CANDIDATE: 16
+- WATCH: 9
+- READY: 4
 
 ## Топ-5 по score (не отбракованные)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 3.1 ч назад)
-- USOS: READY, score 65.2, risk 2.2, conf 100% (обновлено 0 мин назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 17.1 ч назад)
-- SAAS: READY, score 64.7, risk 1.0, conf 100% (обновлено 0 мин назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 3.0 дн назад)
+- SOLdiers: READY, score 69.7, risk 3.0, conf 100% (обновлено 1 мин назад)
+- USOS: READY, score 67.2, risk 0.7, conf 100% (обновлено 1 мин назад)
+- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 5.8 ч назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 19.8 ч назад)
+- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 3.1 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- SAAS — 2026-08-06T05:16:25.125Z (13 мин назад)
-- USOS — 2026-08-06T05:08:00.776Z (22 мин назад)
-- USOS — 2026-08-06T05:04:01.673Z (26 мин назад)
-- USOS — 2026-08-06T05:01:58.513Z (28 мин назад)
-- USOS — 2026-08-06T04:53:53.318Z (36 мин назад)
+- SOLdiers — 2026-08-06T08:09:48.592Z (1 мин назад)
+- SOLdiers — 2026-08-06T07:39:48.318Z (31 мин назад)
+- 2027 — 2026-08-06T07:39:08.463Z (31 мин назад)
+- GOAP — 2026-08-06T07:22:24.693Z (48 мин назад)
+- ANSEM — 2026-08-06T05:53:44.332Z (2.3 ч назад)
+
+## X (соцданные)
+- снимков нет (ключ не задан или ни один токен ещё не дошёл до CANDIDATE/READY)
 
 ## Последние переходы статусов
-- nigga: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- CZ Impact: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- DONT: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- HUGO: — → AVOID (1 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- [invalid]: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- FateXCore: — → AVOID (3 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- LRTY: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- wtnUSDT: — → AVOID (3 мин назад) — [sell-not-verified] В сети Arbitrum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- KASH: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- wtnUSDC: — → AVOID (4 мин назад) — [sell-not-verified] В сети Arbitrum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- Dogecoln: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- DIA: — → AVOID (4 мин назад) — [mint-authority] Mint authority не отозвана — возможна дополнительная эмиссия.
+- SOLdiers: CANDIDATE → READY (1 мин назад) — Opportunity Score 69.7/100, Risk 3.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- MARS: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- THMM: — → AVOID (1 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- CATE: — → AVOID (2 мин назад) — [mint-authority] Mint authority не отозвана — возможна дополнительная эмиссия.
+- 1F916: WATCH → AVOID (2 мин назад) — [insufficient-liquidity] Ликвидность $3 ниже минимума $10,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
+- BULL: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- rSTX: — → WATCH (3 мин назад) — Opportunity Score 33.9/100, Risk 5.5/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
+- UrAnus: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- $UNIFROG: — → AVOID (4 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- GWP: AVOID → DATA_UNAVAILABLE (5 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- TER: — → AVOID (5 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- CRIGRE: AVOID → DATA_UNAVAILABLE (6 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
 
 ## Позиции
 - Открытых: 4; всего: 12; realized P&L: $-376.98
@@ -57,6 +60,7 @@
     · 03:08:07 [NOTE] Unrealized P&L 32% (цена $0.000156000)
     · 02:22:07 [NOTE] Unrealized P&L 57% (цена $0.000185700)
 - GOAP [paper/OPEN] вход $0.004260 × 23403 = $100.00, остаток 100%, realized $0.00
+    · 05:48:51 [NOTE] Unrealized P&L 25% (цена $0.00533100)
     · 12:57:45 [OPEN] Paper вход: 23402.64 шт по $0.00426020 (комиссии $0.30, impact 0.77%)
 - CASHCAT [paper/STOPPED] вход $0.003085 × 32321 = $100.00, остаток 0%, realized $-100.01, закрыта: Ликвидность упала до $1,312 (<60% от входа) — аварийный выход
     · 12:11:29 [STOP_HIT] Ликвидность упала до $1,312 (<60% от входа) — аварийный выход: продано 32320.79 шт по $0.00000129402, P&L $-100.01
@@ -82,18 +86,18 @@
     · 16:09:55 [NOTE] Unrealized P&L -25% (цена $0.000211900)
 
 ## Последний backtest
-- DONE (4.8 ч назад): NO EDGE: expectancy -21.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (7.5 ч назад): NO EDGE: expectancy -21.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 278141 / err 10, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 14 мин назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 8 / err 6, последний успех 4 мин назад)
-- geckoterminal:base: ok (ok 12 / err 2, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 12 / err 2, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 11 / err 3, последний успех 0 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 0 / err 1, последний успех —)
-- geckoterminal:solana: ok (ok 14 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 2 / err 0, последний успех 4 мин назад)
-- jupiter: ok (ok 270253 / err 596, последний успех 0 мин назад)
-- rugcheck: ok (ok 124502 / err 378, последний успех 0 мин назад)
+- dexscreener: ok (ok 284365 / err 10, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 2.9 ч назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 19 / err 155, последний успех 2.0 ч назад)
+- geckoterminal:base: ok (ok 169 / err 5, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 168 / err 6, последний успех 0 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 152 / err 22, последний успех 1 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 0 / err 161, последний успех —)
+- geckoterminal:solana: ok (ok 174 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 79 / err 0, последний успех 2 мин назад)
+- jupiter: ok (ok 277662 / err 601, последний успех 1 мин назад)
+- rugcheck: ok (ok 124765 / err 378, последний успех 1 мин назад)
 
