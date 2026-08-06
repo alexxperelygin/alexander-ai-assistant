@@ -66,6 +66,7 @@ jobs:
           SSHPASS: ${{ secrets.VPS_SSH_PASSWORD }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
           TASK: ${{ steps.task.outputs.task }}
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
         run: |
           sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
           run_ssh() { sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" "$1"; }
@@ -74,6 +75,13 @@ jobs:
           case "$TASK" in
             update)
               echo "== Обновление кода на сервере =="
+              # Платный ключ X передаётся по stdin в файл с режимом 600.
+              # Не через аргументы команды: они видны в списке процессов сервера.
+              if [ -n "${X_BEARER_TOKEN:-}" ]; then
+                printf '%s' "$X_BEARER_TOKEN" | sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" \
+                  'install -d -m 700 /opt/memescope-secrets && cat > /opt/memescope-secrets/x_bearer && chmod 600 /opt/memescope-secrets/x_bearer'
+                echo "Ключ X передан на сервер (значение не печатается)."
+              fi
               # ВАЖНО: без пайпа сразу за ssh — `| tail` маскировал код ошибки,
               # и провалившиеся деплои выглядели успешными.
               if ! run_ssh 'git -C /opt/alexander-ai-assistant fetch -q origin main && git -C /opt/alexander-ai-assistant reset -q --hard origin/main && bash /opt/alexander-ai-assistant/memescope/deploy/install.sh' > /tmp/update.log 2>&1; then

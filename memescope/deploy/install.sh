@@ -88,6 +88,18 @@ npm install --no-audit --no-fund
 # Миграция старого дефолта: пропускная способность сканера 8 → 30 за цикл
 # (дешёвый DexScreener-скрининг фильтрует токены до трат RugCheck/Jupiter).
 sed -i 's/^MAX_CANDIDATES_PER_CYCLE=8$/MAX_CANDIDATES_PER_CYCLE=30/' .env || true
+
+# Платный ключ X кладётся отдельным файлом (режим 600, вне репозитория) — так он
+# не проходит через чат, не попадает в git и не светится в списке процессов.
+# Здесь только переносим его в .env; само значение нигде не печатается.
+SECRET_X="/opt/memescope-secrets/x_bearer"
+if [ -s "$SECRET_X" ]; then
+  sed -i '/^X_BEARER_TOKEN=/d' .env
+  printf 'X_BEARER_TOKEN=%s\n' "$(cat "$SECRET_X")" >> .env
+  say "   ключ X подключён (значение не выводится)"
+else
+  say "   ключ X не задан — социальные данные не собираются"
+fi
 # SQLite однописательный: работающий worker держит блокировку, и db push
 # падает с 'database is locked'. Останавливаем сервисы перед миграцией схемы.
 pm2 stop memescope-web memescope-worker >/dev/null 2>&1 || true
