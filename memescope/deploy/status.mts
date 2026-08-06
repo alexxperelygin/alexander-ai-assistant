@@ -122,35 +122,39 @@ const recentEvents = await prisma.signalEvent.findMany({
   take: 12,
   include: { opportunity: { include: { token: true } } },
 });
-// Расход платного источника. Без этого невозможно понять, работает ли ключ и
-// во сколько обходятся сутки: у pay-per-use цена ошибки — прямой расход баланса.
-const daySocial = await prisma.socialSnapshot.aggregate({
-  where: { source: "x", fetchedAt: { gte: since24h } },
-  _sum: { postsRead: true },
+// Расход и результат по КАЖДОМУ соцсточнику. Раньше печатался только X, и
+// по остальным нельзя было отличить «ключа нет» от «ключ есть, но не работает».
+const socialSources = await prisma.socialSnapshot.groupBy({
+  by: ["source"],
+  where: { fetchedAt: { gte: since24h } },
   _count: { _all: true },
+  _sum: { postsRead: true, mentions: true },
 });
-const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
-const monthSocial = await prisma.socialSnapshot.aggregate({
-  where: { source: "x", fetchedAt: { gte: monthStart } },
-  _sum: { postsRead: true },
-});
-const lastSocial = await prisma.socialSnapshot.findFirst({
-  where: { source: "x" },
-  orderBy: { fetchedAt: "desc" },
-  include: { token: true },
-});
-lines.push(`## X (соцданные)`);
-if (!lastSocial) {
-  lines.push(`- снимков нет (ключ не задан или ни один токен ещё не дошёл до CANDIDATE/READY)`);
-} else {
-  lines.push(`- запросов за 24ч: ${daySocial._count._all}; постов прочитано за 24ч: ${daySocial._sum.postsRead ?? 0}; за месяц: ${monthSocial._sum.postsRead ?? 0}`);
-  const errs = lastSocial.errors ? ` — ${lastSocial.errors}` : "";
-  lines.push(`- последний: ${lastSocial.token.symbol} (${ago(lastSocial.fetchedAt)}) — упоминаний ${lastSocial.mentions ?? "—"}, авторов ${lastSocial.uniqueAuthors ?? "—"}, охват ${lastSocial.reach ?? "—"}, свежих аккаунтов ${lastSocial.freshAccountShare == null ? "—" : `${Math.round(lastSocial.freshAccountShare * 100)}%`}${errs}`);
+lines.push(`## Социальные источники (24ч)`);
+if (socialSources.length === 0) {
+  lines.push(`- снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности`);
 }
-const socialErrors = await prisma.auditLog.count({
+for (const g of socialSources.sort((a, b) => b._count._all - a._count._all)) {
+  const last = await prisma.socialSnapshot.findFirst({
+    where: { source: g.source },
+    orderBy: { fetchedAt: "desc" },
+    include: { token: true },
+  });
+  const errs = last?.errors ? ` ⚠ ${last.errors}` : "";
+  lines.push(
+    `- **${g.source}**: запросов ${g._count._all}, прочитано ${g._sum.postsRead ?? 0}, ` +
+      `упоминаний ${g._sum.mentions ?? 0}; последний — ${last?.token.symbol ?? "—"} (${ago(last?.fetchedAt)})${errs}`,
+  );
+}
+const socialErrors = await prisma.auditLog.findMany({
   where: { action: "social.error", createdAt: { gte: since24h } },
+  orderBy: { createdAt: "desc" },
+  take: 3,
 });
-if (socialErrors > 0) lines.push(`- 🔴 ошибок обращения к X за 24ч: ${socialErrors}`);
+if (socialErrors.length > 0) {
+  lines.push(`- 🔴 ошибок обращения за 24ч: ${socialErrors.length} (последние ниже)`);
+  for (const e of socialErrors) lines.push(`    · ${(e.details ?? "").slice(0, 160)}`);
+}
 lines.push(``);
 
 lines.push(`## Последние переходы статусов`);
