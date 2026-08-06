@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-06T05:22:05.828Z (UTC)
+Сгенерирован: 2026-08-06T05:23:52.830Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 263018; снапшотов за 24ч: 39139
+- Токенов в базе: 263031; снапшотов за 24ч: 39146
 - Ошибок в audit log за 24ч: 0
 
 ## Новые токены за 24ч по сетям
-- solana: 19077
+- solana: 19070
 - bsc: 29
 - ethereum: 20
 - arbitrum: 17
@@ -16,24 +16,38 @@
 
 ## Статусы возможностей
 - AVOID: 103671
-- DATA_UNAVAILABLE: 28152
+- DATA_UNAVAILABLE: 28154
 - CANDIDATE: 20
 - WATCH: 4
 - READY: 3
 
 ## Топ-5 по score (не отбракованные)
-- USOS: READY, score 66.8, risk 2.0, conf 100% (обновлено 1 мин назад)
+- USOS: READY, score 66.2, risk 1.9, conf 100% (обновлено 1 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 3.0 ч назад)
-- SAAS: READY, score 64.9, risk 1.0, conf 100% (обновлено 1 мин назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 17.0 ч назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 17.1 ч назад)
+- SAAS: READY, score 63.8, risk 2.0, conf 100% (обновлено 0 мин назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 3.0 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- SAAS — 2026-08-06T05:16:25.125Z (6 мин назад)
-- USOS — 2026-08-06T05:08:00.776Z (14 мин назад)
-- USOS — 2026-08-06T05:04:01.673Z (18 мин назад)
-- USOS — 2026-08-06T05:01:58.513Z (20 мин назад)
-- USOS — 2026-08-06T04:53:53.318Z (28 мин назад)
+- SAAS — 2026-08-06T05:16:25.125Z (7 мин назад)
+- USOS — 2026-08-06T05:08:00.776Z (16 мин назад)
+- USOS — 2026-08-06T05:04:01.673Z (20 мин назад)
+- USOS — 2026-08-06T05:01:58.513Z (22 мин назад)
+- USOS — 2026-08-06T04:53:53.318Z (30 мин назад)
+
+## Последние переходы статусов
+- BabyDoge: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- thUSD: — → AVOID (1 мин назад) — [sell-not-verified] В сети Arbitrum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- BabyDoge: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- fkUSDC: — → AVOID (1 мин назад) — [sell-not-verified] В сети Arbitrum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- CHUD: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- PERC: — → AVOID (3 мин назад) — [no-contract-risk-source] Для сети Arbitrum нет источника проверки контракта (эмиссия, заморозка, honeypot). Данные собираются для
+- Hacker: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- FMI: — → AVOID (3 мин назад) — [no-contract-risk-source] Для сети Arbitrum нет источника проверки контракта (эмиссия, заморозка, honeypot). Данные собираются для
+- WANTED: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- MEX: — → AVOID (4 мин назад) — [no-contract-risk-source] Для сети Arbitrum нет источника проверки контракта (эмиссия, заморозка, honeypot). Данные собираются для
+- CHUD: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- WERC: — → AVOID (4 мин назад) — [no-contract-risk-source] Для сети Arbitrum нет источника проверки контракта (эмиссия, заморозка, honeypot). Данные собираются для
 
 ## Позиции
 - Открытых: 4; всего: 12; realized P&L: $-376.98
@@ -71,13 +85,13 @@
 - DONE (4.7 ч назад): NO EDGE: expectancy -21.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 277872 / err 10, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 7 мин назад)
-- geckoterminal:arbitrum: ok (ok 6 / err 1, последний успех 0 мин назад)
-- geckoterminal:base: ok (ok 7 / err 0, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 7 / err 0, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 7 / err 0, последний успех 0 мин назад)
-- geckoterminal:solana: ok (ok 7 / err 0, последний успех 0 мин назад)
-- jupiter: ok (ok 269917 / err 595, последний успех 0 мин назад)
-- rugcheck: ok (ok 124488 / err 378, последний успех 1 мин назад)
+- dexscreener: ok (ok 277931 / err 10, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 8 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 6 / err 2, последний успех 2 мин назад)
+- geckoterminal:base: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/base/new_pools?page=1 (ok 7 / err 1, последний успех 2 мин назад)
+- geckoterminal:bsc: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/bsc/new_pools?page=1 (ok 7 / err 1, последний успех 2 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 7 / err 1, последний успех 2 мин назад)
+- geckoterminal:solana: ok (ok 8 / err 0, последний успех 1 мин назад)
+- jupiter: ok (ok 270008 / err 595, последний успех 0 мин назад)
+- rugcheck: ok (ok 124488 / err 378, последний успех 3 мин назад)
 
