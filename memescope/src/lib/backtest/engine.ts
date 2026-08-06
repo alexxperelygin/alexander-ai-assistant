@@ -68,8 +68,12 @@ export async function runBacktest(params: BacktestParams = DEFAULT_BACKTEST_PARA
     }
 
     // Baseline: "buy every token at its first observed snapshot" — the naive
-    // strategy the scoring must beat to prove selection adds value.
-    const baselineOutcomes = await baselineAllTokens(params);
+    // strategy the scoring must beat to prove selection adds value. It must be
+    // drawn from the SAME period as the signals, otherwise the comparison is
+    // between two different markets.
+    const signalFrom = filtered[0]?.createdAt ?? null;
+    const signalTo = filtered[filtered.length - 1]?.createdAt ?? null;
+    const baselineOutcomes = await baselineAllTokens(params, signalFrom, signalTo);
 
     const strategy = aggregate(strategyOutcomes, params.horizon);
     const baseline = aggregate(baselineOutcomes, params.horizon);
@@ -150,18 +154,51 @@ async function forwardSeries(tokenId: string, after: Date, dataMode: string): Pr
   return snaps.map((s) => ({ at: s.fetchedAt, priceUsd: s.priceUsd as number, liquidityUsd: s.liquidityUsd }));
 }
 
-async function baselineAllTokens(params: BacktestParams): Promise<SignalOutcome[]> {
-  const tokens = await prisma.token.findMany({
-    where: { snapshots: { some: { dataMode: params.dataMode } } },
+/** Сколько токенов берём в базовую линию: каждый требует отдельного запроса истории. */
+const BASELINE_SAMPLE = 2000;
+
+function fetchTokenBatch(ids: string[], dataMode: string) {
+  return prisma.token.findMany({
+    where: { id: { in: ids }, snapshots: { some: { dataMode } } },
     include: {
       snapshots: {
-        where: { dataMode: params.dataMode, priceUsd: { gt: 0 } },
+        where: { dataMode, priceUsd: { gt: 0 } },
         orderBy: { fetchedAt: "asc" },
         take: 1,
       },
     },
-    take: 2000,
   });
+}
+
+async function baselineAllTokens(
+  params: BacktestParams,
+  from: Date | null,
+  to: Date | null,
+): Promise<SignalOutcome[]> {
+  // Без окна и сортировки `take: 2000` возвращал самые СТАРЫЕ токены в базе —
+  // базовая линия считалась по другому периоду рынка, чем сигналы, и сравнение
+  // «стратегия vs рынок» было бессмысленным. Берём токены, впервые увиденные в
+  // том же интервале, что и сигналы (fallback — последние 7 дней).
+  const windowFrom = from ?? new Date(Date.now() - 7 * 24 * 3600_000);
+  const windowTo = to ?? new Date();
+
+  // Токенов в окне могут быть сотни тысяч, а на каждый нужен отдельный запрос
+  // истории. Поэтому берём равномерную подвыборку по времени появления: просто
+  // `take: N` дал бы только начало окна, то есть снова другой период.
+  const ids = await prisma.token.findMany({
+    where: { firstSeenAt: { gte: windowFrom, lte: windowTo } },
+    orderBy: { firstSeenAt: "asc" },
+    select: { id: true },
+  });
+  const stride = Math.max(1, Math.ceil(ids.length / BASELINE_SAMPLE));
+  const sampled = ids.filter((_, i) => i % stride === 0).map((t) => t.id);
+
+  // `IN (...)` разбивается на пачки: SQLite ограничивает число параметров в
+  // запросе (на этом уже спотыкался бэктест).
+  const tokens: Awaited<ReturnType<typeof fetchTokenBatch>> = [];
+  for (let i = 0; i < sampled.length; i += 500) {
+    tokens.push(...(await fetchTokenBatch(sampled.slice(i, i + 500), params.dataMode)));
+  }
   const outcomes: SignalOutcome[] = [];
   for (const t of tokens) {
     const first = t.snapshots[0];

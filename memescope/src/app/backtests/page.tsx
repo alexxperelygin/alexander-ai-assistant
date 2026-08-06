@@ -61,7 +61,7 @@ export default async function BacktestsPage() {
                             <td>{a.medianReturn == null ? "—" : fmtPct(a.medianReturn * 100)}</td>
                             <td>{a.profitFactor == null ? "—" : a.profitFactor === Infinity ? "∞" : a.profitFactor.toFixed(2)}</td>
                             <td>{a.maxDrawdown == null ? "—" : `${(a.maxDrawdown * 100).toFixed(0)}%`}</td>
-                            <td>{`${(a.rugRate * 100).toFixed(0)}%`}</td>
+                            <td>{a.rugRate == null ? "—" : `${(a.rugRate * 100).toFixed(0)}%`}</td>
                             <td>{`${(a.unclosablePct * 100).toFixed(0)}%`}</td>
                           </tr>
                         );

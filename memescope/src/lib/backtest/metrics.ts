@@ -28,6 +28,8 @@ export interface SignalOutcome {
   netReturns: Record<string, number | null>;
   rugged: boolean; // liquidity collapsed below 20% of entry within max horizon
   unclosable: boolean; // no forward data or liquidity too thin to simulate exit
+  /** At least one forward observation existed, so "rugged" was actually testable. */
+  rugMeasurable: boolean;
 }
 
 export const HORIZONS_MIN: Record<string, number> = {
@@ -53,6 +55,10 @@ export function evaluateSignal(sig: SignalRecord, forward: PricePoint[]): Signal
   const netReturns: Record<string, number | null> = {};
   let rugged = false;
   let anyExit = false;
+  // Whether the liquidity test could run at all. Without this, a signal we
+  // never observed again counts as "not rugged" and dilutes the rug rate —
+  // the metric would improve simply by losing sight of dying tokens.
+  let rugMeasurable = false;
 
   for (const [key, minutes] of Object.entries(HORIZONS_MIN)) {
     const deadline = sig.at.getTime() + minutes * 60_000;
@@ -65,12 +71,9 @@ export function evaluateSignal(sig: SignalRecord, forward: PricePoint[]): Signal
       netReturns[key] = null;
       continue;
     }
-    if (
-      exitPoint.liquidityUsd != null &&
-      sig.entryLiquidityUsd != null &&
-      exitPoint.liquidityUsd < sig.entryLiquidityUsd * 0.2
-    ) {
-      rugged = true;
+    if (exitPoint.liquidityUsd != null && sig.entryLiquidityUsd != null) {
+      rugMeasurable = true;
+      if (exitPoint.liquidityUsd < sig.entryLiquidityUsd * 0.2) rugged = true;
     }
     const exitFill = simulateFill({
       sideUsd: sig.positionUsd * (exitPoint.priceUsd / sig.entryPriceUsd),
@@ -95,6 +98,7 @@ export function evaluateSignal(sig: SignalRecord, forward: PricePoint[]): Signal
     netReturns,
     rugged,
     unclosable: !anyExit,
+    rugMeasurable,
   };
 }
 
@@ -107,7 +111,9 @@ export interface AggregateMetrics {
   medianReturn: number | null;
   profitFactor: number | null;
   maxDrawdown: number | null; // on equity curve of sequential trades
-  rugRate: number;
+  /** Share of RUG-MEASURABLE signals whose liquidity collapsed (null = none measurable). */
+  rugRate: number | null;
+  rugMeasurable: number;
   unclosablePct: number;
   byMonth: Record<string, { n: number; meanReturn: number }>;
 }
@@ -132,6 +138,8 @@ export function aggregate(outcomes: SignalOutcome[], horizon: string): Aggregate
     maxDd = Math.max(maxDd, (peak - equity) / peak);
   }
 
+  const rugTestable = outcomes.filter((o) => o.rugMeasurable);
+
   const byMonth: Record<string, { n: number; meanReturn: number }> = {};
   for (const o of ordered) {
     const key = o.at.toISOString().slice(0, 7);
@@ -149,7 +157,10 @@ export function aggregate(outcomes: SignalOutcome[], horizon: string): Aggregate
     medianReturn: rets.length ? median(rets) : null,
     profitFactor: grossLoss > 0 ? grossWin / grossLoss : wins.length > 0 ? Infinity : null,
     maxDrawdown: ordered.length ? maxDd : null,
-    rugRate: outcomes.length ? outcomes.filter((o) => o.rugged).length / outcomes.length : 0,
+    rugRate: rugTestable.length
+      ? rugTestable.filter((o) => o.rugged).length / rugTestable.length
+      : null,
+    rugMeasurable: rugTestable.length,
     unclosablePct: outcomes.length
       ? outcomes.filter((o) => o.unclosable).length / outcomes.length
       : 0,
