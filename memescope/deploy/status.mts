@@ -97,6 +97,22 @@ for (const e of readyEvents) {
   lines.push(`- ${e.opportunity.token.symbol} — ${e.createdAt.toISOString()} (${ago(e.createdAt)})`);
 }
 lines.push(``);
+// Мигание статусов (READY → что-то → READY за минуты) означает, что какое-то
+// правило срабатывает через раз. Причина перехода записана в SignalEvent —
+// печатаем её, чтобы диагностировать по факту, а не по догадке.
+const recentEvents = await prisma.signalEvent.findMany({
+  orderBy: { createdAt: "desc" },
+  take: 12,
+  include: { opportunity: { include: { token: true } } },
+});
+lines.push(`## Последние переходы статусов`);
+if (recentEvents.length === 0) lines.push(`- (переходов нет)`);
+for (const e of recentEvents) {
+  const reason = (e.reason ?? "").replace(/\s+/g, " ").slice(0, 130);
+  lines.push(`- ${e.opportunity.token.symbol}: ${e.fromStatus ?? "—"} → ${e.toStatus} (${ago(e.createdAt)}) — ${reason}`);
+}
+lines.push(``);
+
 lines.push(`## Позиции`);
 lines.push(`- Открытых: ${open.length}; всего: ${positions.length}; realized P&L: $${realized.toFixed(2)}`);
 lines.push(``);
