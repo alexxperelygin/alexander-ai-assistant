@@ -244,16 +244,38 @@ log();
 // нужно там, а не там, где мы начали.
 log(`## 1c. Разбивка по сетям (${MAIN_H})`);
 log();
-log(`| Сеть | Наблюдений | Измеримо | Coverage | Медиана | Прибыльных | Rug |`);
-log(`|---|---|---|---|---|---|---|`);
+log(`Две таблицы, и вторая важнее. Базовая линия по всем наблюдениям включает`);
+log(`пулы с копеечной ликвидностью, где позицию съедает проскальзывание — там`);
+log(`«убыточно» означает «невозможно торговать», а не «рынок падает». Поэтому`);
+log(`рядом даётся срез по той вселенной, которую система реально рассматривает:`);
+log(`ликвидность выше порога.`);
+log();
+
 const chains = [...new Set(unbiased.map((o) => o.entry.chain ?? "solana"))].sort();
-for (const ch of chains) {
-  const obs = unbiased.filter((o) => (o.entry.chain ?? "solana") === ch);
+const chainRow = (obs: Obs[], label: string) => {
   const xs = retsOf(obs);
   const rugKnown = obs.filter((o) => o.rug != null);
   const rug = rugKnown.length ? rugKnown.filter((o) => o.rug).length / rugKnown.length : null;
-  log(`| ${ch} | ${obs.length.toLocaleString("ru")} | ${xs.length.toLocaleString("ru")} | ` +
+  log(`| ${label} | ${obs.length.toLocaleString("ru")} | ${xs.length.toLocaleString("ru")} | ` +
       `${pct(covOf(obs), 0)} | **${pct(median(xs))}** | ${pct(winRate(xs), 0)} | ${pct(rug, 0)} |`);
+};
+
+log(`### Все наблюдения`);
+log();
+log(`| Сеть | Наблюдений | Измеримо | Coverage | Медиана | Прибыльных | Rug |`);
+log(`|---|---|---|---|---|---|---|`);
+for (const ch of chains) chainRow(unbiased.filter((o) => (o.entry.chain ?? "solana") === ch), ch);
+log();
+
+log(`### Только торгуемые: ликвидность > $50k`);
+log();
+log(`| Сеть | Наблюдений | Измеримо | Coverage | Медиана | Прибыльных | Rug |`);
+log(`|---|---|---|---|---|---|---|`);
+for (const ch of chains) {
+  chainRow(
+    unbiased.filter((o) => (o.entry.chain ?? "solana") === ch && (o.entry.liquidityUsd ?? 0) > 50_000),
+    ch,
+  );
 }
 log();
 
