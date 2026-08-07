@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-07T07:40:19.155Z (UTC)
+Сгенерирован: 2026-08-07T08:40:14.551Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 296104; снапшотов за 24ч: 41224
+- Токенов в базе: 297273; снапшотов за 24ч: 41408
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,51 +13,51 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20240
-- robinhood: 7862
-- bsc: 2220
-- base: 536
-- ethereum: 190
-- arbitrum: 6
+- solana: 20131
+- robinhood: 7950
+- bsc: 2223
+- base: 528
+- ethereum: 185
+- arbitrum: 5
 
 ## Статусы возможностей
-- AVOID: 104015
+- AVOID: 104014
 - DATA_UNAVAILABLE: 30031
 - WATCH: 16
-- CANDIDATE: 14
-- READY: 2
+- CANDIDATE: 13
+- READY: 4
 
 ## Топ-5 по score (не отбракованные)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 1.2 дн назад)
+- wiwiwi: READY, score 70.4, risk 1.1, conf 100% (обновлено 0 мин назад)
+- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 1.3 дн назад)
+- BITCOIN: READY, score 65.2, risk 2.8, conf 88% (обновлено 1 мин назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 1.8 дн назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 4.1 дн назад)
-- SAAS: CANDIDATE, score 62.7, risk 0.4, conf 100% (обновлено 0 мин назад)
-- TTF: READY, score 62.2, risk 1.8, conf 100% (обновлено 0 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- BITCOIN — 2026-08-07T06:48:49.582Z (51 мин назад)
-- wiwiwi — 2026-08-07T06:15:59.666Z (1.4 ч назад)
-- wiwiwi — 2026-08-07T05:37:59.394Z (2.0 ч назад)
-- BITCOIN — 2026-08-07T05:06:06.688Z (2.6 ч назад)
-- wiwiwi — 2026-08-07T04:23:14.188Z (3.3 ч назад)
+- BITCOIN — 2026-08-07T08:39:10.756Z (1 мин назад)
+- wiwiwi — 2026-08-07T08:36:04.280Z (4 мин назад)
+- wiwiwi — 2026-08-07T08:08:57.948Z (31 мин назад)
+- BITCOIN — 2026-08-07T06:48:49.582Z (1.9 ч назад)
+- wiwiwi — 2026-08-07T06:15:59.666Z (2.4 ч назад)
 
 ## Социальные источники (24ч)
-- **x**: запросов 624, прочитано 396, упоминаний 396; последний — CC (0 мин назад) ⚠ ["дневной бюджет X исчерпан: прочитано 396 из 400 за сутки"]
-- **farcaster**: запросов 529, прочитано 1732, упоминаний 0; последний — MEWFOUR (1.1 ч назад)
+- **x**: запросов 640, прочитано 391, упоминаний 391; последний — USDG (0 мин назад) ⚠ ["дневной бюджет X исчерпан: прочитано 391 из 400 за сутки"]
+- **farcaster**: запросов 529, прочитано 1732, упоминаний 0; последний — MEWFOUR (2.1 ч назад)
 
 ## Последние переходы статусов
-- GOATZO: WATCH → AVOID (0 мин назад) — [insufficient-liquidity] Ликвидность $49,941 ниже минимума $50,000.
-- COOKIE: CANDIDATE → WATCH (1 мин назад) — Opportunity Score 44.5/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- COOKIE: WATCH → CANDIDATE (7 мин назад) — Opportunity Score 51.2/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- GOATZO: AVOID → WATCH (14 мин назад) — Opportunity Score 32.9/100, Risk 25.4/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
-- XST: AVOID → WATCH (14 мин назад) — Opportunity Score 37.8/100, Risk 20.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- wiwiwi: READY → CANDIDATE (15 мин назад) — Opportunity Score 59.8/100, Risk 7.9/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- memes: CANDIDATE → WATCH (18 мин назад) — Opportunity Score 45.0/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BITCOIN: READY → CANDIDATE (42 мин назад) — Opportunity Score 59.2/100, Risk 2.8/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- COOKIE: CANDIDATE → WATCH (45 мин назад) — Opportunity Score 43.8/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- COOKIE: WATCH → CANDIDATE (48 мин назад) — Opportunity Score 50.9/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BITCOIN: CANDIDATE → READY (51 мин назад) — Opportunity Score 66.1/100, Risk 2.8/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- XST: WATCH → AVOID (1.1 ч назад) — [insufficient-liquidity] Ликвидность $49,283 ниже минимума $50,000.
+- BITCOIN: CANDIDATE → READY (1 мин назад) — Opportunity Score 65.2/100, Risk 2.8/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- wiwiwi: CANDIDATE → READY (4 мин назад) — Opportunity Score 67.9/100, Risk 2.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- GOATZO: AVOID → WATCH (9 мин назад) — Opportunity Score 26.0/100, Risk 25.7/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
+- ORDER: WATCH → CANDIDATE (13 мин назад) — Opportunity Score 50.4/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- wiwiwi: READY → CANDIDATE (25 мин назад) — Opportunity Score 59.4/100, Risk 7.8/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- wiwiwi: CANDIDATE → READY (31 мин назад) — Opportunity Score 65.2/100, Risk 0.4/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- ORDER: CANDIDATE → WATCH (38 мин назад) — Opportunity Score 44.9/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- ORDER: WATCH → CANDIDATE (41 мин назад) — Opportunity Score 50.8/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- GOATZO: WATCH → AVOID (1.0 ч назад) — [insufficient-liquidity] Ликвидность $49,941 ниже минимума $50,000.
+- COOKIE: CANDIDATE → WATCH (1.0 ч назад) — Opportunity Score 44.5/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- COOKIE: WATCH → CANDIDATE (1.1 ч назад) — Opportunity Score 51.2/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- GOATZO: AVOID → WATCH (1.2 ч назад) — Opportunity Score 32.9/100, Risk 25.4/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
 
 ## Позиции
 - Открытых: 6; всего: 17; realized P&L: $-541.22
@@ -66,8 +66,8 @@
 - ANSEM [paper/OPEN] вход $0.004344 × 4581 = $20.00, остаток 100%, realized $0.00
     · 03:25:01 [OPEN] Paper вход: 4580.91 шт по $0.00434412 (комиссии $0.10, impact 0.68%)
 - BITCOIN [paper/OPEN] вход $0.01415 × 1406 = $20.00, остаток 100%, realized $0.00
-    · 07:40:06 [ALERT] Нет свежих данных цены — мониторинг деградирован.
-    · 07:39:35 [ALERT] Нет свежих данных цены — мониторинг деградирован.
+    · 08:40:06 [ALERT] Нет свежих данных цены — мониторинг деградирован.
+    · 08:39:35 [ALERT] Нет свежих данных цены — мониторинг деградирован.
 - wiwiwi [paper/OPEN] вход $0.0006047 × 32909 = $20.00, остаток 100%, realized $0.00
     · 21:55:28 [OPEN] Paper вход: 32909.16 шт по $0.000604695 (комиссии $0.10, impact 0.15%)
 - TTF [paper/OPEN] вход $0.001132 × 17580 = $20.00, остаток 100%, realized $0.00
@@ -87,21 +87,22 @@
     · 08:56:29 [STOP_HIT] Stop: цена $0.0000340400 ≤ стопа $0.0000348108: продано 1861636.60 шт по $0.0000336058, P&L $-37.65
     · 08:51:32 [NOTE] Unrealized P&L -31% (цена $0.0000372200)
 - SOLdiers [paper/OPEN] вход $0.00008993 × 1108617 = $100.00, остаток 100%, realized $0.00
+    · 08:38:05 [NOTE] Unrealized P&L 26% (цена $0.000113000)
     · 23:35:23 [OPEN] Paper вход: 1108616.71 шт по $0.0000899319 (комиссии $0.30, impact 1.91%)
 
 ## Последний backtest
-- DONE (1.1 ч назад): NO EDGE: expectancy -13.1% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (2.1 ч назад): NO EDGE: expectancy -13.1% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 340310 / err 11, последний успех 0 мин назад)
+- dexscreener: ok (ok 342890 / err 11, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 1.1 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 671 / err 903, последний успех 2 мин назад)
-- geckoterminal:base: ok (ok 1569 / err 6, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 1509 / err 66, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 1356 / err 218, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 786 / err 773, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 1575 / err 0, последний успех 1 мин назад)
-- goplus: ok (ok 1764 / err 0, последний успех 0 мин назад)
-- jupiter: ok (ok 304931 / err 635, последний успех 0 мин назад)
-- rugcheck: ok (ok 125719 / err 381, последний успех 2 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 700 / err 934, последний успех 2 мин назад)
+- geckoterminal:base: ok (ok 1629 / err 6, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 1569 / err 66, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 1387 / err 247, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 818 / err 801, последний успех 0 мин назад)
+- geckoterminal:solana: ok (ok 1635 / err 0, последний успех 1 мин назад)
+- goplus: ok (ok 1858 / err 0, последний успех 0 мин назад)
+- jupiter: ok (ok 305791 / err 636, последний успех 0 мин назад)
+- rugcheck: ok (ok 125750 / err 381, последний успех 1 мин назад)
 
