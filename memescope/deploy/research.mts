@@ -47,6 +47,11 @@ interface Snap {
   fdvUsd: number | null;
   /** Изменение ликвидности к предыдущему снапшоту, % (вычисляется при загрузке). */
   liqTrendPct?: number | null;
+  /** Социальный срез, известный на момент наблюдения (X). null = не измерялось. */
+  socialMentions?: number | null;
+  socialAuthors?: number | null;
+  socialReach?: number | null;
+  socialFreshShare?: number | null;
 }
 
 function netReturn(entry: Snap, exit: Snap): number | null {
@@ -124,6 +129,42 @@ for (const series of byToken.values()) {
     const gapMin = (cur.fetchedAt.getTime() - prev.fetchedAt.getTime()) / 60_000;
     if (gapMin > 120 || !prev.liquidityUsd || cur.liquidityUsd == null) continue;
     cur.liqTrendPct = ((cur.liquidityUsd - prev.liquidityUsd) / prev.liquidityUsd) * 100;
+  }
+}
+
+// ---------- Социальные данные ----------
+// Привязываем к наблюдению ПОСЛЕДНИЙ соцзамер, сделанный НЕ ПОЗЖЕ него: иначе
+// это было бы заглядыванием в будущее. Замер старше двух часов не используется —
+// внимание в мем-коинах живёт минутами, а не сутками.
+const SOCIAL_MAX_AGE_MS = 2 * 3600_000;
+const socialRows = await prisma.socialSnapshot.findMany({
+  where: { source: "x", fetchedAt: { gte: since } },
+  select: {
+    tokenId: true, fetchedAt: true, mentions: true, uniqueAuthors: true,
+    reach: true, freshAccountShare: true,
+  },
+  orderBy: { fetchedAt: "asc" },
+});
+const socialByToken = new Map<string, typeof socialRows>();
+for (const r of socialRows) {
+  const arr = socialByToken.get(r.tokenId);
+  if (arr) arr.push(r); else socialByToken.set(r.tokenId, [r]);
+}
+let socialMatched = 0;
+for (const series of byToken.values()) {
+  const social = socialByToken.get(series[0]?.tokenId ?? "");
+  if (!social?.length) continue;
+  let idx = 0;
+  for (const snap of series) {
+    while (idx + 1 < social.length && (social[idx + 1] as { fetchedAt: Date }).fetchedAt <= snap.fetchedAt) idx++;
+    const cur = social[idx];
+    if (!cur || cur.fetchedAt > snap.fetchedAt) continue;
+    if (snap.fetchedAt.getTime() - cur.fetchedAt.getTime() > SOCIAL_MAX_AGE_MS) continue;
+    snap.socialMentions = cur.mentions;
+    snap.socialAuthors = cur.uniqueAuthors;
+    snap.socialReach = cur.reach;
+    snap.socialFreshShare = cur.freshAccountShare;
+    socialMatched++;
   }
 }
 
@@ -306,6 +347,10 @@ const feats: { name: string; get: (s: Snap) => number | null }[] = [
   { name: "fdv/liq", get: (s) => (s.fdvUsd != null && s.liquidityUsd ? s.fdvUsd / s.liquidityUsd : null) },
   { name: "ускорение объёма", get: (s) => (s.volume5mUsd != null && s.volume1hUsd ? (s.volume5mUsd * 12) / s.volume1hUsd : null) },
   { name: "Δ ликвидности %", get: (s) => s.liqTrendPct ?? null },
+  { name: "упоминаний в X", get: (s) => s.socialMentions ?? null },
+  { name: "авторов в X", get: (s) => s.socialAuthors ?? null },
+  { name: "охват в X", get: (s) => s.socialReach ?? null },
+  { name: "доля свежих аккаунтов", get: (s) => s.socialFreshShare ?? null },
 ];
 
 function fmtNum(v: number): string {
@@ -335,6 +380,10 @@ log();
 
 // ---------- 4. Правила отбора ----------
 log(`## 4. Правила отбора (${MAIN_H})`);
+log();
+log(`Соцданные (X) привязаны к ${socialMatched.toLocaleString("ru")} наблюдениям —`);
+log(`последний замер не позже наблюдения и не старше 2 часов. Если это число мало,`);
+log(`строки про X ничего не доказывают: отсутствие данных не равно отсутствию связи.`);
 log();
 log(`**Coverage** — доля наблюдений правила с измеримым исходом. Если у правила`);
 log(`coverage сильно выше базовой линии, его результат завышен выживаемостью:`);
@@ -386,6 +435,9 @@ const rules: { name: string; ok: (s: Snap) => boolean }[] = [
   { name: "ликвидность растёт (Δликв > 0)", ok: (s) => (s.liqTrendPct ?? -1) > 0 },
   { name: "ликвидность утекает (Δликв < −5%)", ok: (s) => (s.liqTrendPct ?? 1) < -5 },
   { name: "ликв>50k И Δликв > −2%", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.liqTrendPct ?? -99) > -2 },
+  { name: "есть упоминания в X", ok: (s) => (s.socialMentions ?? 0) > 0 },
+  { name: "упоминаний в X ≥ 3", ok: (s) => (s.socialMentions ?? 0) >= 3 },
+  { name: "ликв>50k И есть упоминания", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.socialMentions ?? 0) > 0 },
   { name: "ликв>50k И Δ1ч>20%", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && (s.priceChange1h ?? 0) > 20 },
   { name: "ликв>50k И сделок>500 И buy/sell>1.5", ok: (s) => (s.liquidityUsd ?? 0) > 50_000 && ((s.buys1h ?? 0) + (s.sells1h ?? 0)) > 500 && (s.buys1h != null && s.sells1h != null ? s.buys1h / Math.max(s.sells1h, 1) : 0) > 1.5 },
 ];
