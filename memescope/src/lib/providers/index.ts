@@ -53,9 +53,20 @@ export function getProviders(): ProviderSet {
     return { dataMode: "mock", discovery: mock, market: mock, risk: mock, routes: mock, socials: [] };
   }
   // Каждый источник включается своим ключом независимо: отсутствие одного не
-  // мешает остальным.
-  const socials = [new XSocial(), new RedditSocial(), new FarcasterSocial()].filter((p) =>
-    p.isConfigured(),
+  // мешает остальным. SOCIAL_SOURCES дополнительно ограничивает список.
+  //
+  // Farcaster выключен по умолчанию НЕ из-за поломки. За сутки: 527 запросов,
+  // 1732 прочитанных поста, 0 упоминаний. Диагностика подтвердила, что тексты
+  // у постов есть — значит адреса контрактов там просто не обсуждают. Признак,
+  // который всегда равен нулю, не может ничего предсказывать: у константы нет
+  // информации. Платить за неё пятью сотнями запросов в сутки незачем.
+  // Включается обратно через SOCIAL_SOURCES=x,farcaster.
+  const enabled = (process.env.SOCIAL_SOURCES ?? "x,reddit")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  const socials = [new XSocial(), new RedditSocial(), new FarcasterSocial()].filter(
+    (p) => enabled.includes(p.name) && p.isConfigured(),
   );
   return {
     dataMode: "live",
