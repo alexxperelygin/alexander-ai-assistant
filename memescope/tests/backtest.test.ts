@@ -131,3 +131,20 @@ describe("edge verdict guards", () => {
     expect(m.rugRate).toBeNull();
   });
 });
+
+describe("horizon exit selection", () => {
+  it("uses the observation closest to the deadline, not the earliest", () => {
+    // Токен снимается часто: за горизонт накапливаются сотни наблюдений.
+    // Исход должен считаться по последнему перед дедлайном, иначе результат
+    // измеряется в начале окна и на длинных горизонтах становится неизмеримым.
+    const dense: PricePoint[] = [];
+    for (let m = 5; m <= 1400; m += 5) {
+      dense.push({ at: min(m), priceUsd: m >= 900 ? 2 : 1.01, liquidityUsd: 100_000 });
+    }
+    const out = evaluateSignal(sig, dense);
+    // Цена удвоилась к концу суток — это и должно попасть в 24ч исход.
+    expect(out.netReturns["24h"]).toBeGreaterThan(0.9);
+    // На часовом горизонте движения ещё не было.
+    expect(out.netReturns["1h"]).toBeLessThan(0.05);
+  });
+});

@@ -163,12 +163,19 @@ async function forwardSeries(
   // миллионы строк, из-за чего прогон перестал завершаться, когда база
   // выросла до 275 тысяч токенов.
   const until = new Date(after.getTime() + (HORIZONS_MIN[horizon] as number) * 60_000);
+  // Порядок УБЫВАЮЩИЙ, и вот почему. Исход считается по последнему наблюдению
+  // перед дедлайном горизонта, а токены во время доопроса снимаются раз в
+  // минуту. При возрастающем порядке лимит в N строк отрезал бы первые часы
+  // после сигнала и до дедлайна не доставал: на горизонте 24ч измеримых
+  // исходов стало 3 вместо 24. Берём ближайшие к дедлайну и разворачиваем.
   const snaps = await prisma.tokenSnapshot.findMany({
     where: { tokenId, fetchedAt: { gt: after, lte: until }, dataMode, priceUsd: { gt: 0 } },
-    orderBy: { fetchedAt: "asc" },
-    take: 300,
+    orderBy: { fetchedAt: "desc" },
+    take: 500,
   });
-  return snaps.map((s) => ({ at: s.fetchedAt, priceUsd: s.priceUsd as number, liquidityUsd: s.liquidityUsd }));
+  return snaps
+    .reverse()
+    .map((s) => ({ at: s.fetchedAt, priceUsd: s.priceUsd as number, liquidityUsd: s.liquidityUsd }));
 }
 
 /** Сколько токенов берём в базовую линию: каждый требует отдельного запроса истории. */
