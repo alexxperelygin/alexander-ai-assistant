@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-07T09:34:07.348Z (UTC)
+Сгенерирован: 2026-08-07T12:46:45.751Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 298357; снапшотов за 24ч: 41684
+- Токенов в базе: 301642; снапшотов за 24ч: 42360
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,61 +13,61 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20196
-- robinhood: 7678
-- bsc: 2246
-- base: 515
-- ethereum: 187
-- arbitrum: 5
+- solana: 19991
+- robinhood: 6124
+- bsc: 2270
+- base: 510
+- ethereum: 195
+- arbitrum: 8
 
 ## Статусы возможностей
-- AVOID: 104014
-- DATA_UNAVAILABLE: 30031
-- WATCH: 16
-- CANDIDATE: 13
-- READY: 4
+- AVOID: 104024
+- DATA_UNAVAILABLE: 30035
+- WATCH: 14
+- CANDIDATE: 11
+- READY: 6
 
 ## Топ-5 по score (не отбракованные)
-- wiwiwi: READY, score 68.6, risk 0.1, conf 100% (обновлено 1 мин назад)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 1.3 дн назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 1.9 дн назад)
-- TTF: READY, score 64.7, risk 1.5, conf 100% (обновлено 1 мин назад)
-- BITCOIN: READY, score 64.0, risk 2.8, conf 88% (обновлено 1 мин назад)
+- wiwiwi: READY, score 66.3, risk 1.9, conf 100% (обновлено 1 мин назад)
+- TTF: READY, score 66.0, risk 0.2, conf 100% (обновлено 1 мин назад)
+- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 1.4 дн назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 2.0 дн назад)
+- SAAS: READY, score 64.5, risk 1.4, conf 100% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- TTF — 2026-08-07T09:29:09.679Z (5 мин назад)
-- BITCOIN — 2026-08-07T09:29:01.859Z (5 мин назад)
-- wiwiwi — 2026-08-07T09:29:01.547Z (5 мин назад)
-- TTF — 2026-08-07T09:27:07.293Z (7 мин назад)
-- BITCOIN — 2026-08-07T09:27:00.341Z (7 мин назад)
+- ANSEM — 2026-08-07T12:35:09.963Z (12 мин назад)
+- BITCOIN — 2026-08-07T12:22:10.265Z (25 мин назад)
+- BITCOIN — 2026-08-07T11:15:00.509Z (1.5 ч назад)
+- BITCOIN — 2026-08-07T10:44:43.748Z (2.0 ч назад)
+- SAAS — 2026-08-07T10:01:59.189Z (2.8 ч назад)
 
 ## Социальные источники (24ч)
-- **x**: запросов 632, прочитано 391, упоминаний 391; последний — GOATZO (2 мин назад) ⚠ ["дневной бюджет X исчерпан: прочитано 391 из 400 за сутки"]
-- **farcaster**: запросов 529, прочитано 1732, упоминаний 0; последний — MEWFOUR (3.0 ч назад)
+- **x**: запросов 633, прочитано 485, упоминаний 485; последний — SAAS (5 мин назад)
+- **farcaster**: запросов 477, прочитано 1620, упоминаний 0; последний — MEWFOUR (6.2 ч назад)
 
 ## Последние переходы статусов
-- TTF: CANDIDATE → READY (5 мин назад) — Opportunity Score 69.7/100, Risk 1.7/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- V4: WATCH → CANDIDATE (5 мин назад) — Opportunity Score 54.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BITCOIN: CANDIDATE → READY (5 мин назад) — Opportunity Score 65.6/100, Risk 2.8/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- wiwiwi: CANDIDATE → READY (5 мин назад) — Opportunity Score 65.8/100, Risk 1.8/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- TTF: READY → CANDIDATE (6 мин назад) — Opportunity Score 53.6/100, Risk 1.9/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- V4: CANDIDATE → WATCH (6 мин назад) — Opportunity Score 35.1/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BITCOIN: READY → CANDIDATE (6 мин назад) — Opportunity Score 49.9/100, Risk 2.8/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- wiwiwi: READY → CANDIDATE (6 мин назад) — Opportunity Score 52.2/100, Risk 2.1/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- COOKIE: WATCH → CANDIDATE (7 мин назад) — Opportunity Score 51.0/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- TTF: CANDIDATE → READY (7 мин назад) — Opportunity Score 69.9/100, Risk 1.8/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- V4: WATCH → CANDIDATE (7 мин назад) — Opportunity Score 50.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BITCOIN: CANDIDATE → READY (7 мин назад) — Opportunity Score 66.2/100, Risk 2.8/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- ANSEM: CANDIDATE → READY (12 мин назад) — Opportunity Score 68.1/100, Risk 0.7/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- XPLT: — → AVOID (14 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- AURA: AVOID → WATCH (15 мин назад) — Opportunity Score 39.3/100, Risk 22.3/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- XPLT: — → AVOID (15 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- XPLT: — → AVOID (16 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- HDWN: — → AVOID (18 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- MRK: — → AVOID (18 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- XPLT: — → AVOID (19 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- BabyAsteroid: AVOID → WATCH (20 мин назад) — Opportunity Score 43.0/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- the machine: AVOID → DATA_UNAVAILABLE (20 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- PIXL: — → AVOID (21 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- STREET: — → AVOID (21 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
 
 ## Позиции
-- Открытых: 6; всего: 17; realized P&L: $-525.24
+- Открытых: 6; всего: 17; realized P&L: $-487.40
 
 ## Последние позиции (детально)
 - ANSEM [paper/OPEN] вход $0.004344 × 4581 = $20.00, остаток 100%, realized $0.00
     · 03:25:01 [OPEN] Paper вход: 4580.91 шт по $0.00434412 (комиссии $0.10, impact 0.68%)
 - BITCOIN [paper/OPEN] вход $0.01415 × 1406 = $20.00, остаток 100%, realized $0.00
-    · 09:34:04 [ALERT] Нет свежих данных цены — мониторинг деградирован.
-    · 09:33:05 [ALERT] Нет свежих данных цены — мониторинг деградирован.
+    · 12:46:34 [ALERT] Нет свежих данных цены — мониторинг деградирован.
+    · 12:46:04 [ALERT] Нет свежих данных цены — мониторинг деградирован.
 - wiwiwi [paper/OPEN] вход $0.0006047 × 32909 = $20.00, остаток 100%, realized $0.00
     · 21:55:28 [OPEN] Paper вход: 32909.16 шт по $0.000604695 (комиссии $0.10, impact 0.15%)
 - TTF [paper/OPEN] вход $0.001132 × 17580 = $20.00, остаток 100%, realized $0.00
@@ -86,23 +86,23 @@
 - GOAT [paper/STOPPED] вход $0.00005356 × 1861637 = $100.00, остаток 0%, realized $-37.65, закрыта: Stop: цена $0.0000340400 ≤ стопа $0.0000348108
     · 08:56:29 [STOP_HIT] Stop: цена $0.0000340400 ≤ стопа $0.0000348108: продано 1861636.60 шт по $0.0000336058, P&L $-37.65
     · 08:51:32 [NOTE] Unrealized P&L -31% (цена $0.0000372200)
-- SOLdiers [paper/PARTIAL_EXIT] вход $0.00008993 × 1108617 = $100.00, остаток 67%, realized $15.98
-    · 09:05:06 [NOTE] Unrealized P&L 51% (цена $0.000136000)
-    · 09:01:04 [TP_HIT] Take-profit 1.5x достигнут: продано 365843.51 шт по $0.000134344, P&L $15.98
+- SOLdiers [paper/PARTIAL_EXIT] вход $0.00008993 × 1108617 = $100.00, остаток 34%, realized $53.82
+    · 12:00:04 [NOTE] Unrealized P&L 117% (цена $0.000195300)
+    · 12:00:04 [TP_HIT] Take-profit 2.0x достигнут: продано 365843.51 шт по $0.000194279, P&L $37.85
 
 ## Последний backtest
-- DONE (3.0 ч назад): NO EDGE: expectancy -13.1% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (6.3 ч назад): NO EDGE: expectancy -13.1% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 345175 / err 11, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 1.2 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 715 / err 972, последний успех 19 мин назад)
-- geckoterminal:base: ok (ok 1684 / err 6, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 1622 / err 66, последний успех 2 мин назад)
-- geckoterminal:eth: ok (ok 1437 / err 250, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 858 / err 814, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 1690 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 1950 / err 0, последний успех 1 мин назад)
-- jupiter: ok (ok 306516 / err 637, последний успех 1 мин назад)
-- rugcheck: ok (ok 125777 / err 381, последний успех 1 мин назад)
+- dexscreener: ok (ok 353434 / err 14, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 1.3 дн назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 874 / err 1005, последний успех 6 мин назад)
+- geckoterminal:base: ok (ok 1875 / err 7, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 1813 / err 68, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 1475 / err 405, последний успех 0 мин назад)
+- geckoterminal:robinhood: ok (ok 894 / err 970, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 1882 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 2262 / err 0, последний успех 1 мин назад)
+- jupiter: ok (ok 309251 / err 641, последний успех 1 мин назад)
+- rugcheck: ok (ok 125876 / err 381, последний успех 1 мин назад)
 
