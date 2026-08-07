@@ -72,12 +72,23 @@ export function summarizeFarcaster(
     0,
   );
 
+  // Диагностика, а не украшение. «0 упоминаний на 1367 прочитанных постов»
+  // имеет два совершенно разных объяснения: либо адрес контракта в Farcaster
+  // действительно не обсуждают, либо поле text приходит не там, где я его жду,
+  // и фильтр релевантности режет всё подряд. Различить их можно только одним
+  // способом — посчитать, у скольких постов текст вообще был.
+  const withText = all.filter((c) => (c.text ?? "").length > 0).length;
+  const errors: string[] = [];
+  if (all.length > 0 && withText === 0)
+    errors.push(`источник вернул ${all.length} постов, но ни у одного нет текста — вероятно, изменился формат ответа`);
+
   return {
     postsRead: all.length,
     mentions: casts.length,
     uniqueAuthors: authors.size,
     reach,
     engagement,
+    errors: errors.length ? errors : undefined,
     // Дата регистрации аккаунта в ответе поиска не приходит: отдельный запрос
     // на каждого автора не окупается. Не знаем — значит null.
     freshAccountShare: null,

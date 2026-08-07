@@ -81,6 +81,30 @@ describe("Farcaster summary", () => {
     expect(s.postsRead).toBe(2);
   });
 
+  it("flags a response whose casts carry no text at all", () => {
+    // Так выглядит смена формата ответа: посты есть, текста нет, фильтр
+    // релевантности обнуляет всё. Это не «токен не обсуждают» — это поломка.
+    const s = summarizeFarcaster(
+      { result: { casts: [{ author: { fid: 1 } }, { author: { fid: 2 } }] } },
+      60,
+      now,
+      "0xabc",
+    );
+    expect(s.mentions).toBe(0);
+    expect(s.errors?.[0]).toContain("нет текста");
+  });
+
+  it("stays silent when the casts do have text", () => {
+    const s = summarizeFarcaster(
+      { result: { casts: [{ author: { fid: 1 }, text: "что-то про рынок", timestamp: new Date(minutesAgo(5)).toISOString() }] } },
+      60,
+      now,
+      "0xabc",
+    );
+    expect(s.mentions).toBe(0); // адреса в тексте нет — это честный ноль
+    expect(s.errors).toBeUndefined();
+  });
+
   it("handles an empty response", () => {
     const s = summarizeFarcaster({}, 60, now);
     expect(s.mentions).toBe(0);
