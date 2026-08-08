@@ -552,6 +552,12 @@ for (const series of byToken.values()) {
     const e = series[i] as Snap;
     if (e.fetchedAt.getTime() < UNBIASED_FROM.getTime()) continue;
     if ((e.liquidityUsd ?? 0) <= 50_000) continue;
+    // Артефакты листинга сюда попадать не должны. У четырёх из пяти лучших
+    // сделок Δ1ч в точности равна Δ24ч — подпись пары, у которой в источнике
+    // меньше часа истории. Цена входа в такой момент наименее надёжна, а
+    // именно эти наблюдения и создавали весь положительный хвост.
+    if (e.priceChange1h != null && e.priceChange24h != null &&
+        e.priceChange1h === e.priceChange24h) continue;
     if (seenExitTokens.has(e.tokenId)) continue;
     seenExitTokens.add(e.tokenId);
     entriesForExit.push({ series, i });
