@@ -172,21 +172,26 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
 // стопом, ни трейлингом. Такую надо видеть в отчёте числом, а не вылавливать
 // глазами в списке событий: незамеченная, она означает открытую сделку без
 // какой-либо защиты.
+// Признак берётся из ALERT-событий монитора, а НЕ из возраста снапшота.
+// Разница существенная: снапшоты пишет сканер, и он может не опрашивать токен
+// сутками, пока монитор спокойно получает по нему цену напрямую. По возрасту
+// снапшота отчёт объявлял бы «стоп не проверяется» там, где всё работает, —
+// то есть врал бы в сторону тревоги, а такому отчёту перестают верить.
 {
+  const since = new Date(Date.now() - 90 * 60_000);
   const degraded: string[] = [];
   for (const p of open) {
-    const lastSnap = await prisma.tokenSnapshot.findFirst({
-      where: { tokenId: p.tokenId, priceUsd: { gt: 0 } },
-      orderBy: { fetchedAt: "desc" },
-      select: { fetchedAt: true },
+    const alert = await prisma.positionEvent.findFirst({
+      where: { positionId: p.id, kind: "ALERT", createdAt: { gte: since } },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
     });
-    const ageMin = lastSnap ? (Date.now() - lastSnap.fetchedAt.getTime()) / 60_000 : Infinity;
-    if (ageMin > 30) degraded.push(`${p.token.symbol} (${Number.isFinite(ageMin) ? `${Math.round(ageMin)} мин` : "нет данных"})`);
+    if (alert) degraded.push(`${p.token.symbol} (${Math.round((Date.now() - alert.createdAt.getTime()) / 60_000)} мин назад)`);
   }
   lines.push(
     degraded.length
-      ? `- ⚠️ без свежей цены (стоп и трейлинг не проверяются): ${degraded.join(", ")}`
-      : `- все открытые позиции с актуальной ценой`,
+      ? `- ⚠️ монитор не получает цену (стоп и трейлинг не проверяются): ${degraded.join(", ")}`
+      : `- монитор получает цену по всем открытым позициям`,
   );
 }
 lines.push(``);
