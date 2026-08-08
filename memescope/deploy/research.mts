@@ -545,62 +545,128 @@ log(`Вход один и тот же во всех строках (ликвид
 log(`токен) — сравниваются ТОЛЬКО правила выхода.`);
 log();
 
-const entriesForExit: { series: Snap[]; i: number }[] = [];
-const seenExitTokens = new Set<string>();
-// Воронка отбора. Без неё нельзя отличить «стратегия зарабатывает» от
-// «мы считаем только тех, за кем продолжали следить»: токен, умерший сразу
-// после входа и больше не опрошенный, просто не попадает в выборку и не
-// портит статистику. Это та же выживаемость, что уже дважды нас обманывала.
-let exitCandidates = 0;
-let exitWithoutForward = 0;
-for (const series of byToken.values()) {
-  for (let i = 0; i < series.length; i++) {
-    const e = series[i] as Snap;
-    if (e.fetchedAt.getTime() < UNBIASED_FROM.getTime()) continue;
-    if ((e.liquidityUsd ?? 0) <= 50_000) continue;
-    // Артефакты листинга сюда попадать не должны. У четырёх из пяти лучших
-    // сделок Δ1ч в точности равна Δ24ч — подпись пары, у которой в источнике
-    // меньше часа истории. Цена входа в такой момент наименее надёжна, а
-    // именно эти наблюдения и создавали весь положительный хвост.
-    if (e.priceChange1h != null && e.priceChange24h != null &&
-        e.priceChange1h === e.priceChange24h) continue;
-    if (seenExitTokens.has(e.tokenId)) continue;
-    seenExitTokens.add(e.tokenId);
-    exitCandidates++;
-    if (i + 1 >= series.length) {
-      exitWithoutForward++; // вход есть, дальнейших наблюдений нет — исход неизмерим
+interface ExitEntry { series: Snap[]; i: number }
+interface EntrySet { entries: ExitEntry[]; candidates: number; withoutForward: number }
+
+/**
+ * Собирает по одному входу на токен по заданным фильтрам.
+ *
+ * Вынесено в функцию не ради красоты: ровно та же процедура ниже запускается
+ * с ДРУГИМИ фильтрами. Без такого сравнения нельзя отличить «отбор работает»
+ * от «так ведёт себя любой токен» — а это разница между стратегией и
+ * измерительным артефактом.
+ */
+function collectExitEntries(opts: { minLiquidityUsd: number; delayMin?: number }): EntrySet {
+  const entries: ExitEntry[] = [];
+  const seen = new Set<string>();
+  // Воронка отбора. Без неё нельзя отличить «стратегия зарабатывает» от
+  // «мы считаем только тех, за кем продолжали следить»: токен, умерший сразу
+  // после входа и больше не опрошенный, просто не попадает в выборку и не
+  // портит статистику. Это та же выживаемость, что уже дважды нас обманывала.
+  let candidates = 0;
+  let withoutForward = 0;
+  for (const series of byToken.values()) {
+    for (let i = 0; i < series.length; i++) {
+      const e = series[i] as Snap;
+      if (e.fetchedAt.getTime() < UNBIASED_FROM.getTime()) continue;
+      if ((e.liquidityUsd ?? 0) <= opts.minLiquidityUsd) continue;
+      // Артефакты листинга сюда попадать не должны. У четырёх из пяти лучших
+      // сделок Δ1ч в точности равна Δ24ч — подпись пары, у которой в источнике
+      // меньше часа истории. Цена входа в такой момент наименее надёжна, а
+      // именно эти наблюдения и создавали весь положительный хвост.
+      if (e.priceChange1h != null && e.priceChange24h != null &&
+          e.priceChange1h === e.priceChange24h) continue;
+      if (seen.has(e.tokenId)) continue;
+      seen.add(e.tokenId);
+      candidates++;
+      // Задержка входа: отбор токена тот же самый, но покупаем не в момент
+      // первого подходящего наблюдения, а через delayMin минут после него.
+      let start = i;
+      if (opts.delayMin) {
+        const notBefore = e.fetchedAt.getTime() + opts.delayMin * 60_000;
+        start = -1;
+        for (let j = i + 1; j < series.length; j++) {
+          if ((series[j] as Snap).fetchedAt.getTime() >= notBefore) { start = j; break; }
+        }
+        if (start < 0) { withoutForward++; break; }
+      }
+      if (start + 1 >= series.length) {
+        withoutForward++; // вход есть, дальнейших наблюдений нет — исход неизмерим
+        break;
+      }
+      entries.push({ series, i: start });
       break;
     }
-    entriesForExit.push({ series, i });
-    break;
   }
+  return { entries, candidates, withoutForward };
 }
 
-log(`Воронка: подошло входов **${exitCandidates}**, из них без единого наблюдения`);
-log(`после входа — **${exitWithoutForward}** (${pct(exitCandidates ? exitWithoutForward / exitCandidates : 0, 0)}).`);
+/**
+ * Доверительный интервал среднего бутстрапом. Нужен потому, что «+22% на 130
+ * сделках» и «+22% на 13 000 сделках» — совершенно разные утверждения, а по
+ * одному числу их не различить. Если интервал накрывает ноль, результат
+ * неотличим от случайности, и никакие красивые проценты этого не меняют.
+ * Генератор детерминированный: отчёт должен воспроизводиться.
+ */
+function bootstrapMeanCI(xs: number[], iters = 2000): [number, number] | null {
+  if (xs.length < 20) return null;
+  let seed = 12345;
+  const rnd = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const means: number[] = [];
+  for (let k = 0; k < iters; k++) {
+    let s = 0;
+    for (let j = 0; j < xs.length; j++) s += xs[Math.floor(rnd() * xs.length)] as number;
+    means.push(s / xs.length);
+  }
+  means.sort((a, b) => a - b);
+  return [quantile(means, 0.025), quantile(means, 0.975)];
+}
+
+function policyReturns(entries: ExitEntry[], policy: ExitPolicy): number[] {
+  return entries
+    .map((e) => simulateExit(e.series, e.i, policy))
+    .filter((r): r is number => r != null);
+}
+
+/** Печатает таблицу по всем политикам выхода для одного набора входов. */
+function logPolicyTable(entries: ExitEntry[], withCI: boolean): void {
+  log(`| Политика выхода | Сделок | Среднее | ${withCI ? "95% интервал среднего | " : ""}Без лучшей сделки | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
+  log(`|---|---|---|${withCI ? "---|" : ""}---|---|---|---|---|`);
+  for (const policy of POLICIES) {
+    const rs = policyReturns(entries, policy);
+    if (rs.length < 20) {
+      log(`| ${policy.name} | ${rs.length} | мало данных | ${withCI ? "| " : ""}| | | | |`);
+      continue;
+    }
+    const sorted = [...rs].sort((a, b) => b - a);
+    const best = sorted[0] as number;
+    // Колонка «без лучшей сделки» — главная проверка на самообман. Если весь
+    // плюс держится на одном наблюдении, стратегии нет: повторить единичное
+    // событие нельзя, а следующая такая же выборка его просто не содержит.
+    const withoutBest = mean(sorted.slice(1));
+    const ci = withCI ? bootstrapMeanCI(rs) : null;
+    const ciCell = withCI ? `${ci ? `${pct(ci[0], 0)} … ${pct(ci[1], 0)}` : "—"} | ` : "";
+    log(`| ${policy.name} | ${rs.length} | **${pct(mean(rs))}** | ${ciCell}${pct(withoutBest)} | ${pct(winsorMean(rs))} | ` +
+        `${pct(median(rs))} | ${pct(winRate(rs), 0)} | ${pct(best, 0)} |`);
+  }
+  log();
+}
+
+const candidateSet = collectExitEntries({ minLiquidityUsd: 50_000 });
+const entriesForExit = candidateSet.entries;
+
+log(`Воронка: подошло входов **${candidateSet.candidates}**, из них без единого наблюдения`);
+log(`после входа — **${candidateSet.withoutForward}** (${pct(candidateSet.candidates ? candidateSet.withoutForward / candidateSet.candidates : 0, 0)}).`);
 log(`Эти токены исключены не потому, что плохи, а потому что за ними перестали`);
 log(`следить. Если их доля велика, весь плюс ниже может быть выживаемостью.`);
 log();
-log(`| Политика выхода | Сделок | Среднее | Без лучшей сделки | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
-log(`|---|---|---|---|---|---|---|---|`);
-for (const policy of POLICIES) {
-  const rs = entriesForExit
-    .map((e) => simulateExit(e.series, e.i, policy))
-    .filter((r): r is number => r != null);
-  if (rs.length < 20) {
-    log(`| ${policy.name} | ${rs.length} | мало данных | | | | | |`);
-    continue;
-  }
-  const sorted = [...rs].sort((a, b) => b - a);
-  const best = sorted[0] as number;
-  // Колонка «без лучшей сделки» — главная проверка на самообман. Если весь
-  // плюс держится на одном наблюдении, стратегии нет: повторить единичное
-  // событие нельзя, а следующая такая же выборка его просто не содержит.
-  const withoutBest = mean(sorted.slice(1));
-  log(`| ${policy.name} | ${rs.length} | **${pct(mean(rs))}** | ${pct(withoutBest)} | ${pct(winsorMean(rs))} | ` +
-      `${pct(median(rs))} | ${pct(winRate(rs), 0)} | ${pct(best, 0)} |`);
-}
+log(`Колонка «95% интервал среднего» — бутстрап. Если интервал накрывает ноль,`);
+log(`результат неотличим от случайности при этом числе сделок.`);
 log();
+logPolicyTable(entriesForExit, true);
 
 // Разделение по времени: правило выхода, которое работает только на прошлой
 // половине окна, — подгонка, а не стратегия.
@@ -659,6 +725,50 @@ log();
   }
   log();
 }
+// ---------- 4e. Контрольные группы ----------
+// Всё, что выше, отвечает на вопрос «сколько заработала эта комбинация».
+// Оно НЕ отвечает на главный: а комбинация ли это заработала? Плюс в 20%
+// может означать три разные вещи, и различить их можно только контролем:
+//   1) фильтр по ликвидности действительно отбирает лучшие токены;
+//   2) плюс даёт правило выхода на ЛЮБОМ токене — тогда отбор ни при чём;
+//   3) плюс возникает потому, что мы покупаем в момент ПЕРВОГО наблюдения,
+//      а первая увиденная цена систематически ниже последующих (артефакт
+//      измерения, а не рынок) — тогда торговать этим нельзя вообще.
+// Ниже по одному контролю на каждую версию.
+{
+  log(`### 4e. Контрольные группы: это отбор или артефакт измерения`);
+  log();
+  log(`Положительное среднее выше само по себе ничего не доказывает. Ровно та же`);
+  log(`процедура запускается здесь с изменённым ОДНИМ условием: если результат не`);
+  log(`меняется, значит найденное правило ни при чём.`);
+  log();
+
+  const noFilter = collectExitEntries({ minLiquidityUsd: 0 });
+  log(`**Контроль 1 — без фильтра по ликвидности.** Те же выходы, вход в любой`);
+  log(`токен (${noFilter.entries.length} сделок из ${noFilter.candidates} входов).`);
+  log(`Если среднее такое же — фильтр ликвидности не отбирает ничего, и «стратегия»`);
+  log(`сводится к правилу выхода.`);
+  log();
+  logPolicyTable(noFilter.entries, true);
+
+  const delayed = collectExitEntries({ minLiquidityUsd: 50_000, delayMin: 60 });
+  log(`**Контроль 2 — тот же отбор, вход на час позже.** Токены отбираются точно`);
+  log(`так же, но покупка происходит через 60 минут после подходящего наблюдения`);
+  log(`(${delayed.entries.length} сделок из ${delayed.candidates} входов).`);
+  log(`Это проверка на артефакт первой цены: если весь плюс исчезает от часовой`);
+  log(`задержки, значит мы измеряли не рынок, а то, что первая увиденная цена`);
+  log(`систематически занижена. Торговать этим нельзя — эта «прибыль» существует`);
+  log(`только в базе данных.`);
+  log();
+  logPolicyTable(delayed.entries, true);
+
+  log(`Вывод по контролям делается так: кандидат считается живым, только если его`);
+  log(`среднее ЗАМЕТНО выше контроля 1 и ВЫЖИВАЕТ в контроле 2. Совпадение с`);
+  log(`контролем 1 означает, что отбор бесполезен; провал контроля 2 означает, что`);
+  log(`результата нет вовсе.`);
+  log();
+}
+
 log(`Если среднее у какой-то политики устойчиво положительное при достаточном`);
 log(`числе сделок — это первый настоящий кандидат в стратегию. Если все`);
 log(`отрицательные, значит дело не в выходе, и вход отбирает мусор.`);
