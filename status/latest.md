@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-08T20:41:47.993Z (UTC)
+Сгенерирован: 2026-08-08T20:43:25.465Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 339831; снапшотов за 24ч: 40679
+- Токенов в базе: 339881; снапшотов за 24ч: 40685
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,54 +13,54 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20076
-- robinhood: 3202
-- bsc: 2270
+- solana: 20071
+- robinhood: 3208
+- bsc: 2269
 - base: 470
 - ethereum: 216
 - arbitrum: 3
 
 ## Статусы возможностей
-- AVOID: 104531
-- DATA_UNAVAILABLE: 31368
-- CANDIDATE: 15
-- WATCH: 10
-- READY: 5
+- AVOID: 104530
+- DATA_UNAVAILABLE: 31369
+- CANDIDATE: 14
+- WATCH: 11
+- READY: 6
 
 ## Топ-5 по score (не отбракованные)
-- Chonketha: READY, score 70.5, risk 0.6, conf 100% (обновлено 2 мин назад)
-- FWA: READY, score 69.7, risk 4.0, conf 88% (обновлено 1 мин назад)
-- TTF: READY, score 68.6, risk 0.2, conf 100% (обновлено 2 мин назад)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 2.8 дн назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 3.3 дн назад)
+- FWA: READY, score 70.4, risk 4.0, conf 88% (обновлено 0 мин назад)
+- Chonketha: READY, score 70.3, risk 0.8, conf 100% (обновлено 0 мин назад)
+- TTF: READY, score 68.5, risk 0.2, conf 100% (обновлено 0 мин назад)
+- SAAS: READY, score 66.9, risk 0.2, conf 100% (обновлено 0 мин назад)
+- BITCOIN: READY, score 66.1, risk 2.8, conf 88% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- FWA — 2026-08-08T20:06:03.514Z (36 мин назад)
+- BITCOIN — 2026-08-08T20:42:25.680Z (1 мин назад)
+- FWA — 2026-08-08T20:06:03.514Z (37 мин назад)
 - BLUAI — 2026-08-08T19:19:14.239Z (1.4 ч назад)
 - FWA — 2026-08-08T19:05:22.056Z (1.6 ч назад)
 - BITCOIN — 2026-08-08T18:11:07.722Z (2.5 ч назад)
-- BLUAI — 2026-08-08T18:10:09.478Z (2.5 ч назад)
 
 ## Социальные источники (24ч)
-- **x**: запросов 199, прочитано 607, упоминаний 607; последний — BLUAI (16.1 ч назад)
+- **x**: запросов 198, прочитано 597, упоминаний 597; последний — BLUAI (16.1 ч назад)
 
 ## Последние переходы статусов
-- SE: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- LHRSE: — → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
-- JUSTICE: AVOID → DATA_UNAVAILABLE (2 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- KSB: — → AVOID (2 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- FAKEOUT: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- ONBONKS: — → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
-- DAVID: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- BABY: — → AVOID (4 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- FABLEOS: AVOID → DATA_UNAVAILABLE (5 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- FUND: — → AVOID (5 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- Binho_UP: — → AVOID (6 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- openhuman: WATCH → AVOID (6 мин назад) — [insufficient-liquidity] Ликвидность $3 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
+- David: AVOID → DATA_UNAVAILABLE (1 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- Mars Farm: — → WATCH (1 мин назад) — Opportunity Score 41.5/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- BITCOIN: CANDIDATE → READY (1 мин назад) — Opportunity Score 66.1/100, Risk 2.8/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- SE: AVOID → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- LHRSE: — → DATA_UNAVAILABLE (3 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
+- JUSTICE: AVOID → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- KSB: — → AVOID (4 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- FAKEOUT: AVOID → DATA_UNAVAILABLE (5 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- ONBONKS: — → DATA_UNAVAILABLE (5 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
+- DAVID: AVOID → DATA_UNAVAILABLE (6 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- BABY: — → AVOID (6 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- FABLEOS: AVOID → DATA_UNAVAILABLE (7 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
 
 ## Позиции
 - Открытых: 8; всего: 20; realized P&L: $-505.59
-- ⚠️ без свежей цены (стоп и трейлинг не проверяются): SOLdiers (3624 мин), wiwiwi (1443 мин)
+- ⚠️ монитор не получает цену (стоп и трейлинг не проверяются): BITCOIN (2 мин назад), BLUAI (2 мин назад), FWA (2 мин назад)
 
 ## Последние позиции (детально)
 - FWA [paper/OPEN] вход $0.01687 × 1180 = $20.00, остаток 100%, realized $0.00
@@ -95,18 +95,18 @@
     · 00:39:40 [NOTE] Unrealized P&L 25% (цена $0.00533100)
 
 ## Последний backtest
-- DONE (20.0 ч назад): NO EDGE: expectancy -11.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (0 мин назад): NO EDGE: expectancy -10.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 435758 / err 18, последний успех 0 мин назад)
+- dexscreener: ok (ok 435842 / err 18, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 2.6 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 1954 / err 1839, последний успех 2 мин назад)
-- geckoterminal:base: ok (ok 3789 / err 7, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 3725 / err 69, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 3111 / err 682, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 1804 / err 1974, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 3796 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 5277 / err 0, последний успех 1 мин назад)
-- jupiter: ok (ok 328739 / err 660, последний успех 1 мин назад)
-- rugcheck: ok (ok 126526 / err 381, последний успех 1 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 1954 / err 1841, последний успех 4 мин назад)
+- geckoterminal:base: ok (ok 3790 / err 7, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 3727 / err 69, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 3113 / err 682, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 1806 / err 1974, последний успех 0 мин назад)
+- geckoterminal:solana: ok (ok 3797 / err 0, последний успех 1 мин назад)
+- goplus: ok (ok 5282 / err 0, последний успех 0 мин назад)
+- jupiter: ok (ok 328763 / err 660, последний успех 0 мин назад)
+- rugcheck: ok (ok 126527 / err 381, последний успех 1 мин назад)
 
