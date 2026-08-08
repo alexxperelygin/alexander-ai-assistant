@@ -559,21 +559,51 @@ for (const series of byToken.values()) {
   }
 }
 
-log(`| Политика выхода | Сделок | Среднее | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
-log(`|---|---|---|---|---|---|---|`);
+log(`| Политика выхода | Сделок | Среднее | Без лучшей сделки | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
+log(`|---|---|---|---|---|---|---|---|`);
 for (const policy of POLICIES) {
   const rs = entriesForExit
     .map((e) => simulateExit(e.series, e.i, policy))
     .filter((r): r is number => r != null);
   if (rs.length < 20) {
-    log(`| ${policy.name} | ${rs.length} | мало данных | | | | |`);
+    log(`| ${policy.name} | ${rs.length} | мало данных | | | | | |`);
     continue;
   }
-  const best = Math.max(...rs);
-  log(`| ${policy.name} | ${rs.length} | **${pct(mean(rs))}** | ${pct(winsorMean(rs))} | ` +
+  const sorted = [...rs].sort((a, b) => b - a);
+  const best = sorted[0] as number;
+  // Колонка «без лучшей сделки» — главная проверка на самообман. Если весь
+  // плюс держится на одном наблюдении, стратегии нет: повторить единичное
+  // событие нельзя, а следующая такая же выборка его просто не содержит.
+  const withoutBest = mean(sorted.slice(1));
+  log(`| ${policy.name} | ${rs.length} | **${pct(mean(rs))}** | ${pct(withoutBest)} | ${pct(winsorMean(rs))} | ` +
       `${pct(median(rs))} | ${pct(winRate(rs), 0)} | ${pct(best, 0)} |`);
 }
 log();
+
+// Разбор крупнейших выигрышей: реальный ли это рост или артефакт данных.
+// Именно на этом вопросе держится весь вывод про «прибыль в хвосте».
+{
+  const policy = POLICIES[POLICIES.length - 1] as ExitPolicy;
+  const scored = entriesForExit
+    .map((e) => ({ e, r: simulateExit(e.series, e.i, policy) }))
+    .filter((x): x is { e: { series: Snap[]; i: number }; r: number } => x.r != null)
+    .sort((a, b) => b.r - a.r)
+    .slice(0, 5);
+  log(`### Пять лучших сделок политики «${policy.name}»`);
+  log();
+  log(`Проверка, рынок это или мусор в данных. Скачок цены в тысячи раз при`);
+  log(`копеечной ликвидности — почти всегда смена пула или сбой источника, а не`);
+  log(`движение, на котором можно было заработать.`);
+  log();
+  for (const { e, r } of scored) {
+    const entry = e.series[e.i] as Snap;
+    log(`- **${pct(r, 0)}** · ${entry.chain} · цена входа $${entry.priceUsd.toPrecision(3)} · ` +
+        `ликв $${Math.round(entry.liquidityUsd ?? 0).toLocaleString("ru")} · ` +
+        `Δ1ч ${entry.priceChange1h ?? "—"}% · Δ24ч ${entry.priceChange24h ?? "—"}% · ` +
+        `сделок 1ч ${(entry.buys1h ?? 0) + (entry.sells1h ?? 0)}`);
+  }
+  log();
+}
 log(`Если среднее у какой-то политики устойчиво положительное при достаточном`);
 log(`числе сделок — это первый настоящий кандидат в стратегию. Если все`);
 log(`отрицательные, значит дело не в выходе, и вход отбирает мусор.`);
