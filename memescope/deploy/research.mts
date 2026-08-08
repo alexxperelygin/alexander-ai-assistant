@@ -520,6 +520,65 @@ function simulateExit(series: Snap[], i: number, policy: ExitPolicy): number | n
   return exit ? netReturn(entry, exit) : null;
 }
 
+// Правила, по которым бумажный портфель торгует ПРЯМО СЕЙЧАС. Их надо
+// измерять наравне с гипотезами, а не считать заданными: реализованный
+// результат −$505 на 18 позициях требует объяснения, и лесенка тейков —
+// первый подозреваемый. Она продаёт треть на 1.5x и треть на 2x, то есть
+// обрубает ровно тот правый хвост, из которого, по разделу 4d, и берётся
+// вся прибыль. Если так — портфель структурно режет выигрыши и оставляет
+// убытки целиком.
+const LIVE_LADDER: { multiple: number; fraction: number }[] = [
+  { multiple: 1.5, fraction: 0.33 },
+  { multiple: 2.0, fraction: 0.33 },
+  { multiple: 4.0, fraction: 0.34 },
+];
+
+/**
+ * Моделирует действующие правила монитора: аварийный выход при падении
+ * ликвидности ниже 60% от входной, жёсткий стоп −35%, лесенка тейков.
+ * Доли считаются от исходного объёма, издержки — как у остальных строк
+ * (по полному размеру позиции), чтобы сравнение было честным.
+ */
+function simulateLiveLadder(series: Snap[], i: number, maxHoldMin = 4320): number | null {
+  const entry = series[i] as Snap;
+  const deadline = entry.fetchedAt.getTime() + maxHoldMin * 60_000;
+  const entryLiq = entry.liquidityUsd;
+  const taken = LIVE_LADDER.map(() => false);
+  let remaining = 1;
+  let total = 0;
+  let last: Snap | null = null;
+  for (let j = i + 1; j < series.length && remaining > 0; j++) {
+    const p = series[j] as Snap;
+    if (p.fetchedAt.getTime() > deadline) break;
+    last = p;
+    const isDrain = entryLiq != null && p.liquidityUsd != null && p.liquidityUsd < entryLiq * 0.6;
+    if (isDrain || p.priceUsd <= entry.priceUsd * 0.65) {
+      const r = netReturn(entry, p);
+      if (r == null) return null;
+      total += remaining * r;
+      remaining = 0;
+      break;
+    }
+    for (let k = 0; k < LIVE_LADDER.length; k++) {
+      const step = LIVE_LADDER[k] as { multiple: number; fraction: number };
+      if (taken[k] || p.priceUsd < entry.priceUsd * step.multiple) continue;
+      const r = netReturn(entry, p);
+      if (r == null) return null;
+      const f = Math.min(remaining, step.fraction);
+      total += f * r;
+      remaining -= f;
+      taken[k] = true;
+    }
+  }
+  if (remaining > 0) {
+    if (!last) return null;
+    const r = netReturn(entry, last);
+    if (r == null) return null;
+    total += remaining * r;
+  }
+  return total;
+}
+
 const POLICIES: ExitPolicy[] = [
   { name: "фикс. выход через 6ч", stopPct: 1, trailPct: null, maxHoldMin: 360 },
   { name: "фикс. выход через 24ч", stopPct: 1, trailPct: null, maxHoldMin: 1440 },
@@ -556,7 +615,11 @@ interface EntrySet { entries: ExitEntry[]; candidates: number; withoutForward: n
  * от «так ведёт себя любой токен» — а это разница между стратегией и
  * измерительным артефактом.
  */
-function collectExitEntries(opts: { minLiquidityUsd: number; delayMin?: number }): EntrySet {
+function collectExitEntries(opts: {
+  minLiquidityUsd: number;
+  maxLiquidityUsd?: number;
+  delayMin?: number;
+}): EntrySet {
   const entries: ExitEntry[] = [];
   const seen = new Set<string>();
   // Воронка отбора. Без неё нельзя отличить «стратегия зарабатывает» от
@@ -570,6 +633,7 @@ function collectExitEntries(opts: { minLiquidityUsd: number; delayMin?: number }
       const e = series[i] as Snap;
       if (e.fetchedAt.getTime() < UNBIASED_FROM.getTime()) continue;
       if ((e.liquidityUsd ?? 0) <= opts.minLiquidityUsd) continue;
+      if (opts.maxLiquidityUsd != null && (e.liquidityUsd ?? 0) > opts.maxLiquidityUsd) continue;
       // Артефакты листинга сюда попадать не должны. У четырёх из пяти лучших
       // сделок Δ1ч в точности равна Δ24ч — подпись пары, у которой в источнике
       // меньше часа истории. Цена входа в такой момент наименее надёжна, а
@@ -625,9 +689,23 @@ function bootstrapMeanCI(xs: number[], iters = 2000): [number, number] | null {
   return [quantile(means, 0.025), quantile(means, 0.975)];
 }
 
-function policyReturns(entries: ExitEntry[], policy: ExitPolicy): number[] {
+/** Политика выхода как именованная функция: помимо параметрических правил
+ * сюда попадает действующая живая лесенка, которую тоже надо мерить. */
+interface NamedExit { name: string; run: (series: Snap[], i: number) => number | null }
+const EXITS: NamedExit[] = [
+  ...POLICIES.map((p): NamedExit => ({
+    name: p.name,
+    run: (series, i) => simulateExit(series, i, p),
+  })),
+  {
+    name: "ТЕКУЩАЯ живая: стоп −35% + тейки 1.5x/2x/4x",
+    run: (series, i) => simulateLiveLadder(series, i),
+  },
+];
+
+function policyReturns(entries: ExitEntry[], exit: NamedExit): number[] {
   return entries
-    .map((e) => simulateExit(e.series, e.i, policy))
+    .map((e) => exit.run(e.series, e.i))
     .filter((r): r is number => r != null);
 }
 
@@ -635,7 +713,7 @@ function policyReturns(entries: ExitEntry[], policy: ExitPolicy): number[] {
 function logPolicyTable(entries: ExitEntry[], withCI: boolean): void {
   log(`| Политика выхода | Сделок | Среднее | ${withCI ? "95% интервал среднего | " : ""}Без лучшей сделки | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
   log(`|---|---|---|${withCI ? "---|" : ""}---|---|---|---|---|`);
-  for (const policy of POLICIES) {
+  for (const policy of EXITS) {
     const rs = policyReturns(entries, policy);
     if (rs.length < 20) {
       log(`| ${policy.name} | ${rs.length} | мало данных | ${withCI ? "| " : ""}| | | | |`);
@@ -685,10 +763,10 @@ logPolicyTable(entriesForExit, true);
     xs.length > 1 ? mean([...xs].sort((a, b) => b - a).slice(1)) : null;
   log(`| Политика выхода | TRAIN n | TRAIN среднее | TRAIN без лучшей | TEST n | TEST среднее | TEST без лучшей |`);
   log(`|---|---|---|---|---|---|---|`);
-  for (const policy of POLICIES) {
+  for (const policy of EXITS) {
     const tr: number[] = [], te: number[] = [];
     for (const e of entriesForExit) {
-      const r = simulateExit(e.series, e.i, policy);
+      const r = policy.run(e.series, e.i);
       if (r == null) continue;
       ((e.series[e.i] as Snap).fetchedAt.getTime() <= split ? tr : te).push(r);
     }
@@ -767,6 +845,72 @@ logPolicyTable(entriesForExit, true);
   log(`контролем 1 означает, что отбор бесполезен; провал контроля 2 означает, что`);
   log(`результата нет вовсе.`);
   log();
+
+  // Контроль 1 сравнивает «> $50k» со «всем подряд», и у этого сравнения есть
+  // изъян: в мелких пулах $50 позиции сами по себе стоят дороже (проскальзывание
+  // растёт), поэтому часть разницы — не качество токенов, а цена исполнения.
+  // Порог $50k к тому же выбран нами, а любой выбранный порог легко подогнать.
+  // Честная проверка — доза-эффект: если результат растёт С РОСТОМ ликвидности
+  // плавно, это похоже на настоящую зависимость. Если он плоский везде и
+  // подскакивает ровно на нашем пороге — мы подобрали число под данные.
+  {
+    const BUCKETS: { name: string; min: number; max?: number }[] = [
+      { name: "до $10k", min: 0, max: 10_000 },
+      { name: "$10k – $50k", min: 10_000, max: 50_000 },
+      { name: "$50k – $200k", min: 50_000, max: 200_000 },
+      { name: "$200k – $1M", min: 200_000, max: 1_000_000 },
+      { name: "больше $1M", min: 1_000_000 },
+    ];
+    const shown = EXITS.filter((e) =>
+      e.name === "фикс. выход через 24ч" || e.name === "стоп −20% + трейлинг 30%, до 3д");
+    log(`**Доза-эффект по ликвидности.** Порог $50k выбран нами, поэтому проверяем`);
+    log(`не «выше/ниже порога», а всю шкалу. Плавный рост — признак настоящей`);
+    log(`зависимости; скачок ровно на нашем пороге — признак подгонки.`);
+    log();
+    log(`| Ликвидность на входе | Сделок | ${shown.map((e) => `${e.name}: среднее`).join(" | ")} | Прибыльных |`);
+    log(`|---|---|${shown.map(() => "---|").join("")}---|`);
+    for (const b of BUCKETS) {
+      const set = collectExitEntries({ minLiquidityUsd: b.min, maxLiquidityUsd: b.max });
+      const cells = shown.map((e) => {
+        const rs = policyReturns(set.entries, e);
+        return rs.length >= 20 ? `**${pct(mean(rs))}**` : `n=${rs.length}`;
+      });
+      const ref = policyReturns(set.entries, shown[0] as NamedExit);
+      log(`| ${b.name} | ${ref.length} | ${cells.join(" | ")} | ${ref.length >= 20 ? pct(winRate(ref), 0) : "—"} |`);
+    }
+    log();
+  }
+
+  // Контроль 2 показал, что часовая задержка съедает примерно половину
+  // результата. У этого два несовместимых объяснения, и различить их можно
+  // только формой кривой:
+  //   * ЦЕНА УСТАРЕЛА — первое наблюдение показывает цену, которой уже нет.
+  //     Тогда потеря происходит СРАЗУ, за первые минуты, и торговать нечем:
+  //     купить по этой цене было невозможно уже в момент, когда мы её увидели.
+  //   * МОМЕНТУМ — рост действительно продолжается после нашего наблюдения.
+  //     Тогда результат убывает ПЛАВНО, и вопрос только в скорости исполнения.
+  {
+    const DELAYS = [0, 5, 15, 30, 60, 120];
+    const shown = EXITS.filter((e) =>
+      e.name === "фикс. выход через 24ч" || e.name === "стоп −20% + трейлинг 30%, до 3д");
+    log(`**Кривая затухания по задержке входа.** Тот же отбор, покупка через N`);
+    log(`минут после подходящего наблюдения. Обрыв между 0 и 5 минутами означает,`);
+    log(`что первая цена нежизнеспособна (купить по ней было нельзя). Плавное`);
+    log(`затухание означает, что эффект реален, а вопрос — в скорости исполнения.`);
+    log();
+    log(`| Задержка входа | Сделок | ${shown.map((e) => `${e.name}: среднее`).join(" | ")} |`);
+    log(`|---|---|${shown.map(() => "---|").join("")}`);
+    for (const d of DELAYS) {
+      const set = collectExitEntries({ minLiquidityUsd: 50_000, delayMin: d || undefined });
+      const cells = shown.map((e) => {
+        const rs = policyReturns(set.entries, e);
+        return rs.length >= 20 ? `**${pct(mean(rs))}**` : `n=${rs.length}`;
+      });
+      const ref = policyReturns(set.entries, shown[0] as NamedExit);
+      log(`| ${d} мин | ${ref.length} | ${cells.join(" | ")} |`);
+    }
+    log();
+  }
 }
 
 log(`Если среднее у какой-то политики устойчиво положительное при достаточном`);
