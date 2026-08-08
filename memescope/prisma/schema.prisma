@@ -190,6 +190,8 @@ model Position {
   remainingQty   Float
   realizedPnlUsd Float    @default(0)
   stopPriceUsd   Float?
+  /** Максимальная цена, наблюдённая с момента входа: база трейлинг-стопа. */
+  peakPriceUsd   Float?
   takeProfits    String? // JSON array [{price, fraction, done}]
   invalidation   String? // JSON invalidation conditions
   closeReason    String?

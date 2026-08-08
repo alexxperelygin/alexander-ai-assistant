@@ -2,6 +2,7 @@ import { prisma } from "../db";
 import { getProviders } from "../providers";
 import { notify } from "../notify/notifier";
 import { sellPosition } from "../paper/portfolio";
+import { FROZEN_EXIT, FREEZE_AT } from "../paper/exit-policy";
 
 // Position monitoring pass: refresh market state for every open position,
 // enforce stops / take-profits / liquidity-drain exits, and alert on risk
@@ -42,11 +43,20 @@ export async function monitorPositionsOnce(): Promise<void> {
         });
       }
 
+      // Пик цены с момента входа — база трейлинг-стопа. Обновляется ДО
+      // проверок выхода: иначе первое же наблюдение нового максимума
+      // сравнивалось бы с устаревшим пиком и трейлинг срабатывал бы поздно.
+      const peak = Math.max(pos.peakPriceUsd ?? pos.entryPriceUsd, price);
+      if (peak > (pos.peakPriceUsd ?? 0)) {
+        await prisma.position.update({ where: { id: pos.id }, data: { peakPriceUsd: peak } })
+          .catch(() => {}); // позиция могла закрыться параллельно
+      }
+
       // 1) Liquidity drain → emergency exit (rug in progress).
-      if (entryLiq != null && liq != null && liq < entryLiq * 0.6) {
+      if (entryLiq != null && liq != null && liq < entryLiq * FROZEN_EXIT.liquidityFloorRatio) {
         await sellPosition({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
-          reason: `Ликвидность упала до $${Math.round(liq).toLocaleString()} (<60% от входа) — аварийный выход`,
+          reason: `Ликвидность упала до $${Math.round(liq).toLocaleString()} (<${Math.round(FROZEN_EXIT.liquidityFloorRatio * 100)}% от входа) — аварийный выход`,
           kind: "STOP_HIT",
         }).catch(async (e) => notify("critical", "Аварийный выход не исполнен", String(e)));
         continue;
@@ -62,7 +72,44 @@ export async function monitorPositionsOnce(): Promise<void> {
         continue;
       }
 
-      // 3) Take-profit ladder.
+      // Позиции, открытые ДО заморозки правил, доживают по своим прежним
+      // условиям. Менять условия уже открытой сделки задним числом нельзя:
+      // её результат перестанет быть сравнимым, а именно на сравнимости
+      // держится вся проверка после 8 августа.
+      const frozenRules = pos.openedAt.getTime() >= FREEZE_AT.getTime();
+
+      // 3) Трейлинг-стоп от максимума. Смысл правила: не обрубать прибыль
+      // заранее, но и не отдавать обратно уже набранный рост. Именно оно
+      // заменило лесенку частичных фиксаций — та продавала на 1.5x и 2x и
+      // тем самым убивала редкие крупные выигрыши, ради которых стратегия
+      // и существует (docs/PREREGISTRATION.md).
+      const trailStop = peak * (1 - FROZEN_EXIT.trailPct);
+      if (frozenRules && peak > pos.entryPriceUsd && price <= trailStop) {
+        await sellPosition({
+          positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
+          reason: `Трейлинг: цена $${price.toPrecision(6)} ≤ ${Math.round((1 - FROZEN_EXIT.trailPct) * 100)}% от максимума $${peak.toPrecision(6)}`,
+          kind: "STOP_HIT",
+        }).catch(async (e) => notify("critical", "Трейлинг не исполнен", String(e)));
+        continue;
+      }
+
+      // 4) Предельный срок удержания. Без него позиция может висеть неделями:
+      // проверка стратегии считает результат на горизонте 3 суток, и живой
+      // портфель должен закрываться там же, иначе отчёт и портфель измеряют
+      // разные вещи.
+      const heldMin = (Date.now() - pos.openedAt.getTime()) / 60_000;
+      if (frozenRules && heldMin >= FROZEN_EXIT.maxHoldMin) {
+        await sellPosition({
+          positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
+          reason: `Достигнут предельный срок удержания ${Math.round(FROZEN_EXIT.maxHoldMin / 1440)} сут — выход по времени`,
+          kind: "CLOSE",
+        }).catch(async (e) => notify("warning", "Выход по времени не исполнен", String(e)));
+        continue;
+      }
+
+      // 5) Лесенка тейков. Для НОВЫХ позиций она пуста (см. выше); код
+      // остаётся ради позиций, открытых до заморозки правил, — менять их
+      // условия задним числом нельзя, иначе их результат станет несравнимым.
       const tps: Tp[] = pos.takeProfits ? JSON.parse(pos.takeProfits) : [];
       let changed = false;
       for (const tp of tps) {
@@ -89,7 +136,7 @@ export async function monitorPositionsOnce(): Promise<void> {
         }).catch(() => {}); // position may be fully closed already
       }
 
-      // 4) Unrealized P&L bookkeeping event (kept sparse: only large moves).
+      // 6) Unrealized P&L bookkeeping event (kept sparse: only large moves).
       const unrealizedPct = ((price - pos.entryPriceUsd) / pos.entryPriceUsd) * 100;
       if (Math.abs(unrealizedPct) >= 25) {
         const last = await prisma.positionEvent.findFirst({

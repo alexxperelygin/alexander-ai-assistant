@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { decideStatus, HYSTERESIS_POINTS, READY_SCORE } from "../src/lib/strategy/lifecycle";
+import { buildTradePlan, decideStatus, HYSTERESIS_POINTS, READY_SCORE } from "../src/lib/strategy/lifecycle";
+import { FROZEN_EXIT } from "../src/lib/paper/exit-policy";
 import { DEFAULT_RISK_SETTINGS, type FeatureVector, type ScoreBreakdown } from "../src/lib/types";
 
 function features(): FeatureVector {
@@ -46,5 +47,31 @@ describe("status hysteresis (anti-flapping)", () => {
       rejections: [], settings: S, previousStatus: "READY",
     });
     expect(d.status).toBe("CANDIDATE");
+  });
+});
+
+describe("frozen exit policy (docs/PREREGISTRATION.md)", () => {
+  // Эти проверки существуют ради одной ошибки: тихо вернуть лесенку тейков.
+  // Измерение показало, что частичные фиксации на 1.5x и 2x обрубают правый
+  // хвост и уводят результат с +26% к +8.5%, а на выборке без фильтра
+  // ликвидности — в минус. Возврат лесенки не сломает ни один другой тест,
+  // поэтому ловим его здесь.
+  it("plan sells nothing early: the take-profit ladder is gone", () => {
+    const plan = buildTradePlan({
+      features: features(), settings: DEFAULT_RISK_SETTINGS,
+      symbol: "TEST", mint: "So11111111111111111111111111111111111111112",
+    });
+    expect(plan).not.toBeNull();
+    expect(plan!.takeProfitLevels).toEqual([]);
+    expect(plan!.stopCondition).toContain("−20%");
+    expect(plan!.stopCondition).toContain("30%");
+  });
+
+  it("keeps the frozen numbers the report and the portfolio share", () => {
+    // Отчёт и живой портфель считают одно и то же только пока константа одна.
+    expect(FROZEN_EXIT.stopPct).toBeCloseTo(0.2);
+    expect(FROZEN_EXIT.trailPct).toBeCloseTo(0.3);
+    expect(FROZEN_EXIT.liquidityFloorRatio).toBeCloseTo(0.6);
+    expect(FROZEN_EXIT.maxHoldMin).toBe(3 * 24 * 60);
   });
 });

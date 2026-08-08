@@ -2,6 +2,7 @@ import { prisma } from "../db";
 import { getRiskSettings } from "../settings";
 import { notify } from "../notify/notifier";
 import { simulateFill } from "./execution";
+import { FROZEN_EXIT } from "./exit-policy";
 import type { TradePlan } from "../types";
 
 // Position lifecycle: open (paper or user-confirmed manual), partial exits,
@@ -85,12 +86,13 @@ export async function openPosition(args: OpenPositionArgs) {
     costUsd = args.sizeUsd;
   }
 
-  const stopPriceUsd = entryPriceUsd * 0.65; // −35%, см. plan.stopCondition
-  const takeProfits = (args.plan?.takeProfitLevels ?? [
-    { multiple: 1.5, sellFraction: 0.33 },
-    { multiple: 2.0, sellFraction: 0.33 },
-    { multiple: 4.0, sellFraction: 0.34 },
-  ]).map((tp) => ({ price: entryPriceUsd * tp.multiple, fraction: tp.sellFraction, done: false }));
+  // Замороженные правила выхода, см. docs/PREREGISTRATION.md: жёсткий стоп
+  // −20%, трейлинг 30% от максимума, лимит удержания 3 суток, аварийный выход
+  // по обвалу ликвидности. Лесенки частичных фиксаций больше нет — измерение
+  // показало, что она обрубает правый хвост и уводит результат к нулю.
+  const stopPriceUsd = entryPriceUsd * (1 - FROZEN_EXIT.stopPct);
+  const takeProfits = (args.plan?.takeProfitLevels ?? [])
+    .map((tp) => ({ price: entryPriceUsd * tp.multiple, fraction: tp.sellFraction, done: false }));
 
   const pos = await prisma.position.create({
     data: {
@@ -105,6 +107,7 @@ export async function openPosition(args: OpenPositionArgs) {
       slippagePct,
       remainingQty: quantity,
       stopPriceUsd,
+      peakPriceUsd: entryPriceUsd,
       takeProfits: JSON.stringify(takeProfits),
       invalidation: args.plan ? JSON.stringify(args.plan.invalidation) : null,
       events: {

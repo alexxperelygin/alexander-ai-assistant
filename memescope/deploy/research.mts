@@ -19,6 +19,7 @@
 //    правила завышен выживаемостью, а не предсказанием.
 import { prisma } from "../src/lib/db";
 import { simulateFill } from "../src/lib/paper/execution";
+import { FREEZE_AT, FROZEN_EXIT } from "../src/lib/paper/exit-policy";
 
 const POSITION_USD = 50;
 const HORIZONS: Record<string, number> = { "1h": 60, "6h": 360, "24h": 1440 };
@@ -501,6 +502,8 @@ interface ExitPolicy {
   trailPct: number | null;
   /** Предельное время удержания, минуты. */
   maxHoldMin: number;
+  /** Аварийный выход, если ликвидность упала ниже этой доли от входной. */
+  drainRatio?: number;
 }
 
 /** Прогоняет сделку по политике и возвращает чистый результат после издержек. */
@@ -516,6 +519,10 @@ function simulateExit(series: Snap[], i: number, policy: ExitPolicy): number | n
     if (p.priceUsd > peak) peak = p.priceUsd;
     if (p.priceUsd <= entry.priceUsd * (1 - policy.stopPct)) break;
     if (policy.trailPct != null && p.priceUsd <= peak * (1 - policy.trailPct)) break;
+    // Аварийный выход по обвалу ликвидности. Он есть в живом мониторе, поэтому
+    // без него отчёт считал бы не ту стратегию, которой торгует система.
+    if (policy.drainRatio != null && entry.liquidityUsd != null && p.liquidityUsd != null &&
+        p.liquidityUsd < entry.liquidityUsd * policy.drainRatio) break;
   }
   return exit ? netReturn(entry, exit) : null;
 }
@@ -588,6 +595,18 @@ const POLICIES: ExitPolicy[] = [
   { name: "стоп −35% + трейлинг 50%", stopPct: 0.35, trailPct: 0.5, maxHoldMin: 1440 },
   { name: "стоп −20% + трейлинг 30%, до 3д", stopPct: 0.2, trailPct: 0.3, maxHoldMin: 4320 },
 ];
+
+/** Ровно то, чем торгует бумажный портфель после заморозки правил. Константы
+ * общие с живым кодом (src/lib/paper/exit-policy.ts): если бы они дублировались,
+ * отчёт рано или поздно проверял бы не ту стратегию, что работает на сервере. */
+const FROZEN_POLICY: ExitPolicy = {
+  name: "ЗАМОРОЖЕНО: стоп −20% + трейлинг 30% + выход по ликвидности, до 3д",
+  stopPct: FROZEN_EXIT.stopPct,
+  trailPct: FROZEN_EXIT.trailPct,
+  maxHoldMin: FROZEN_EXIT.maxHoldMin,
+  drainRatio: FROZEN_EXIT.liquidityFloorRatio,
+};
+POLICIES.push(FROZEN_POLICY);
 
 log(`## 4d. Политики выхода: где на мем-коинах вообще берётся прибыль`);
 log();
@@ -911,6 +930,71 @@ logPolicyTable(entriesForExit, true);
     }
     log();
   }
+}
+
+// ---------- 4f. Проверка после заморозки ----------
+// Единственный раздел отчёта, который имеет право что-то доказывать. Всё
+// остальное посчитано на данных, по которым правила и подбирались, а такой
+// результат положителен почти всегда — достаточно перебрать достаточно
+// вариантов. Здесь считаются ТОЛЬКО сделки, начавшиеся после момента
+// заморозки правил, и критерии зафиксированы заранее в
+// docs/PREREGISTRATION.md, чтобы вердикт нельзя было подогнать по факту.
+{
+  log(`## 4f. Проверка после заморозки правил (${FREEZE_AT.toISOString()})`);
+  log();
+  log(`Правила заморожены и описаны в \`docs/PREREGISTRATION.md\`. Считаются только`);
+  log(`сделки, вход в которые состоялся ПОСЛЕ этого момента: всё, что раньше, —`);
+  log(`данные, на которых правила подбирались, и доказательством быть не может.`);
+  log();
+
+  const afterFreeze = (e: ExitEntry) =>
+    (e.series[e.i] as Snap).fetchedAt.getTime() >= FREEZE_AT.getTime();
+  const testEntries = entriesForExit.filter(afterFreeze);
+  const controlEntries = collectExitEntries({ minLiquidityUsd: 0 }).entries.filter(afterFreeze);
+
+  const rs = policyReturns(testEntries, { name: FROZEN_POLICY.name, run: (s, i) => simulateExit(s, i, FROZEN_POLICY) });
+  const control = policyReturns(controlEntries, { name: "контроль", run: (s, i) => simulateExit(s, i, FROZEN_POLICY) });
+
+  const MIN_TRADES = 100;
+  const m = mean(rs);
+  const ci = bootstrapMeanCI(rs);
+  const sorted = [...rs].sort((a, b) => b - a);
+  const withoutBest = rs.length > 1 ? mean(sorted.slice(1)) : null;
+  const controlMean = mean(control);
+
+  const days = Math.max(0, (Date.now() - FREEZE_AT.getTime()) / 86_400_000);
+  log(`Прошло с заморозки: **${days.toFixed(1)} сут**. Сделок с измеримым исходом: **${rs.length}**.`);
+  log();
+
+  const checks: { name: string; ok: boolean; detail: string }[] = [
+    { name: `Объём ≥ ${MIN_TRADES} сделок`, ok: rs.length >= MIN_TRADES, detail: `${rs.length}` },
+    { name: "Среднее > 0", ok: m != null && m > 0, detail: pct(m) },
+    { name: "Нижняя граница 95% интервала > 0", ok: ci != null && ci[0] > 0, detail: ci ? `${pct(ci[0], 0)} … ${pct(ci[1], 0)}` : "—" },
+    { name: "Среднее без лучшей сделки > 0", ok: withoutBest != null && withoutBest > 0, detail: pct(withoutBest) },
+    { name: "Выше контроля «вход в любой токен»", ok: m != null && controlMean != null && m > controlMean, detail: `${pct(m)} против ${pct(controlMean)} (n=${control.length})` },
+  ];
+
+  log(`| Критерий (зафиксирован заранее) | Значение | Итог |`);
+  log(`|---|---|---|`);
+  for (const c of checks) log(`| ${c.name} | ${c.detail} | ${c.ok ? "✅ пройден" : "❌ не пройден"} |`);
+  log();
+
+  const failed = checks.filter((c) => !c.ok);
+  const volumeOnly = failed.length === 1 && failed[0]?.name.startsWith("Объём");
+  if (!failed.length) {
+    log(`**Все критерии пройдены.** Кандидат подтверждён на одном out-of-sample`);
+    log(`окне. Это НЕ значит «стратегия найдена» и не является основанием включать`);
+    log(`реальные деньги — это основание продолжать проверку.`);
+  } else if (volumeOnly && days < 6.5) {
+    log(`**Проверка ещё идёт.** Сделок пока недостаточно (${rs.length} из ${MIN_TRADES}),`);
+    log(`остальные критерии на текущей выборке ${failed.length === 1 ? "выполняются" : "нет"}.`);
+    log(`Промежуточные цифры не являются вердиктом и не должны так читаться.`);
+  } else {
+    log(`**NO EDGE.** Не пройдено критериев: ${failed.length} (${failed.map((c) => c.name).join("; ")}).`);
+    log(`По заранее записанному правилу это отрицательный вердикт, а не повод`);
+    log(`«добрать данных» или ослабить критерий.`);
+  }
+  log();
 }
 
 log(`Если среднее у какой-то политики устойчиво положительное при достаточном`);
