@@ -179,20 +179,31 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
 // то есть врал бы в сторону тревоги, а такому отчёту перестают верить.
 {
   const since = new Date(Date.now() - 90 * 60_000);
-  const degraded: string[] = [];
+  // Два РАЗНЫХ состояния, и путать их нельзя. «Работает по запасному
+  // источнику» — позиция защищена, стоп считается. «Цены нет вообще» —
+  // защиты нет. Оба пишутся как ALERT, поэтому различаем по началу текста.
+  const noPrice: string[] = [];
+  const onFallback: string[] = [];
   for (const p of open) {
-    const alert = await prisma.positionEvent.findFirst({
+    const alerts = await prisma.positionEvent.findMany({
       where: { positionId: p.id, kind: "ALERT", createdAt: { gte: since } },
       orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
+      take: 5,
+      select: { createdAt: true, message: true },
     });
-    if (alert) degraded.push(`${p.token.symbol} (${Math.round((Date.now() - alert.createdAt.getTime()) / 60_000)} мин назад)`);
+    const latest = alerts[0];
+    if (!latest) continue;
+    const mins = Math.round((Date.now() - latest.createdAt.getTime()) / 60_000);
+    if (latest.message.startsWith("Прямой запрос")) onFallback.push(`${p.token.symbol} (${mins} мин назад)`);
+    else noPrice.push(`${p.token.symbol} (${mins} мин назад)`);
   }
   lines.push(
-    degraded.length
-      ? `- ⚠️ монитор не получает цену (стоп и трейлинг не проверяются): ${degraded.join(", ")}`
-      : `- монитор получает цену по всем открытым позициям`,
+    noPrice.length
+      ? `- ⚠️ цены нет ни из одного источника, стоп и трейлинг НЕ проверяются: ${noPrice.join(", ")}`
+      : `- цена доступна по всем открытым позициям`,
   );
+  if (onFallback.length)
+    lines.push(`- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): ${onFallback.join(", ")}`);
 }
 lines.push(``);
 lines.push(`## Последние позиции (детально)`);
