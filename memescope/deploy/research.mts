@@ -611,8 +611,14 @@ log();
   const split = times.length ? (times[Math.floor(times.length * 0.7)] as number) : 0;
   log(`### Проверка на разных половинах окна`);
   log();
-  log(`| Политика выхода | TRAIN n | TRAIN среднее | TEST n | TEST среднее |`);
-  log(`|---|---|---|---|---|`);
+  // Колонки «без лучшей» обязательны именно здесь. На проверочной половине
+  // всего несколько десятков сделок, и одного крупного выигрыша достаточно,
+  // чтобы средняя выглядела убедительно. Если без него остаётся около нуля —
+  // проверка не пройдена, сколько бы ни было в основной колонке.
+  const dropBest = (xs: number[]): number | null =>
+    xs.length > 1 ? mean([...xs].sort((a, b) => b - a).slice(1)) : null;
+  log(`| Политика выхода | TRAIN n | TRAIN среднее | TRAIN без лучшей | TEST n | TEST среднее | TEST без лучшей |`);
+  log(`|---|---|---|---|---|---|---|`);
   for (const policy of POLICIES) {
     const tr: number[] = [], te: number[] = [];
     for (const e of entriesForExit) {
@@ -620,7 +626,8 @@ log();
       if (r == null) continue;
       ((e.series[e.i] as Snap).fetchedAt.getTime() <= split ? tr : te).push(r);
     }
-    log(`| ${policy.name} | ${tr.length} | **${pct(mean(tr))}** | ${te.length} | **${pct(mean(te))}** |`);
+    log(`| ${policy.name} | ${tr.length} | **${pct(mean(tr))}** | ${pct(dropBest(tr))} | ` +
+        `${te.length} | **${pct(mean(te))}** | ${pct(dropBest(te))} |`);
   }
   log();
   log(`Совпадение знака и порядка величины на обеих половинах — необходимое`);
