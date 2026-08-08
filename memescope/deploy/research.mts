@@ -966,29 +966,38 @@ logPolicyTable(entriesForExit, true);
   log(`Прошло с заморозки: **${days.toFixed(1)} сут**. Сделок с измеримым исходом: **${rs.length}**.`);
   log();
 
-  const checks: { name: string; ok: boolean; detail: string }[] = [
-    { name: `Объём ≥ ${MIN_TRADES} сделок`, ok: rs.length >= MIN_TRADES, detail: `${rs.length}` },
-    { name: "Среднее > 0", ok: m != null && m > 0, detail: pct(m) },
-    { name: "Нижняя граница 95% интервала > 0", ok: ci != null && ci[0] > 0, detail: ci ? `${pct(ci[0], 0)} … ${pct(ci[1], 0)}` : "—" },
-    { name: "Среднее без лучшей сделки > 0", ok: withoutBest != null && withoutBest > 0, detail: pct(withoutBest) },
-    { name: "Выше контроля «вход в любой токен»", ok: m != null && controlMean != null && m > controlMean, detail: `${pct(m)} против ${pct(controlMean)} (n=${control.length})` },
+  // Вердикт выносится только когда для него есть основания. Пока выборка не
+  // набрана и дедлайн не наступил, раздел обязан показывать «проверка идёт»:
+  // напечатать «NO EDGE» на нулевой выборке — это выдать отсутствие данных за
+  // отрицательный результат, что так же нечестно, как выдать шум за прибыль.
+  const DEADLINE = new Date("2026-08-15T00:00:00Z");
+  const deadlineReached = Date.now() >= DEADLINE.getTime();
+  const enough = rs.length >= MIN_TRADES;
+  const decidable = enough || deadlineReached;
+
+  const checks: { name: string; ok: boolean | null; detail: string }[] = [
+    { name: `Объём ≥ ${MIN_TRADES} сделок`, ok: enough ? true : deadlineReached ? false : null, detail: `${rs.length}` },
+    { name: "Среднее > 0", ok: m == null ? null : m > 0, detail: pct(m) },
+    { name: "Нижняя граница 95% интервала > 0", ok: ci == null ? null : ci[0] > 0, detail: ci ? `${pct(ci[0], 0)} … ${pct(ci[1], 0)}` : "—" },
+    { name: "Среднее без лучшей сделки > 0", ok: withoutBest == null ? null : withoutBest > 0, detail: pct(withoutBest) },
+    { name: "Выше контроля «вход в любой токен»", ok: m == null || controlMean == null ? null : m > controlMean, detail: `${pct(m)} против ${pct(controlMean)} (n=${control.length})` },
   ];
 
-  log(`| Критерий (зафиксирован заранее) | Значение | Итог |`);
+  log(`| Критерий (зафиксирован заранее) | Значение | ${decidable ? "Итог" : "Пока"} |`);
   log(`|---|---|---|`);
-  for (const c of checks) log(`| ${c.name} | ${c.detail} | ${c.ok ? "✅ пройден" : "❌ не пройден"} |`);
+  for (const c of checks)
+    log(`| ${c.name} | ${c.detail} | ${c.ok == null ? "нет данных" : c.ok ? "✅ пройден" : "❌ не пройден"} |`);
   log();
 
-  const failed = checks.filter((c) => !c.ok);
-  const volumeOnly = failed.length === 1 && failed[0]?.name.startsWith("Объём");
-  if (!failed.length) {
+  const failed = checks.filter((c) => c.ok === false);
+  if (!decidable) {
+    log(`**Проверка идёт, вердикта пока нет.** Набрано ${rs.length} сделок из ${MIN_TRADES};`);
+    log(`дедлайн — ${DEADLINE.toISOString().slice(0, 10)}. Цифры выше промежуточные: на малой`);
+    log(`выборке они скачут, и читать их как результат нельзя ни в плюс, ни в минус.`);
+  } else if (!failed.length) {
     log(`**Все критерии пройдены.** Кандидат подтверждён на одном out-of-sample`);
     log(`окне. Это НЕ значит «стратегия найдена» и не является основанием включать`);
     log(`реальные деньги — это основание продолжать проверку.`);
-  } else if (volumeOnly && days < 6.5) {
-    log(`**Проверка ещё идёт.** Сделок пока недостаточно (${rs.length} из ${MIN_TRADES}),`);
-    log(`остальные критерии на текущей выборке ${failed.length === 1 ? "выполняются" : "нет"}.`);
-    log(`Промежуточные цифры не являются вердиктом и не должны так читаться.`);
   } else {
     log(`**NO EDGE.** Не пройдено критериев: ${failed.length} (${failed.map((c) => c.name).join("; ")}).`);
     log(`По заранее записанному правилу это отрицательный вердикт, а не повод`);
