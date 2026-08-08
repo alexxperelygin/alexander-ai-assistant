@@ -547,6 +547,12 @@ log();
 
 const entriesForExit: { series: Snap[]; i: number }[] = [];
 const seenExitTokens = new Set<string>();
+// Воронка отбора. Без неё нельзя отличить «стратегия зарабатывает» от
+// «мы считаем только тех, за кем продолжали следить»: токен, умерший сразу
+// после входа и больше не опрошенный, просто не попадает в выборку и не
+// портит статистику. Это та же выживаемость, что уже дважды нас обманывала.
+let exitCandidates = 0;
+let exitWithoutForward = 0;
 for (const series of byToken.values()) {
   for (let i = 0; i < series.length; i++) {
     const e = series[i] as Snap;
@@ -560,11 +566,21 @@ for (const series of byToken.values()) {
         e.priceChange1h === e.priceChange24h) continue;
     if (seenExitTokens.has(e.tokenId)) continue;
     seenExitTokens.add(e.tokenId);
+    exitCandidates++;
+    if (i + 1 >= series.length) {
+      exitWithoutForward++; // вход есть, дальнейших наблюдений нет — исход неизмерим
+      break;
+    }
     entriesForExit.push({ series, i });
     break;
   }
 }
 
+log(`Воронка: подошло входов **${exitCandidates}**, из них без единого наблюдения`);
+log(`после входа — **${exitWithoutForward}** (${pct(exitCandidates ? exitWithoutForward / exitCandidates : 0, 0)}).`);
+log(`Эти токены исключены не потому, что плохи, а потому что за ними перестали`);
+log(`следить. Если их доля велика, весь плюс ниже может быть выживаемостью.`);
+log();
 log(`| Политика выхода | Сделок | Среднее | Без лучшей сделки | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
 log(`|---|---|---|---|---|---|---|---|`);
 for (const policy of POLICIES) {
@@ -585,6 +601,32 @@ for (const policy of POLICIES) {
       `${pct(median(rs))} | ${pct(winRate(rs), 0)} | ${pct(best, 0)} |`);
 }
 log();
+
+// Разделение по времени: правило выхода, которое работает только на прошлой
+// половине окна, — подгонка, а не стратегия.
+{
+  const times = entriesForExit
+    .map((e) => (e.series[e.i] as Snap).fetchedAt.getTime())
+    .sort((a, b) => a - b);
+  const split = times.length ? (times[Math.floor(times.length * 0.7)] as number) : 0;
+  log(`### Проверка на разных половинах окна`);
+  log();
+  log(`| Политика выхода | TRAIN n | TRAIN среднее | TEST n | TEST среднее |`);
+  log(`|---|---|---|---|---|`);
+  for (const policy of POLICIES) {
+    const tr: number[] = [], te: number[] = [];
+    for (const e of entriesForExit) {
+      const r = simulateExit(e.series, e.i, policy);
+      if (r == null) continue;
+      ((e.series[e.i] as Snap).fetchedAt.getTime() <= split ? tr : te).push(r);
+    }
+    log(`| ${policy.name} | ${tr.length} | **${pct(mean(tr))}** | ${te.length} | **${pct(mean(te))}** |`);
+  }
+  log();
+  log(`Совпадение знака и порядка величины на обеих половинах — необходимое`);
+  log(`условие. Расхождение означает, что результат случаен.`);
+  log();
+}
 
 // Разбор крупнейших выигрышей: реальный ли это рост или артефакт данных.
 // Именно на этом вопросе держится весь вывод про «прибыль в хвосте».
