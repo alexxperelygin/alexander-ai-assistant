@@ -477,6 +477,105 @@ log(`Доверять можно только правилу, у которог�
 log(`при достаточном n. Расхождение TRAIN/TEST = подгонка под историю.`);
 log();
 
+// ---------- 4d. Политики выхода ----------
+// Здесь проверяется гипотеза, которую вся предыдущая методика не могла увидеть.
+//
+// До сих пор результат считался так: вошли и вышли РОВНО через фиксированный
+// срок. При таком правиле прибыль ограничена сверху тем, что случилось к
+// дедлайну, а мем-рынок устроен наоборот — распределение с толстым правым
+// хвостом: подавляющее большинство токенов теряет почти всё, единицы дают
+// десятки концов. На таком распределении МЕДИАНА почти обязана быть
+// отрицательной даже у прибыльной стратегии, а решение принимается по СРЕДНЕМУ
+// на портфель: девяносто мелких потерь окупаются одним крупным выигрышем.
+//
+// Значит искать надо не в отборе входа, а в правиле выхода: резать убыток
+// быстро и не обрубать прибыль дедлайном. Именно это здесь и моделируется.
+interface ExitPolicy {
+  name: string;
+  /** Жёсткий стоп от цены входа, доля (0.35 = −35%). */
+  stopPct: number;
+  /** Трейлинг от достигнутого максимума, доля. null = не используется. */
+  trailPct: number | null;
+  /** Предельное время удержания, минуты. */
+  maxHoldMin: number;
+}
+
+/** Прогоняет сделку по политике и возвращает чистый результат после издержек. */
+function simulateExit(series: Snap[], i: number, policy: ExitPolicy): number | null {
+  const entry = series[i] as Snap;
+  const deadline = entry.fetchedAt.getTime() + policy.maxHoldMin * 60_000;
+  let peak = entry.priceUsd;
+  let exit: Snap | null = null;
+  for (let j = i + 1; j < series.length; j++) {
+    const p = series[j] as Snap;
+    if (p.fetchedAt.getTime() > deadline) break;
+    exit = p; // на случай, если ни одно условие не сработает — выходим по последнему
+    if (p.priceUsd > peak) peak = p.priceUsd;
+    if (p.priceUsd <= entry.priceUsd * (1 - policy.stopPct)) break;
+    if (policy.trailPct != null && p.priceUsd <= peak * (1 - policy.trailPct)) break;
+  }
+  return exit ? netReturn(entry, exit) : null;
+}
+
+const POLICIES: ExitPolicy[] = [
+  { name: "фикс. выход через 6ч", stopPct: 1, trailPct: null, maxHoldMin: 360 },
+  { name: "фикс. выход через 24ч", stopPct: 1, trailPct: null, maxHoldMin: 1440 },
+  { name: "стоп −35%, держать до 24ч", stopPct: 0.35, trailPct: null, maxHoldMin: 1440 },
+  { name: "стоп −20%, держать до 24ч", stopPct: 0.2, trailPct: null, maxHoldMin: 1440 },
+  { name: "стоп −20% + трейлинг 30%", stopPct: 0.2, trailPct: 0.3, maxHoldMin: 1440 },
+  { name: "стоп −35% + трейлинг 50%", stopPct: 0.35, trailPct: 0.5, maxHoldMin: 1440 },
+  { name: "стоп −20% + трейлинг 30%, до 3д", stopPct: 0.2, trailPct: 0.3, maxHoldMin: 4320 },
+];
+
+log(`## 4d. Политики выхода: где на мем-коинах вообще берётся прибыль`);
+log();
+log(`Всё предыдущее считало результат по фиксированному сроку выхода. Это`);
+log(`структурно не способно найти прибыль на рынке с толстым правым хвостом:`);
+log(`большинство токенов теряет почти всё, единицы дают десятки концов, и`);
+log(`медиана обязана быть отрицательной даже у прибыльной стратегии.`);
+log();
+log(`Портфель живёт по СРЕДНЕМУ, а не по медиане: девяносто мелких потерь`);
+log(`окупаются одним крупным выигрышем. Поэтому здесь главная колонка — среднее,`);
+log(`а медиана приводится как напоминание, что большинство сделок убыточно.`);
+log();
+log(`Вход один и тот же во всех строках (ликвидность > $50k, одно наблюдение на`);
+log(`токен) — сравниваются ТОЛЬКО правила выхода.`);
+log();
+
+const entriesForExit: { series: Snap[]; i: number }[] = [];
+const seenExitTokens = new Set<string>();
+for (const series of byToken.values()) {
+  for (let i = 0; i < series.length; i++) {
+    const e = series[i] as Snap;
+    if (e.fetchedAt.getTime() < UNBIASED_FROM.getTime()) continue;
+    if ((e.liquidityUsd ?? 0) <= 50_000) continue;
+    if (seenExitTokens.has(e.tokenId)) continue;
+    seenExitTokens.add(e.tokenId);
+    entriesForExit.push({ series, i });
+    break;
+  }
+}
+
+log(`| Политика выхода | Сделок | Среднее | Винз. среднее | Медиана | Прибыльных | Лучшая |`);
+log(`|---|---|---|---|---|---|---|`);
+for (const policy of POLICIES) {
+  const rs = entriesForExit
+    .map((e) => simulateExit(e.series, e.i, policy))
+    .filter((r): r is number => r != null);
+  if (rs.length < 20) {
+    log(`| ${policy.name} | ${rs.length} | мало данных | | | | |`);
+    continue;
+  }
+  const best = Math.max(...rs);
+  log(`| ${policy.name} | ${rs.length} | **${pct(mean(rs))}** | ${pct(winsorMean(rs))} | ` +
+      `${pct(median(rs))} | ${pct(winRate(rs), 0)} | ${pct(best, 0)} |`);
+}
+log();
+log(`Если среднее у какой-то политики устойчиво положительное при достаточном`);
+log(`числе сделок — это первый настоящий кандидат в стратегию. Если все`);
+log(`отрицательные, значит дело не в выходе, и вход отбирает мусор.`);
+log();
+
 // ---------- 4c. Ругпуллы ----------
 // Rug здесь = ликвидность к концу горизонта упала ниже 20% от входной, то есть
 // выйти по разумной цене было уже нельзя. Ключевой вопрос: рост rug rate в
