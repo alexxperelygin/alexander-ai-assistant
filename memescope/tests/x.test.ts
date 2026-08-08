@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { budgetBlock, summarize } from "../src/lib/providers/x";
+import {
+  budgetBlock,
+  DAILY_POST_BUDGET,
+  MONTHLY_POST_BUDGET,
+  summarize,
+} from "../src/lib/providers/x";
 
 const now = new Date("2026-08-06T00:00:00Z");
 const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000).toISOString();
@@ -79,22 +84,22 @@ describe("X social summary", () => {
 
 describe("X spend limits", () => {
   it("allows a read while both budgets have room", () => {
-    expect(budgetBlock(100, 10, 10)).toBeNull();
+    expect(budgetBlock(0, 0, 10)).toBeNull();
   });
 
   it("stops on the daily cap before the month is anywhere near spent", () => {
     // Именно этот случай защищает баланс при оплате по факту: месяц ещё пуст,
     // но что-то читает без остановки.
-    const blocked = budgetBlock(500, 400, 10);
+    const blocked = budgetBlock(0, DAILY_POST_BUDGET, 10);
     expect(blocked).toContain("дневной");
   });
 
   it("stops on the monthly cap", () => {
-    expect(budgetBlock(9000, 0, 10)).toContain("месячный");
+    expect(budgetBlock(MONTHLY_POST_BUDGET, 0, 10)).toContain("месячный");
   });
 
   it("counts the planned read, not just what is already spent", () => {
-    // 8995 прочитано, потолок 9000: запрос на 10 постов не должен пройти.
-    expect(budgetBlock(8995, 0, 10)).not.toBeNull();
+    // До потолка остаётся 5 постов, а запрос читает 10 — он не должен пройти.
+    expect(budgetBlock(MONTHLY_POST_BUDGET - 5, 0, 10)).not.toBeNull();
   });
 });

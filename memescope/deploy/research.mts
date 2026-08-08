@@ -66,7 +66,10 @@ function netReturn(entry: Snap, exit: Snap): number | null {
     liquidityUsd: exit.liquidityUsd, direction: "sell",
   });
   if (!sell.executed) return null;
-  return (buy.quantity * sell.effectivePriceUsd - sell.feesUsd) / POSITION_USD - 1;
+  // grossUsd уже учитывает комиссии и не может быть отрицательным: лонг теряет
+  // максимум вложенное. Прежняя формула считала это вручную и на скачках цены
+  // выдавала убытки в тысячи процентов.
+  return sell.grossUsd / POSITION_USD - 1;
 }
 
 const pct = (v: number | null | undefined, d = 1): string =>

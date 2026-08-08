@@ -26,6 +26,17 @@ export interface FillResult {
   totalCostPct: number; // full round-trip friction of THIS fill vs mid
 }
 
+/**
+ * Проскальзывание, выше которого сделка считается неисполнимой.
+ *
+ * Формула impact = size/(depth+size) стремится к 100%, но задолго до этого
+ * сделка перестаёт существовать в реальности: вылить в пул объём, сравнимый с
+ * самим пулом, нельзя ни по какой цене. Без этого предела симуляция выдавала
+ * «исполнение» с эффективной ценой около нуля — и такой выход выглядел не как
+ * невозможный, а как чудовищный убыток.
+ */
+const MAX_EXECUTABLE_IMPACT_PCT = 50;
+
 export function simulateFill(p: FillParams): FillResult {
   const dexFeePct = p.dexFeePct ?? 0.25;
   const networkFeeUsd = p.networkFeeUsd ?? 0.05;
@@ -52,24 +63,42 @@ export function simulateFill(p: FillParams): FillResult {
     };
   }
 
-  const adversePct = impactPct + latencyDriftPct;
+  if (impactPct >= MAX_EXECUTABLE_IMPACT_PCT) {
+    return {
+      executed: false,
+      reason: `проскальзывание ${impactPct.toFixed(0)}% — объём несопоставим с пулом, сделка неисполнима`,
+      effectivePriceUsd: 0, quantity: 0, grossUsd: 0, feesUsd: 0, impactPct, totalCostPct: 0,
+    };
+  }
+
+  // Ограничение снизу на эффективную цену: без него adversePct > 100 давал
+  // ОТРИЦАТЕЛЬНУЮ цену исполнения, то есть продавец доплачивал покупателю.
+  const adversePct = Math.min(99, impactPct + latencyDriftPct);
   const effectivePriceUsd =
     p.direction === "buy"
       ? p.priceUsd * (1 + adversePct / 100)
       : p.priceUsd * (1 - adversePct / 100);
 
-  const dexFeeUsd = p.sideUsd * (dexFeePct / 100);
+  const quantity = p.direction === "buy" ? 0 : p.sideUsd / p.priceUsd;
+  // Комиссия DEX берётся с ФАКТИЧЕСКОГО оборота сделки, а не с суммы, которую
+  // хотелось получить. На продаже это принципиально: если цена в данных
+  // скакнула, желаемая сумма огромна, а реально исполнить удаётся копейки —
+  // комиссия, посчитанная от желаемой, превращала сделку в убыток в тысячи
+  // процентов. Лонг не может потерять больше вложенного.
+  const sellGrossUsd = p.direction === "sell" ? quantity * effectivePriceUsd : 0;
+  const turnoverUsd = p.direction === "buy" ? p.sideUsd : sellGrossUsd;
+  const dexFeeUsd = turnoverUsd * (dexFeePct / 100);
   const feesUsd = dexFeeUsd + networkFeeUsd;
 
   const netUsd = p.sideUsd - (p.direction === "buy" ? feesUsd : 0);
-  const quantity = p.direction === "buy" ? netUsd / effectivePriceUsd : p.sideUsd / p.priceUsd;
+  const buyQuantity = netUsd / effectivePriceUsd;
   const grossUsd =
-    p.direction === "buy" ? netUsd : quantity * effectivePriceUsd - feesUsd;
+    p.direction === "buy" ? netUsd : Math.max(0, sellGrossUsd - feesUsd);
 
   return {
     executed: true,
     effectivePriceUsd,
-    quantity,
+    quantity: p.direction === "buy" ? buyQuantity : quantity,
     grossUsd,
     feesUsd,
     impactPct,

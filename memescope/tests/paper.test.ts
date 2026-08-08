@@ -49,3 +49,48 @@ describe("simulateFill", () => {
     expect(proceeds).toBeGreaterThan(97); // ...but costs are bounded (~1-2%)
   });
 });
+
+describe("cost model invariants", () => {
+  it("refuses a sell that would move the pool by half", () => {
+    // Вылить в пул объём, сравнимый с самим пулом, нельзя ни по какой цене.
+    // Раньше это «исполнялось» с ценой около нуля и выглядело как убыток.
+    const fill = simulateFill({
+      sideUsd: 100_000,
+      priceUsd: 1,
+      liquidityUsd: 50_000,
+      direction: "sell",
+    });
+    expect(fill.executed).toBe(false);
+    expect(fill.reason).toContain("неисполнима");
+  });
+
+  it("never lets a long round-trip lose more than the stake", () => {
+    // Цена в данных скакнула вверх в тысячу раз: желаемая сумма продажи
+    // огромна, исполнить удаётся мало. Комиссия не должна считаться от
+    // желаемой суммы — иначе получается убыток в тысячи процентов.
+    const stake = 50;
+    const buy = simulateFill({ sideUsd: stake, priceUsd: 1, liquidityUsd: 200_000, direction: "buy" });
+    expect(buy.executed).toBe(true);
+    for (const exitPrice of [0.000001, 0.5, 1, 1000]) {
+      const sell = simulateFill({
+        sideUsd: buy.quantity * exitPrice,
+        priceUsd: exitPrice,
+        liquidityUsd: 200_000,
+        direction: "sell",
+      });
+      if (!sell.executed) continue;
+      const netReturn = sell.grossUsd / stake - 1;
+      expect(netReturn).toBeGreaterThanOrEqual(-1);
+    }
+  });
+
+  it("keeps the effective sell price positive", () => {
+    const fill = simulateFill({
+      sideUsd: 49_000,
+      priceUsd: 2,
+      liquidityUsd: 100_000,
+      direction: "sell",
+    });
+    if (fill.executed) expect(fill.effectivePriceUsd).toBeGreaterThan(0);
+  });
+});
