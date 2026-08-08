@@ -10,6 +10,61 @@ import { FROZEN_EXIT, FREEZE_AT } from "../paper/exit-policy";
 
 interface Tp { price: number; fraction: number; done: boolean }
 
+/** Как часто повторять предупреждение об отсутствии цены. */
+const STALE_ALERT_INTERVAL_MS = 3600_000;
+/** Через сколько без цены позиция считается непригодной к сопровождению. */
+const STALE_EXIT_MS = 6 * 3600_000;
+
+/**
+ * Что делать, когда источник перестал отдавать цену открытой позиции.
+ *
+ * Раньше монитор просто писал ALERT и уходил — каждые тридцать секунд, вечно.
+ * Две беды. Первая: позиция без цены не проверяется ни стопом, ни трейлингом,
+ * ни лимитом удержания (все они стоят ПОСЛЕ этой проверки), то есть открытая
+ * сделка оставалась вообще без защиты и не закрывалась никогда. Вторая:
+ * тысячи одинаковых событий, в которых тонет всё остальное.
+ *
+ * Правильного ответа тут нет: цены нет, значит честного результата тоже нет.
+ * Из двух неправд — «висит вечно» и «закрыта по последней известной цене с
+ * пометкой, что результат недостоверен» — вторая хотя бы не притворяется
+ * работающим мониторингом.
+ */
+async function handleMissingPrice(positionId: string, tokenId: string): Promise<void> {
+  const last = await prisma.tokenSnapshot.findFirst({
+    where: { tokenId, priceUsd: { gt: 0 } },
+    orderBy: { fetchedAt: "desc" },
+  });
+  const ageMs = last ? Date.now() - last.fetchedAt.getTime() : Infinity;
+
+  if (last?.priceUsd != null && ageMs >= STALE_EXIT_MS) {
+    const hours = Math.round(ageMs / 3600_000);
+    await sellPosition({
+      positionId, fraction: 1, priceUsd: last.priceUsd, liquidityUsd: last.liquidityUsd,
+      reason: `Источник не отдаёт цену ${hours} ч — выход по последней известной цене ` +
+        `$${last.priceUsd.toPrecision(6)} от ${last.fetchedAt.toISOString()}. ` +
+        `Результат этой сделки НЕДОСТОВЕРЕН: реальная цена выхода неизвестна.`,
+      kind: "CLOSE",
+    }).catch(async (e) => notify("warning", "Закрытие по устаревшей цене не исполнено", String(e)));
+    return;
+  }
+
+  // Предупреждение не чаще раза в час: смысл в том, чтобы проблему было видно,
+  // а не в том, чтобы забить журнал.
+  const lastAlert = await prisma.positionEvent.findFirst({
+    where: { positionId, kind: "ALERT" },
+    orderBy: { createdAt: "desc" },
+  });
+  if (lastAlert && Date.now() - lastAlert.createdAt.getTime() < STALE_ALERT_INTERVAL_MS) return;
+  await prisma.positionEvent.create({
+    data: {
+      positionId, kind: "ALERT",
+      message: last
+        ? `Нет свежих данных цены ${Math.round(ageMs / 60_000)} мин — мониторинг деградирован, стоп и трейлинг не проверяются.`
+        : "Нет данных цены вообще — мониторинг деградирован, стоп и трейлинг не проверяются.",
+    },
+  });
+}
+
 export async function monitorPositionsOnce(): Promise<void> {
   const providers = getProviders();
   const open = await prisma.position.findMany({
@@ -21,9 +76,7 @@ export async function monitorPositionsOnce(): Promise<void> {
     try {
       const snap = await providers.market.getMarketSnapshot(pos.token.mint);
       if (!snap || snap.priceUsd == null) {
-        await prisma.positionEvent.create({
-          data: { positionId: pos.id, kind: "ALERT", message: "Нет свежих данных цены — мониторинг деградирован." },
-        });
+        await handleMissingPrice(pos.id, pos.tokenId);
         continue;
       }
       const price = snap.priceUsd;

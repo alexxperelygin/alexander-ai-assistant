@@ -167,6 +167,28 @@ lines.push(``);
 
 lines.push(`## Позиции`);
 lines.push(`- Открытых: ${open.length}; всего: ${positions.length}; realized P&L: $${realized.toFixed(2)}`);
+
+// Позиция, по которой источник перестал отдавать цену, не проверяется ни
+// стопом, ни трейлингом. Такую надо видеть в отчёте числом, а не вылавливать
+// глазами в списке событий: незамеченная, она означает открытую сделку без
+// какой-либо защиты.
+{
+  const degraded: string[] = [];
+  for (const p of open) {
+    const lastSnap = await prisma.tokenSnapshot.findFirst({
+      where: { tokenId: p.tokenId, priceUsd: { gt: 0 } },
+      orderBy: { fetchedAt: "desc" },
+      select: { fetchedAt: true },
+    });
+    const ageMin = lastSnap ? (Date.now() - lastSnap.fetchedAt.getTime()) / 60_000 : Infinity;
+    if (ageMin > 30) degraded.push(`${p.token.symbol} (${Number.isFinite(ageMin) ? `${Math.round(ageMin)} мин` : "нет данных"})`);
+  }
+  lines.push(
+    degraded.length
+      ? `- ⚠️ без свежей цены (стоп и трейлинг не проверяются): ${degraded.join(", ")}`
+      : `- все открытые позиции с актуальной ценой`,
+  );
+}
 lines.push(``);
 lines.push(`## Последние позиции (детально)`);
 const recentPositions = await prisma.position.findMany({
