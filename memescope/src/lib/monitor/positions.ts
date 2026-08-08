@@ -15,8 +15,35 @@ const STALE_ALERT_INTERVAL_MS = 3600_000;
 /** Через сколько без цены позиция считается непригодной к сопровождению. */
 const STALE_EXIT_MS = 6 * 3600_000;
 
+/** Свежесть, при которой снапшот сканера годится вместо прямого запроса. */
+const FALLBACK_MAX_AGE_MS = 30 * 60_000;
+
+/** Последний снапшот токена, если он достаточно свежий для решений по стопу. */
+async function freshSnapshot(tokenId: string) {
+  const s = await prisma.tokenSnapshot.findFirst({
+    where: { tokenId, priceUsd: { gt: 0 }, fetchedAt: { gte: new Date(Date.now() - FALLBACK_MAX_AGE_MS) } },
+    orderBy: { fetchedAt: "desc" },
+  });
+  return s?.priceUsd != null ? s : null;
+}
+
+/** Отмечает работу на запасном источнике — не чаще раза в час, для диагностики. */
+async function noteFallback(positionId: string, at: Date): Promise<void> {
+  const last = await prisma.positionEvent.findFirst({
+    where: { positionId, kind: "ALERT" },
+    orderBy: { createdAt: "desc" },
+  });
+  if (last && Date.now() - last.createdAt.getTime() < STALE_ALERT_INTERVAL_MS) return;
+  await prisma.positionEvent.create({
+    data: {
+      positionId, kind: "ALERT",
+      message: `Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от ${at.toISOString()}.`,
+    },
+  });
+}
+
 /**
- * Что делать, когда источник перестал отдавать цену открытой позиции.
+ * Что делать, когда цены нет НИГДЕ — ни прямым запросом, ни в свежих снапшотах.
  *
  * Раньше монитор просто писал ALERT и уходил — каждые тридцать секунд, вечно.
  * Две беды. Первая: позиция без цены не проверяется ни стопом, ни трейлингом,
@@ -74,13 +101,27 @@ export async function monitorPositionsOnce(): Promise<void> {
 
   for (const pos of open) {
     try {
+      // Прямой запрос — основной путь. Но если он не отвечает по этому токену,
+      // это ещё не значит, что цены нет: сканер пишет снапшоты по своему
+      // маршруту и часто продолжает видеть тот же токен. Отчёт показал ровно
+      // такую пару — монитор молчит по BITCOIN, BLUAI и FWA, а данные в базе
+      // свежие. Отказываться от защиты позиции, имея цену под рукой, нельзя.
       const snap = await providers.market.getMarketSnapshot(pos.token.mint);
-      if (!snap || snap.priceUsd == null) {
-        await handleMissingPrice(pos.id, pos.tokenId);
-        continue;
+      let price: number;
+      let liq: number | null;
+      if (snap?.priceUsd != null) {
+        price = snap.priceUsd;
+        liq = snap.liquidityUsd ?? null;
+      } else {
+        const fallback = await freshSnapshot(pos.tokenId);
+        if (!fallback) {
+          await handleMissingPrice(pos.id, pos.tokenId);
+          continue;
+        }
+        price = fallback.priceUsd as number;
+        liq = fallback.liquidityUsd;
+        await noteFallback(pos.id, fallback.fetchedAt);
       }
-      const price = snap.priceUsd;
-      const liq = snap.liquidityUsd ?? null;
 
       // Entry-time liquidity from OPEN event, for drain detection.
       const openEvent = await prisma.positionEvent.findFirst({
