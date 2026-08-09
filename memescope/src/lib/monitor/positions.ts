@@ -15,20 +15,33 @@ const STALE_ALERT_INTERVAL_MS = 3600_000;
 /** Через сколько без цены позиция считается непригодной к сопровождению. */
 const STALE_EXIT_MS = 6 * 3600_000;
 
-/** Свежесть, при которой снапшот сканера годится вместо прямого запроса. */
+/** Свежесть, при которой снапшот сканера равноценен прямому запросу. */
 const FALLBACK_MAX_AGE_MS = 30 * 60_000;
 
-/** Последний снапшот токена, если он достаточно свежий для решений по стопу. */
-async function freshSnapshot(tokenId: string) {
+/**
+ * Последний снапшот токена, годный хоть для чего-то, и признак «он несвежий».
+ *
+ * Между тридцатью минутами и шестью часами была дыра: снапшот уже не считался
+ * пригодным, но и до принудительного закрытия дело не доходило, поэтому
+ * позиция до пяти с половиной часов жила вообще без стопа. Именно в такой
+ * дыре сейчас висят BLUAI и FWA.
+ *
+ * Устаревшая цена не годится для решений «держим дальше» — трейлинг по ней
+ * посчитать нельзя, максимум прошлой цены неизвестен. Но для решения «пора
+ * выходить» она осмысленна: если полтора часа назад цена была ниже стопа,
+ * это факт, а не догадка, и выйти поздно честнее, чем не выйти вовсе.
+ */
+async function lastUsableSnapshot(tokenId: string) {
   const s = await prisma.tokenSnapshot.findFirst({
-    where: { tokenId, priceUsd: { gt: 0 }, fetchedAt: { gte: new Date(Date.now() - FALLBACK_MAX_AGE_MS) } },
+    where: { tokenId, priceUsd: { gt: 0 }, fetchedAt: { gte: new Date(Date.now() - STALE_EXIT_MS) } },
     orderBy: { fetchedAt: "desc" },
   });
-  return s?.priceUsd != null ? s : null;
+  if (s?.priceUsd == null) return null;
+  return { snap: s, stale: Date.now() - s.fetchedAt.getTime() > FALLBACK_MAX_AGE_MS };
 }
 
 /** Отмечает работу на запасном источнике — не чаще раза в час, для диагностики. */
-async function noteFallback(positionId: string, at: Date): Promise<void> {
+async function noteFallback(positionId: string, at: Date, stale: boolean): Promise<void> {
   const last = await prisma.positionEvent.findFirst({
     where: { positionId, kind: "ALERT" },
     orderBy: { createdAt: "desc" },
@@ -37,7 +50,9 @@ async function noteFallback(positionId: string, at: Date): Promise<void> {
   await prisma.positionEvent.create({
     data: {
       positionId, kind: "ALERT",
-      message: `Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от ${at.toISOString()}.`,
+      message: stale
+        ? `Прямой запрос цены не отвечает, снапшот сканера устарел (${at.toISOString()}): проверяются только стоп и обвал ликвидности, трейлинг — нет.`
+        : `Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от ${at.toISOString()}.`,
     },
   });
 }
@@ -109,18 +124,21 @@ export async function monitorPositionsOnce(): Promise<void> {
       const snap = await providers.market.getMarketSnapshot(pos.token.mint);
       let price: number;
       let liq: number | null;
+      // Цена устарела — решения «держим дальше» по ней принимать нельзя.
+      let stalePrice = false;
       if (snap?.priceUsd != null) {
         price = snap.priceUsd;
         liq = snap.liquidityUsd ?? null;
       } else {
-        const fallback = await freshSnapshot(pos.tokenId);
+        const fallback = await lastUsableSnapshot(pos.tokenId);
         if (!fallback) {
           await handleMissingPrice(pos.id, pos.tokenId);
           continue;
         }
-        price = fallback.priceUsd as number;
-        liq = fallback.liquidityUsd;
-        await noteFallback(pos.id, fallback.fetchedAt);
+        price = fallback.snap.priceUsd as number;
+        liq = fallback.snap.liquidityUsd;
+        stalePrice = fallback.stale;
+        await noteFallback(pos.id, fallback.snap.fetchedAt, fallback.stale);
       }
 
       // Entry-time liquidity from OPEN event, for drain detection.
@@ -140,8 +158,12 @@ export async function monitorPositionsOnce(): Promise<void> {
       // Пик цены с момента входа — база трейлинг-стопа. Обновляется ДО
       // проверок выхода: иначе первое же наблюдение нового максимума
       // сравнивалось бы с устаревшим пиком и трейлинг срабатывал бы поздно.
-      const peak = Math.max(pos.peakPriceUsd ?? pos.entryPriceUsd, price);
-      if (peak > (pos.peakPriceUsd ?? 0)) {
+      // Устаревшая цена в пик не идёт: максимум — это «где цена была», а по
+      // старому снапшоту мы не знаем, что происходило после него.
+      const peak = stalePrice
+        ? (pos.peakPriceUsd ?? pos.entryPriceUsd)
+        : Math.max(pos.peakPriceUsd ?? pos.entryPriceUsd, price);
+      if (!stalePrice && peak > (pos.peakPriceUsd ?? 0)) {
         await prisma.position.update({ where: { id: pos.id }, data: { peakPriceUsd: peak } })
           .catch(() => {}); // позиция могла закрыться параллельно
       }
@@ -177,8 +199,12 @@ export async function monitorPositionsOnce(): Promise<void> {
       // заменило лесенку частичных фиксаций — та продавала на 1.5x и 2x и
       // тем самым убивала редкие крупные выигрыши, ради которых стратегия
       // и существует (docs/PREREGISTRATION.md).
+      // Трейлинг по устаревшей цене не считается: он сравнивает текущую цену с
+      // максимумом, а «текущей» у нас в этот момент нет. Жёсткий стоп и обвал
+      // ликвидности выше — считаются, потому что они говорят «стало плохо»,
+      // и сработать поздно там лучше, чем не сработать совсем.
       const trailStop = peak * (1 - FROZEN_EXIT.trailPct);
-      if (frozenRules && peak > pos.entryPriceUsd && price <= trailStop) {
+      if (frozenRules && !stalePrice && peak > pos.entryPriceUsd && price <= trailStop) {
         await sellPosition({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
           reason: `Трейлинг: цена $${price.toPrecision(6)} ≤ ${Math.round((1 - FROZEN_EXIT.trailPct) * 100)}% от максимума $${peak.toPrecision(6)}`,

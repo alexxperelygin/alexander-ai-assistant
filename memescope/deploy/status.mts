@@ -184,6 +184,7 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
   // защиты нет. Оба пишутся как ALERT, поэтому различаем по началу текста.
   const noPrice: string[] = [];
   const onFallback: string[] = [];
+  const partial: string[] = [];
   for (const p of open) {
     const alerts = await prisma.positionEvent.findMany({
       where: { positionId: p.id, kind: "ALERT", createdAt: { gte: since } },
@@ -194,14 +195,18 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     const latest = alerts[0];
     if (!latest) continue;
     const mins = Math.round((Date.now() - latest.createdAt.getTime()) / 60_000);
-    if (latest.message.startsWith("Прямой запрос")) onFallback.push(`${p.token.symbol} (${mins} мин назад)`);
-    else noPrice.push(`${p.token.symbol} (${mins} мин назад)`);
+    const label = `${p.token.symbol} (${mins} мин назад)`;
+    if (latest.message.includes("устарел")) partial.push(label);
+    else if (latest.message.startsWith("Прямой запрос")) onFallback.push(label);
+    else noPrice.push(label);
   }
   lines.push(
     noPrice.length
       ? `- ⚠️ цены нет ни из одного источника, стоп и трейлинг НЕ проверяются: ${noPrice.join(", ")}`
       : `- цена доступна по всем открытым позициям`,
   );
+  if (partial.length)
+    lines.push(`- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: ${partial.join(", ")}`);
   if (onFallback.length)
     lines.push(`- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): ${onFallback.join(", ")}`);
 }
