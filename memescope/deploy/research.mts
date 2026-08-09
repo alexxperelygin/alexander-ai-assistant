@@ -1004,6 +1004,42 @@ logPolicyTable(entriesForExit, true);
     log(`«добрать данных» или ослабить критерий.`);
   }
   log();
+
+  // Обязательная проверка на мусор, обещанная в docs/PREREGISTRATION.md: если
+  // результат держится на скачках, похожих на смену пула или сбой источника,
+  // вердикт отрицательный независимо от цифр. Раньше такой разбор печатался
+  // только для in-sample выборки — то есть ровно там, где он уже ничего не
+  // решает. Проверять надо ту выборку, по которой выносится вердикт.
+  //
+  // Повод конкретный: 9 августа среднее подскочило до +219% при среднем без
+  // лучшей сделки −3.5%, то есть одна сделка дала около +7000%. Такое число
+  // сначала проверяют, а не празднуют.
+  {
+    const scored = testEntries
+      .map((e) => ({ e, r: simulateExit(e.series, e.i, FROZEN_POLICY) }))
+      .filter((x): x is { e: ExitEntry; r: number } => x.r != null)
+      .sort((a, b) => b.r - a.r)
+      .slice(0, 5);
+    if (scored.length) {
+      log(`### Пять лучших сделок проверочной выборки`);
+      log();
+      log(`Рост в десятки раз при копеечной ликвидности или Δ24ч в тысячи`);
+      log(`процентов — почти всегда смена пула или сбой источника, а не движение,`);
+      log(`на котором можно было заработать.`);
+      log();
+      for (const { e, r } of scored) {
+        const entry = e.series[e.i] as Snap;
+        const exitIdx = e.series.length - 1;
+        const held = ((e.series[exitIdx] as Snap).fetchedAt.getTime() - entry.fetchedAt.getTime()) / 3600_000;
+        log(`- **${pct(r, 0)}** · ${entry.chain} · вход $${entry.priceUsd.toPrecision(3)} · ` +
+            `ликв $${Math.round(entry.liquidityUsd ?? 0).toLocaleString("ru")} · ` +
+            `Δ1ч ${entry.priceChange1h ?? "—"}% · Δ24ч ${entry.priceChange24h ?? "—"}% · ` +
+            `сделок 1ч ${(entry.buys1h ?? 0) + (entry.sells1h ?? 0)} · ` +
+            `наблюдений после входа ${e.series.length - e.i - 1} за ${held.toFixed(1)} ч`);
+      }
+      log();
+    }
+  }
 }
 
 log(`Если среднее у какой-то политики устойчиво положительное при достаточном`);
