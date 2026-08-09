@@ -1,2 +1,2 @@
-backtest
-run: 95
+research
+run: 96
