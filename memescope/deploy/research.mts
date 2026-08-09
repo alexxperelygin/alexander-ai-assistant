@@ -227,6 +227,29 @@ const isUnbiased = (o: Obs) => o.entry.fetchedAt.getTime() >= UNBIASED_FROM.getT
 // покрывают один и тот же отрезок от стартовой цены. Такие наблюдения
 // одновременно раздувают «моментум-правила» и портят их результат, поэтому
 // исключаются с явным подсчётом, а не молча.
+/**
+ * Адрес пула, из которого взято наблюдение.
+ *
+ * Источник отдаёт по токену ЛУЧШУЮ пару, а «лучшая» со временем меняется:
+ * ликвидность переезжает в другой пул, и котировка скачком переходит на его
+ * цену. Для нас это выглядит как рост в десятки раз — только заработать на
+ * нём было нельзя, потому что нашей позиции в новом пуле нет.
+ *
+ * Адрес пары не хранится отдельной колонкой, но лежит в сыром payload'е
+ * снапшота. Разбираем регуляркой, а не JSON.parse: payload обрезан до 4000
+ * символов, и на длинных ответах разбор падал бы — а нам нужно только одно
+ * поле, которое стоит в начале.
+ */
+async function pairAddressAt(tokenId: string, at: Date): Promise<string | null> {
+  const row = await prisma.tokenSnapshot.findFirst({
+    where: { tokenId, fetchedAt: { lte: at } },
+    orderBy: { fetchedAt: "desc" },
+    select: { raw: true },
+  });
+  const m = row?.raw ? /"pairAddress":"([^"]+)"/.exec(row.raw) : null;
+  return m?.[1] ?? null;
+}
+
 const isListingArtifact = (s: Snap): boolean =>
   s.priceChange1h != null && s.priceChange24h != null &&
   s.priceChange1h === s.priceChange24h && Math.abs(s.priceChange1h) > 1000;
@@ -1051,20 +1074,45 @@ logPolicyTable(entriesForExit, true);
         const from = top.e.i;
         log(`**Ценовой путь лучшей сделки** (${(s[from] as Snap).chain}, вход помечен →):`);
         log();
-        log(`| Время | Цена | Ликвидность | Сделок 1ч |`);
-        log(`|---|---|---|---|`);
+        log(`| Время | Цена | Ликвидность | Сделок 1ч | Пул |`);
+        log(`|---|---|---|---|---|`);
         const step = Math.max(1, Math.ceil((s.length - from) / 12));
         for (let j = from; j < s.length; j += step) {
           const p = s[j] as Snap;
+          const pair = await pairAddressAt(p.tokenId, p.fetchedAt);
           log(`| ${j === from ? "→ " : ""}${p.fetchedAt.toISOString().slice(11, 16)} | ` +
               `$${p.priceUsd.toPrecision(4)} | ` +
               `$${p.liquidityUsd == null ? "—" : Math.round(p.liquidityUsd).toLocaleString("ru")} | ` +
-              `${(p.buys1h ?? 0) + (p.sells1h ?? 0)} |`);
+              `${(p.buys1h ?? 0) + (p.sells1h ?? 0)} | ` +
+              `${pair ? `…${pair.slice(-6)}` : "—"} |`);
         }
         log();
-        log(`Если цена выросла в десятки раз, а ликвидность и число сделок остались`);
-        log(`прежними — это не рынок. По правилу из \`docs/PREREGISTRATION.md\` такой`);
-        log(`результат означает NO EDGE независимо от того, как красиво выглядит среднее.`);
+        log(`Колонка «Пул» решает вопрос. Источник отдаёт по токену ЛУЧШУЮ пару, и`);
+        log(`когда ликвидность переезжает в другой пул, котировка скачком переходит`);
+        log(`на его цену. В отчёте это выглядит ростом в десятки раз, но заработать`);
+        log(`на нём было нельзя: нашей позиции в новом пуле нет. Сменился адрес —`);
+        log(`сделка недостоверна, как бы красиво ни выглядело среднее`);
+        log(`(правило из \`docs/PREREGISTRATION.md\`).`);
+        log();
+      }
+
+      // То же самое, но по ВСЕЙ проверочной выборке: одна подозрительная сделка
+      // — случай, а систематическая смена пулов означает, что весь правый хвост
+      // исследования измеряет переезды ликвидности, а не заработок.
+      {
+        let changed = 0, known = 0;
+        for (const { e } of testEntries.map((e) => ({ e }))) {
+          const entry = e.series[e.i] as Snap;
+          const last = e.series[e.series.length - 1] as Snap;
+          const a = await pairAddressAt(entry.tokenId, entry.fetchedAt);
+          const b = await pairAddressAt(last.tokenId, last.fetchedAt);
+          if (!a || !b) continue;
+          known++;
+          if (a !== b) changed++;
+        }
+        log(`**Смена пула за время удержания:** ${changed} из ${known} сделок, у которых`);
+        log(`адрес пары известен на обоих концах. Если доля заметная, правый хвост`);
+        log(`измеряет переезды ликвидности между пулами, а не доходность стратегии.`);
         log();
       }
     }
