@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-09T04:39:33.958Z (UTC)
+Сгенерирован: 2026-08-09T04:40:42.739Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 347826; снапшотов за 24ч: 42175
+- Worker: ✅ работает (последний цикл: 1 мин назад)
+- Токенов в базе: 347868; снапшотов за 24ч: 42177
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,29 +13,29 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 19881
+- solana: 19899
 - robinhood: 2814
-- bsc: 2336
-- base: 479
+- bsc: 2337
+- base: 480
 - ethereum: 185
 - arbitrum: 2
 
 ## Статусы возможностей
-- AVOID: 104667
+- AVOID: 104668
 - DATA_UNAVAILABLE: 31588
 - CANDIDATE: 16
 - WATCH: 10
 - READY: 4
 
 ## Топ-5 по score (не отбракованные)
-- TTF: READY, score 66.1, risk 0.2, conf 100% (обновлено 1 мин назад)
+- TTF: READY, score 66.6, risk 0.2, conf 100% (обновлено 1 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 3.1 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 3.7 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 5.9 дн назад)
-- SAAS: READY, score 63.6, risk 0.2, conf 100% (обновлено 1 мин назад)
+- BITCOIN: CANDIDATE, score 64.3, risk 2.8, conf 88% (обновлено 1 мин назад)
+- SAAS: READY, score 63.9, risk 0.3, conf 100% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- BITCOIN — 2026-08-09T04:15:59.490Z (24 мин назад)
+- BITCOIN — 2026-08-09T04:15:59.490Z (25 мин назад)
 - BITCOIN — 2026-08-09T03:16:01.796Z (1.4 ч назад)
 - BITCOIN — 2026-08-09T00:57:55.273Z (3.7 ч назад)
 - BITCOIN — 2026-08-09T00:15:55.546Z (4.4 ч назад)
@@ -45,23 +45,23 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- thefungustoe: — → AVOID (0 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- PROFIT: — → AVOID (2 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- SIMO: — → AVOID (3 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- 火星猴: — → AVOID (3 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- TITAN: WATCH → AVOID (5 мин назад) — [insufficient-liquidity] Ликвидность $4 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
-- BITCOIN: READY → CANDIDATE (5 мин назад) — Opportunity Score 58.5/100, Risk 8.8/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- GIVE: CANDIDATE → WATCH (7 мин назад) — Opportunity Score 44.2/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- TITAN: — → WATCH (14 мин назад) — Opportunity Score 40.1/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- JOB: — → AVOID (14 мин назад) — [insufficient-liquidity] Ликвидность $1 ниже минимума $50,000.
-- TKO: — → AVOID (16 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- PSYOP: — → DATA_UNAVAILABLE (17 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
-- SHX: — → AVOID (18 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- VIK: — → AVOID (1 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- thefungustoe: — → AVOID (2 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- PROFIT: — → AVOID (3 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- SIMO: — → AVOID (4 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- 火星猴: — → AVOID (5 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- TITAN: WATCH → AVOID (6 мин назад) — [insufficient-liquidity] Ликвидность $4 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
+- BITCOIN: READY → CANDIDATE (6 мин назад) — Opportunity Score 58.5/100, Risk 8.8/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- GIVE: CANDIDATE → WATCH (8 мин назад) — Opportunity Score 44.2/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- TITAN: — → WATCH (15 мин назад) — Opportunity Score 40.1/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- JOB: — → AVOID (16 мин назад) — [insufficient-liquidity] Ликвидность $1 ниже минимума $50,000.
+- TKO: — → AVOID (17 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- PSYOP: — → DATA_UNAVAILABLE (18 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: liquidityUsd, risk-report, sell-
 
 ## Позиции
 - Открытых: 8; всего: 20; realized P&L: $-505.59
 - цена доступна по всем открытым позициям
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): BITCOIN (57 мин назад), BLUAI (57 мин назад), FWA (57 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): BITCOIN (58 мин назад), BLUAI (58 мин назад), FWA (58 мин назад)
 
 ## Последние позиции (детально)
 - FWA [paper/OPEN] вход $0.01687 × 1180 = $20.00, остаток 100%, realized $0.00
@@ -96,18 +96,18 @@
     · 00:39:40 [NOTE] Unrealized P&L 25% (цена $0.00533100)
 
 ## Последний backtest
-- DONE (7.9 ч назад): NO EDGE: expectancy -10.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (0 мин назад): NO EDGE: expectancy -10.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 458160 / err 19, последний успех 0 мин назад)
+- dexscreener: ok (ok 458210 / err 19, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 3.0 дн назад)
-- geckoterminal:arbitrum: ok (ok 2417 / err 1853, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 4267 / err 7, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 4197 / err 76, последний успех 0 мин назад)
-- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 3137 / err 1135, последний успех 1.7 ч назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 1827 / err 2428, последний успех 1.7 ч назад)
-- geckoterminal:solana: ok (ok 4274 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 6008 / err 0, последний успех 1 мин назад)
-- jupiter: ok (ok 334493 / err 682, последний успех 0 мин назад)
-- rugcheck: ok (ok 126736 / err 381, последний успех 1 мин назад)
+- geckoterminal:arbitrum: ok (ok 2419 / err 1853, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 4268 / err 7, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 4198 / err 76, последний успех 0 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 3137 / err 1136, последний успех 1.7 ч назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 1827 / err 2430, последний успех 1.7 ч назад)
+- geckoterminal:solana: ok (ok 4275 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 6008 / err 0, последний успех 2 мин назад)
+- jupiter: ok (ok 334508 / err 682, последний успех 1 мин назад)
+- rugcheck: ok (ok 126736 / err 381, последний успех 2 мин назад)
 
