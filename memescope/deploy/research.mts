@@ -19,7 +19,7 @@
 //    правила завышен выживаемостью, а не предсказанием.
 import { prisma } from "../src/lib/db";
 import { simulateFill } from "../src/lib/paper/execution";
-import { FREEZE_AT, FROZEN_EXIT } from "../src/lib/paper/exit-policy";
+import { FREEZE_AT, FROZEN_EXIT, VENTURE_EXIT, VENTURE_FREEZE_AT } from "../src/lib/paper/exit-policy";
 
 const POSITION_USD = 50;
 const HORIZONS: Record<string, number> = { "1h": 60, "6h": 360, "24h": 1440 };
@@ -1336,6 +1336,95 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
       log();
     }
   }
+}
+
+// ---------- 4h. Венчурная проверка ----------
+// Отдельный тест с отдельной заморозкой (docs/PREREGISTRATION_VENTURE.md).
+// Он не заменяет проверку 4f: у одной проверки не может быть двух наборов
+// критериев, иначе побеждает тот, который удобнее по факту.
+{
+  const VENTURE_POLICY: ExitPolicy = {
+    name: "венчурный: стоп −20% без трейлинга, до 3д",
+    stopPct: VENTURE_EXIT.stopPct,
+    trailPct: null, // трейлинг убран — он и обрубал хвост
+    maxHoldMin: VENTURE_EXIT.maxHoldMin,
+    drainRatio: VENTURE_EXIT.liquidityFloorRatio,
+  };
+  const MIN_TRADES = 500;
+  const TAIL = 1; // «хвост» = рост больше +100%
+
+  log(`## 4h. Венчурная проверка (заморожена ${VENTURE_FREEZE_AT.toISOString()})`);
+  log();
+  log(`Правила и критерии — \`docs/PREREGISTRATION_VENTURE.md\`. Главная метрика`);
+  log(`здесь ЧАСТОТА хвостов, а не среднее: среднее на таком распределении не`);
+  log(`стабилизируется и за 500 сделок, а частота измерима.`);
+  log();
+
+  const afterV = (e: ExitEntry) =>
+    (e.series[e.i] as Snap).fetchedAt.getTime() >= VENTURE_FREEZE_AT.getTime();
+  const testE = entriesForExit.filter(afterV);
+  const ctrlE = collectExitEntries({ minLiquidityUsd: 0 }).entries.filter(afterV);
+  const run = (e: ExitEntry) => simulateExit(e.series, e.i, VENTURE_POLICY);
+
+  const rs = testE.map(run).filter((r): r is number => r != null);
+  const ctrl = ctrlE.map(run).filter((r): r is number => r != null);
+  const tailRate = (xs: number[]) => (xs.length ? xs.filter((r) => r > TAIL).length / xs.length : null);
+  const tr = tailRate(rs), cr = tailRate(ctrl);
+  const body = rs.filter((r) => r <= 10);
+
+  // Хвостовые сделки: из скольких разных суток и сетей они пришли. Если все
+  // из одного дня — измерена рыночная волна, а не свойство отбора.
+  const tailEntries = testE.filter((e) => { const r = run(e); return r != null && r > TAIL; });
+  const tailDays = new Set(tailEntries.map((e) => (e.series[e.i] as Snap).fetchedAt.toISOString().slice(0, 10)));
+  const tailChains = new Set(tailEntries.map((e) => (e.series[e.i] as Snap).chain));
+
+  // Превышение частоты над контролем с бутстрап-интервалом: одно отношение
+  // долей ничего не значит, пока неизвестно, насколько оно устойчиво.
+  let ratioLow: number | null = null;
+  if (rs.length >= 20 && ctrl.length >= 20 && cr) {
+    let seed = 987654321;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+    const ratios: number[] = [];
+    for (let k = 0; k < 2000; k++) {
+      const a = tailRate(Array.from({ length: rs.length }, () => rs[Math.floor(rnd() * rs.length)] as number));
+      const b = tailRate(Array.from({ length: ctrl.length }, () => ctrl[Math.floor(rnd() * ctrl.length)] as number));
+      if (a != null && b != null && b > 0) ratios.push(a / b);
+    }
+    ratios.sort((a, b) => a - b);
+    ratioLow = ratios.length ? quantile(ratios, 0.025) : null;
+  }
+
+  const days = Math.max(0, (Date.now() - VENTURE_FREEZE_AT.getTime()) / 86_400_000);
+  log(`Прошло с заморозки: **${days.toFixed(1)} сут**. Сделок: **${rs.length}**, контроль: ${ctrl.length}.`);
+  log();
+
+  const bodyMean = mean(body), allMean = mean(rs);
+  const checks: { name: string; ok: boolean | null; detail: string }[] = [
+    { name: `Объём ≥ ${MIN_TRADES} сделок`, ok: rs.length >= MIN_TRADES ? true : null, detail: `${rs.length}` },
+    { name: "Частота хвостов выше контроля (нижняя граница > 1.0)", ok: ratioLow == null ? null : ratioLow > 1, detail: `${pct(tr, 2)} против ${pct(cr, 2)}${ratioLow == null ? "" : `, нижняя граница ×${ratioLow.toFixed(2)}`}` },
+    { name: "Тело не ниже −2%", ok: bodyMean == null ? null : bodyMean >= -0.02, detail: pct(bodyMean) },
+    { name: "Среднее > 0", ok: allMean == null ? null : allMean > 0, detail: pct(allMean) },
+    { name: "Хвосты из ≥5 суток и ≥2 сетей", ok: tailEntries.length ? tailDays.size >= 5 && tailChains.size >= 2 : null, detail: `${tailEntries.length} хвостов, ${tailDays.size} сут, ${tailChains.size} сет.` },
+  ];
+
+  log(`| Критерий (зафиксирован заранее) | Значение | ${rs.length >= MIN_TRADES ? "Итог" : "Пока"} |`);
+  log(`|---|---|---|`);
+  for (const c of checks)
+    log(`| ${c.name} | ${c.detail} | ${c.ok == null ? "нет данных" : c.ok ? "✅ пройден" : "❌ не пройден"} |`);
+  log();
+
+  const failed = checks.filter((c) => c.ok === false);
+  if (rs.length < MIN_TRADES) {
+    log(`**Проверка идёт, вердикта нет.** Набрано ${rs.length} из ${MIN_TRADES}.`);
+    log(`Промежуточные значения на хвостовом распределении скачут особенно сильно —`);
+    log(`одно событие двигает среднее на сотни процентов. Читать их нельзя.`);
+  } else if (!failed.length) {
+    log(`**Венчурный формат подтверждён на одном окне.** Это не разрешение включать`);
+    log(`реальные деньги: подтверждена частота хвостов, а не размер прибыли.`);
+  } else {
+    log(`**NO EDGE для венчурного формата.** Не пройдено: ${failed.map((c) => c.name).join("; ")}.`);
+  }
+  log();
 }
 
 log(`## 5. Итог`);
