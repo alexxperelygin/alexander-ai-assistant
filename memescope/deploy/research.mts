@@ -1273,8 +1273,17 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
   log(`сделке: точек входа на порядок больше, чем в проверочной выборке.`);
   log();
 
+  // Разделение на «вся неделя» и «после заморозки» здесь обязательно. Вся
+  // неделя — это в основном те данные, на которых правила и подбирались, и
+  // положительное тело выборки на них ничего не доказывает. Решает третья
+  // строка: если тело положительно и ПОСЛЕ заморозки, стратегия не зависит
+  // от хвостов вовсе, и венчурный формат просто не нужен. Если только до —
+  // это снова расхождение in-sample и out-of-sample.
+  const afterFreezeG = (e: ExitEntry) =>
+    (e.series[e.i] as Snap).fetchedAt.getTime() >= FREEZE_AT.getTime();
   const groups: { name: string; entries: ExitEntry[] }[] = [
-    { name: "наш фильтр (ликв > $50k)", entries: entriesForExit },
+    { name: "наш фильтр, вся неделя (в основном in-sample)", entries: entriesForExit },
+    { name: "наш фильтр, ТОЛЬКО после заморозки", entries: entriesForExit.filter(afterFreezeG) },
     { name: "контроль (любой токен)", entries: collectExitEntries({ minLiquidityUsd: 0 }).entries },
   ];
   const THRESHOLDS = [1, 5, 10, 50];
@@ -1295,12 +1304,20 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
   // Если наблюдаемая частота на порядок выше пороговой — запас есть; если
   // она рядом с порогом, венчурный формат держится на удаче, а не на числах.
   {
-    const rs = policyReturns(entriesForExit, { name: "frozen", run: (s, i) => simulateExit(s, i, FROZEN_POLICY) });
+    const rs = policyReturns(entriesForExit.filter(afterFreezeG), { name: "frozen", run: (s, i) => simulateExit(s, i, FROZEN_POLICY) });
     const tails = rs.filter((r) => r > 10);
     const body = rs.filter((r) => r <= 10);
     const bodyMean = mean(body);
     const tailMean = mean(tails);
-    if (bodyMean != null && bodyMean < 0 && tailMean != null && tails.length) {
+    // Тело может оказаться и положительным — тогда вопрос о венчурном формате
+    // снимается сам собой, и об этом надо сказать, а не молча пропустить блок.
+    if (bodyMean != null && bodyMean >= 0) {
+      log(`**Хвосты не нужны.** На данных после заморозки тело выборки (всё, кроме`);
+      log(`выигрышей больше 10x) даёт ${pct(bodyMean)} на сделку. Если это подтвердится на`);
+      log(`полной выборке, стратегия не зависит от редких сверхвыигрышей, и венчурный`);
+      log(`формат ей просто не нужен — достаточно обычного портфеля.`);
+      log();
+    } else if (bodyMean != null && tailMean != null && tails.length) {
       const breakEvenOneIn = tailMean / -bodyMean + 1;
       const observedOneIn = rs.length / tails.length;
       log(`**Точка безубыточности.** Тело выборки (всё, кроме выигрышей больше 10x)`);
