@@ -1,26 +1,26 @@
-# Backtest (2026-08-10T00:38:24Z)
+# Backtest (2026-08-10T12:46:58Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
 Status: DONE
-NO EDGE: expectancy -2.2% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+NO EDGE: expectancy -5.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 112,
+    "signals": 118,
     "horizon": "24h",
-    "evaluable": 51,
-    "winRate": 0.5882352941176471,
-    "expectancy": -0.021603561796709466,
-    "medianReturn": 0.03738447767068531,
-    "profitFactor": 0.8214160567098543,
+    "evaluable": 57,
+    "winRate": 0.49122807017543857,
+    "expectancy": -0.055603482611956946,
+    "medianReturn": -0.005257367584162398,
+    "profitFactor": 0.5855000533073726,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.09278350515463918,
-    "rugMeasurable": 97,
-    "unclosablePct": 0.13392857142857142,
+    "rugRate": 0.0970873786407767,
+    "rugMeasurable": 103,
+    "unclosablePct": 0.1271186440677966,
     "byMonth": {
       "2026-08": {
-        "n": 51,
-        "meanReturn": -0.021603561796709466
+        "n": 57,
+        "meanReturn": -0.055603482611956946
       }
     }
   },
@@ -43,30 +43,30 @@ NO EDGE: expectancy -2.2% ≤ 0 после издержек. Сигналы в �
       }
     }
   },
-  "verdict": "NO EDGE: expectancy -2.2% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO EDGE: expectancy -5.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
 }
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
 Status: DONE
-NO EDGE: expectancy -8.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+NO EDGE: expectancy -8.1% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 112,
+    "signals": 118,
     "horizon": "6h",
-    "evaluable": 82,
-    "winRate": 0.4268292682926829,
-    "expectancy": -0.08689022175932294,
+    "evaluable": 88,
+    "winRate": 0.42045454545454547,
+    "expectancy": -0.08093997823633278,
     "medianReturn": -0.011524913942797033,
-    "profitFactor": 0.378320803757071,
+    "profitFactor": 0.387477382685669,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.0625,
-    "rugMeasurable": 96,
-    "unclosablePct": 0.14285714285714285,
+    "rugRate": 0.058823529411764705,
+    "rugMeasurable": 102,
+    "unclosablePct": 0.13559322033898305,
     "byMonth": {
       "2026-08": {
-        "n": 82,
-        "meanReturn": -0.08689022175932296
+        "n": 88,
+        "meanReturn": -0.08093997823633282
       }
     }
   },
@@ -89,5 +89,5 @@ NO EDGE: expectancy -8.7% ≤ 0 после издержек. Сигналы в �
       }
     }
   },
-  "verdict": "NO EDGE: expectancy -8.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO EDGE: expectancy -8.1% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
 }
