@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-11T08:39:58.480Z (UTC)
+Сгенерирован: 2026-08-11T08:42:11.441Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 404645; снапшотов за 24ч: 41998
+- Worker: ✅ работает (последний цикл: 0 мин назад)
+- Токенов в базе: 404684; снапшотов за 24ч: 41985
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,10 +13,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20597
-- robinhood: 4139
-- bsc: 2741
-- base: 608
+- solana: 20577
+- robinhood: 4123
+- bsc: 2735
+- base: 607
 - ethereum: 213
 - arbitrum: 11
 
@@ -28,14 +28,14 @@
 - READY: 2
 
 ## Топ-5 по score (не отбракованные)
-- Jimothy: READY, score 69.4, risk 0.7, conf 100% (обновлено 1 мин назад)
+- Jimothy: READY, score 70.9, risk 0.0, conf 100% (обновлено 0 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 5.3 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 5.8 дн назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 8.1 дн назад)
 - GLOW: CANDIDATE, score 59.0, risk 7.7, conf 100% (обновлено 5.2 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- BITCOIN — 2026-08-11T07:13:45.144Z (1.4 ч назад)
+- BITCOIN — 2026-08-11T07:13:45.144Z (1.5 ч назад)
 - BITCOIN — 2026-08-11T06:28:49.375Z (2.2 ч назад)
 - BITCOIN — 2026-08-11T03:21:43.756Z (5.3 ч назад)
 - BITCOIN — 2026-08-11T02:04:43.409Z (6.6 ч назад)
@@ -45,16 +45,16 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- BabyAsteroid: WATCH → CANDIDATE (6 мин назад) — Opportunity Score 50.0/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- PAXG: — → WATCH (13 мин назад) — Opportunity Score 35.9/100, Risk 16.4/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- EAGLE: WATCH → AVOID (14 мин назад) — [liquidity-draining] Ликвидность упала на 6.0% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- DERP: CANDIDATE → WATCH (25 мин назад) — Opportunity Score 45.0/100, Risk 16.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- COOKIE: WATCH → CANDIDATE (26 мин назад) — Opportunity Score 52.1/100, Risk 10.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BabyAsteroid: CANDIDATE → WATCH (38 мин назад) — Opportunity Score 44.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- EMT: WATCH → AVOID (45 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- DERP: WATCH → CANDIDATE (49 мин назад) — Opportunity Score 51.3/100, Risk 10.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BabyAsteroid: WATCH → CANDIDATE (52 мин назад) — Opportunity Score 50.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- EAGLE: AVOID → WATCH (53 мин назад) — Opportunity Score 37.2/100, Risk 10.5/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BabyAsteroid: WATCH → CANDIDATE (8 мин назад) — Opportunity Score 50.0/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- PAXG: — → WATCH (15 мин назад) — Opportunity Score 35.9/100, Risk 16.4/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- EAGLE: WATCH → AVOID (16 мин назад) — [liquidity-draining] Ликвидность упала на 6.0% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- DERP: CANDIDATE → WATCH (27 мин назад) — Opportunity Score 45.0/100, Risk 16.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- COOKIE: WATCH → CANDIDATE (28 мин назад) — Opportunity Score 52.1/100, Risk 10.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- BabyAsteroid: CANDIDATE → WATCH (40 мин назад) — Opportunity Score 44.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- EMT: WATCH → AVOID (47 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- DERP: WATCH → CANDIDATE (51 мин назад) — Opportunity Score 51.3/100, Risk 10.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- BabyAsteroid: WATCH → CANDIDATE (54 мин назад) — Opportunity Score 50.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- EAGLE: AVOID → WATCH (55 мин назад) — Opportunity Score 37.2/100, Risk 10.5/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
 - DERP: — → WATCH (1.1 ч назад) — Opportunity Score 44.6/100, Risk 10.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
 - SSSC: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
 
@@ -62,7 +62,7 @@
 - Открытых: 4; всего: 24; realized P&L: $-540.08
 - из них закрыто по устаревшей цене (результат недостоверен): 2 шт на $3.49 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): BITCOIN (52 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): BITCOIN (54 мин назад)
 
 ## Последние позиции (детально)
 - Jimothy [paper/STOPPED] вход $0.006642 × 2996 = $20.00, остаток 0%, realized $-1.17, закрыта: Трейлинг: цена $0.00633500 ≤ 70% от максимума $0.0206500
@@ -97,18 +97,18 @@
     · 02:10:14 [NOTE] Unrealized P&L -25% (цена $0.000452100)
 
 ## Последний backtest
-- DONE (1 мин назад): NO EDGE: expectancy -7.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (3 мин назад): NO EDGE: expectancy -7.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 595468 / err 26, последний успех 0 мин назад)
+- dexscreener: ok (ok 595551 / err 26, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 5.1 дн назад)
-- geckoterminal:arbitrum: ok (ok 4890 / err 2499, последний успех 0 мин назад)
-- geckoterminal:base: ok (ok 7380 / err 12, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 7155 / err 236, последний успех 1 мин назад)
-- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 4247 / err 3143, последний успех 4 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 2588 / err 4786, последний успех 4 мин назад)
-- geckoterminal:solana: ok (ok 7392 / err 0, последний успех 1 мин назад)
-- goplus: ok (ok 10886 / err 0, последний успех 0 мин назад)
-- jupiter: ok (ok 362313 / err 697, последний успех 1 мин назад)
-- rugcheck: ok (ok 127645 / err 382, последний успех 9 мин назад)
+- geckoterminal:arbitrum: ok (ok 4892 / err 2499, последний успех 1 мин назад)
+- geckoterminal:base: ok (ok 7382 / err 12, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 7157 / err 236, последний успех 1 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 4247 / err 3145, последний успех 6 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 2588 / err 4788, последний успех 7 мин назад)
+- geckoterminal:solana: ok (ok 7394 / err 0, последний успех 1 мин назад)
+- goplus: ok (ok 10888 / err 0, последний успех 1 мин назад)
+- jupiter: ok (ok 362322 / err 697, последний успех 0 мин назад)
+- rugcheck: ok (ok 127646 / err 382, последний успех 1 мин назад)
 
