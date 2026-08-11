@@ -1404,7 +1404,15 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
     { name: "Частота хвостов выше контроля (нижняя граница > 1.0)", ok: ratioLow == null ? null : ratioLow > 1, detail: `${pct(tr, 2)} против ${pct(cr, 2)}${ratioLow == null ? "" : `, нижняя граница ×${ratioLow.toFixed(2)}`}` },
     { name: "Тело не ниже −2%", ok: bodyMean == null ? null : bodyMean >= -0.02, detail: pct(bodyMean) },
     { name: "Среднее > 0", ok: allMean == null ? null : allMean > 0, detail: pct(allMean) },
-    { name: "Хвосты из ≥5 суток и ≥2 сетей", ok: tailEntries.length ? tailDays.size >= 5 && tailChains.size >= 2 : null, detail: `${tailEntries.length} хвостов, ${tailDays.size} сут, ${tailChains.size} сет.` },
+    // «Хвосты минимум из пяти суток» невозможно выполнить, пока проверка идёт
+    // меньше пяти суток. Помечать такое как «не пройден» — та же неправда, что
+    // печатать NO EDGE на нулевой выборке: отсутствие возможности выдаётся за
+    // отрицательный результат.
+    {
+      name: "Хвосты из ≥5 суток и ≥2 сетей",
+      ok: days < 5 || !tailEntries.length ? null : tailDays.size >= 5 && tailChains.size >= 2,
+      detail: `${tailEntries.length} хвостов, ${tailDays.size} сут, ${tailChains.size} сет.`,
+    },
   ];
 
   log(`| Критерий (зафиксирован заранее) | Значение | ${rs.length >= MIN_TRADES ? "Итог" : "Пока"} |`);
