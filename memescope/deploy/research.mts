@@ -550,6 +550,28 @@ function simulateExit(series: Snap[], i: number, policy: ExitPolicy): number | n
   return exit ? netReturn(entry, exit) : null;
 }
 
+/** То же самое, но возвращает и снапшот выхода: без него нельзя проверить,
+ * была ли на момент выхода вообще торговля. */
+function simulateExitDetailed(series: Snap[], i: number, policy: ExitPolicy): { ret: number; exit: Snap } | null {
+  const entry = series[i] as Snap;
+  const deadline = entry.fetchedAt.getTime() + policy.maxHoldMin * 60_000;
+  let peak = entry.priceUsd;
+  let exit: Snap | null = null;
+  for (let j = i + 1; j < series.length; j++) {
+    const p = series[j] as Snap;
+    if (p.fetchedAt.getTime() > deadline) break;
+    exit = p;
+    if (p.priceUsd > peak) peak = p.priceUsd;
+    if (p.priceUsd <= entry.priceUsd * (1 - policy.stopPct)) break;
+    if (policy.trailPct != null && p.priceUsd <= peak * (1 - policy.trailPct)) break;
+    if (policy.drainRatio != null && entry.liquidityUsd != null && p.liquidityUsd != null &&
+        p.liquidityUsd < entry.liquidityUsd * policy.drainRatio) break;
+  }
+  if (!exit) return null;
+  const ret = netReturn(entry, exit);
+  return ret == null ? null : { ret, exit };
+}
+
 // Правила, по которым бумажный портфель торгует ПРЯМО СЕЙЧАС. Их надо
 // измерять наравне с гипотезами, а не считать заданными: реализованный
 // результат −$505 на 18 позициях требует объяснения, и лесенка тейков —
@@ -1061,6 +1083,45 @@ logPolicyTable(entriesForExit, true);
             `наблюдений после входа ${e.series.length - e.i - 1} за ${held.toFixed(1)} ч`);
       }
       log();
+
+      // Проверка исполнимости выхода. Модель издержек учитывает РАЗМЕР пула,
+      // но не учитывает, идёт ли в нём торговля. Токен с одной сделкой в час
+      // даёт котировку, а не рынок: наши $50 были бы там единственной сделкой,
+      // и «цена выхода» существует только в базе.
+      //
+      // У трёх из пяти лучших сделок на выходе стояла почти нулевая
+      // активность, а весь результат держится на хвосте — значит это не
+      // придирка, а вопрос, есть ли результат вообще. Проверяется прямо:
+      // считаем те же критерии, оставив только сделки, где на выходе было
+      // не меньше десяти сделок в час.
+      {
+        const MIN_EXIT_TXNS = 10;
+        const kept: number[] = [];
+        let dropped = 0;
+        for (const e of testEntries) {
+          const d = simulateExitDetailed(e.series, e.i, FROZEN_POLICY);
+          if (!d) continue;
+          const txns = (d.exit.buys1h ?? 0) + (d.exit.sells1h ?? 0);
+          if (txns >= MIN_EXIT_TXNS) kept.push(d.ret); else dropped++;
+        }
+        const keptCI = bootstrapMeanCI(kept);
+        const keptSorted = [...kept].sort((a, b) => b - a);
+        log(`**Исполнимость выхода.** Оставлены только сделки, у которых на момент`);
+        log(`выхода в паре шло не меньше ${MIN_EXIT_TXNS} сделок в час. Отброшено ${dropped} из`);
+        log(`${kept.length + dropped}: цена без торговли — это котировка, а не рынок, и продать`);
+        log(`по ней было бы не у кого.`);
+        log();
+        log(`| Выборка | Сделок | Среднее | 95% интервал | Без лучшей | Медиана |`);
+        log(`|---|---|---|---|---|---|`);
+        log(`| только с живой торговлей на выходе | ${kept.length} | **${pct(mean(kept))}** | ` +
+            `${keptCI ? `${pct(keptCI[0], 0)} … ${pct(keptCI[1], 0)}` : "—"} | ` +
+            `${kept.length > 1 ? pct(mean(keptSorted.slice(1))) : "—"} | ${pct(median(kept))} |`);
+        log();
+        log(`Если здесь результат разваливается, значит преимущество жило в сделках,`);
+        log(`которые нельзя было закрыть, и вердикт по правилу из`);
+        log(`\`docs/PREREGISTRATION.md\` — NO EDGE, какими бы ни были цифры выше.`);
+        log();
+      }
 
       // Ценовой путь лучшей сделки — то единственное, что отличает настоящий
       // рост от артефакта. Настоящий: цена растёт через несколько наблюдений,
