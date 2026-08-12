@@ -3,6 +3,7 @@
 // Используется workflow'ом .github/workflows/status.yml для публикации
 // status/latest.md — чтобы состояние сервера было видно без захода на него.
 import { prisma } from "../src/lib/db";
+import { FREEZE_AT } from "../src/lib/paper/exit-policy";
 
 function ago(d: Date | null | undefined): string {
   if (!d) return "—";
@@ -173,6 +174,26 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
 // сидит внутри общей суммы realized P&L. Если не показать эту долю отдельно,
 // итоговая цифра тихо смешивает посчитанное с придуманным.
 {
+  // Общая сумма P&L мешает две разные вещи: сделки по старым правилам (стоп
+  // −35% плюс лесенка тейков, которая измеримо срезала доходность) и сделки
+  // по замороженным правилам, прошедшим проверку. Первые уже история, вторые —
+  // единственное, что здесь похоже на боевую проверку выходов, поэтому их
+  // результат надо видеть отдельно, а не растворённым в общем минусе.
+  {
+    const closed = positions.filter((p) => p.status === "CLOSED" || p.status === "STOPPED");
+    const post = closed.filter((p) => p.openedAt.getTime() >= FREEZE_AT.getTime());
+    const pre = closed.filter((p) => p.openedAt.getTime() < FREEZE_AT.getTime());
+    const sum = (xs: typeof closed) => xs.reduce((s, p) => s + p.realizedPnlUsd, 0);
+    lines.push(
+      `- по замороженным правилам (после ${FREEZE_AT.toISOString().slice(0, 10)}): ${post.length} закрытых, ` +
+      `$${sum(post).toFixed(2)}; по старым правилам: ${pre.length} закрытых, $${sum(pre).toFixed(2)}`,
+    );
+    if (post.length) {
+      const wins = post.filter((p) => p.realizedPnlUsd > 0).length;
+      lines.push(`  · из них прибыльных ${wins} из ${post.length}; вход по-прежнему по конвейеру READY, а не по правилу из проверки`);
+    }
+  }
+
   const unreliable = positions.filter((p) => p.closeReason?.includes("НЕДОСТОВЕРЕН"));
   if (unreliable.length) {
     const sum = unreliable.reduce((s, p) => s + p.realizedPnlUsd, 0);
