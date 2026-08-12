@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-12T02:43:18.391Z (UTC)
+Сгенерирован: 2026-08-12T04:39:19.818Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 429297; снапшотов за 24ч: 42375
+- Токенов в базе: 431534; снапшотов за 24ч: 42375
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,61 +13,61 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20968
-- robinhood: 6630
-- bsc: 2261
-- base: 565
-- ethereum: 247
-- arbitrum: 87
+- solana: 20984
+- robinhood: 6959
+- bsc: 2262
+- base: 550
+- ethereum: 241
+- arbitrum: 86
 
 ## Статусы возможностей
-- AVOID: 107779
-- DATA_UNAVAILABLE: 32685
-- CANDIDATE: 18
-- WATCH: 15
-- READY: 1
+- AVOID: 107781
+- DATA_UNAVAILABLE: 32684
+- CANDIDATE: 17
+- WATCH: 14
+- READY: 2
 
 ## Топ-5 по score (не отбракованные)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 6.0 дн назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 6.6 дн назад)
+- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 6.1 дн назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 6.7 дн назад)
+- Mog: READY, score 64.6, risk 0.0, conf 88% (обновлено 0 мин назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 8.9 дн назад)
-- GLOW: CANDIDATE, score 59.0, risk 7.7, conf 100% (обновлено 6.0 дн назад)
-- FRANK: CANDIDATE, score 58.9, risk 2.7, conf 100% (обновлено 7.3 дн назад)
+- GLOW: CANDIDATE, score 59.0, risk 7.7, conf 100% (обновлено 6.1 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- Mog — 2026-08-11T22:09:57.022Z (4.5 ч назад)
-- Mog — 2026-08-11T14:23:58.734Z (12.3 ч назад)
-- Mog — 2026-08-11T11:41:21.377Z (15.0 ч назад)
-- BITCOIN — 2026-08-11T07:13:45.144Z (19.5 ч назад)
-- BITCOIN — 2026-08-11T06:28:49.375Z (20.2 ч назад)
+- Mog — 2026-08-12T04:24:56.991Z (14 мин назад)
+- Mog — 2026-08-12T03:03:54.920Z (1.6 ч назад)
+- Mog — 2026-08-12T02:45:02.597Z (1.9 ч назад)
+- Mog — 2026-08-11T22:09:57.022Z (6.5 ч назад)
+- Mog — 2026-08-11T14:23:58.734Z (14.3 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- DERP: CANDIDATE → WATCH (5 мин назад) — Opportunity Score 44.5/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- ARB: CANDIDATE → WATCH (34 мин назад) — Opportunity Score 44.6/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- ARB: WATCH → CANDIDATE (39 мин назад) — Opportunity Score 51.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- DERP: WATCH → CANDIDATE (1.3 ч назад) — Opportunity Score 50.4/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- ARB: CANDIDATE → WATCH (1.3 ч назад) — Opportunity Score 44.8/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- MFLO: AVOID → WATCH (1.5 ч назад) — Opportunity Score 23.8/100, Risk 22.1/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- ARB: WATCH → CANDIDATE (1.6 ч назад) — Opportunity Score 51.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- PRIVATUS: AVOID → CANDIDATE (1.7 ч назад) — Opportunity Score 54.9/100, Risk 8.7/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- ARB: CANDIDATE → WATCH (2.1 ч назад) — Opportunity Score 43.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- ARB: WATCH → CANDIDATE (2.2 ч назад) — Opportunity Score 50.2/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- DUAL: WATCH → CANDIDATE (2.2 ч назад) — Opportunity Score 51.0/100, Risk 4.4/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- DERP: CANDIDATE → WATCH (2.5 ч назад) — Opportunity Score 44.5/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- USDe: WATCH → CANDIDATE (2 мин назад) — Opportunity Score 54.3/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- DERP: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 44.8/100, Risk 16.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- DERP: WATCH → CANDIDATE (8 мин назад) — Opportunity Score 50.5/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- Otter: DATA_UNAVAILABLE → AVOID (8 мин назад) — [insufficient-liquidity] Ликвидность $3,968 ниже минимума $50,000.
+- PRIVATUS: CANDIDATE → WATCH (9 мин назад) — Opportunity Score 44.9/100, Risk 15.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Mog: CANDIDATE → READY (14 мин назад) — Opportunity Score 69.8/100, Risk 0.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- DERP: CANDIDATE → WATCH (32 мин назад) — Opportunity Score 44.9/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- LOUIE: WATCH → AVOID (37 мин назад) — [sell-not-confirmed] Продажа не подтверждается симуляцией маршрута (возможен honeypot).
+- AKE: CANDIDATE → WATCH (1.1 ч назад) — Opportunity Score 44.0/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- AKE: WATCH → CANDIDATE (1.1 ч назад) — Opportunity Score 50.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- USDe: CANDIDATE → WATCH (1.2 ч назад) — Opportunity Score 43.1/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- DERP: WATCH → CANDIDATE (1.5 ч назад) — Opportunity Score 50.8/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
 
 ## Позиции
 - Открытых: 3; всего: 25; realized P&L: $-538.91
 - из них закрыто по устаревшей цене (результат недостоверен): 3 шт на $2.34 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): Mog (1 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): Mog (57 мин назад)
 
 ## Последние позиции (детально)
 - Mog [paper/OPEN] вход $1.012e-7 × 196633338 = $20.00, остаток 100%, realized $0.00
+    · 03:42:27 [ALERT] Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от 2026-08-12T03:41:57.180Z.
     · 02:42:27 [ALERT] Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от 2026-08-12T02:42:02.460Z.
-    · 01:42:26 [ALERT] Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от 2026-08-12T01:41:59.941Z.
 - Jimothy [paper/STOPPED] вход $0.006642 × 2996 = $20.00, остаток 0%, realized $-1.17, закрыта: Трейлинг: цена $0.00633500 ≤ 70% от максимума $0.0206500
     · 07:47:49 [STOP_HIT] Трейлинг: цена $0.00633500 ≤ 70% от максимума $0.0206500: продано 2996.28 шт по $0.00631549, P&L $-1.17
     · 07:47:19 [NOTE] Unrealized P&L 211% (цена $0.0206500)
@@ -97,18 +97,18 @@
     · 14:48:20 [ALERT] Прямой запрос цены не отвечает, снапшот сканера устарел (2026-08-11T09:42:57.522Z): проверяются только стоп и обвал ликвидности, трейлинг — 
 
 ## Последний backtest
-- DONE (6.1 ч назад): NO EDGE: expectancy -7.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (0 мин назад): NO EDGE: expectancy -7.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 636449 / err 26, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 5.9 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 5094 / err 3377, последний успех 2.9 ч назад)
-- geckoterminal:base: ok (ok 8462 / err 12, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 8237 / err 236, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 5253 / err 3219, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 3523 / err 4933, последний успех 0 мин назад)
-- geckoterminal:solana: ok (ok 8474 / err 0, последний успех 1 мин назад)
-- goplus: ok (ok 12903 / err 8, последний успех 0 мин назад)
-- jupiter: ok (ok 364186 / err 711, последний успех 0 мин назад)
-- rugcheck: ok (ok 127740 / err 383, последний успех 9 мин назад)
+- dexscreener: ok (ok 640741 / err 26, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 6.0 дн назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 5094 / err 3493, последний успех 4.9 ч назад)
+- geckoterminal:base: ok (ok 8578 / err 12, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 8353 / err 236, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 5369 / err 3219, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 3639 / err 4933, последний успех 0 мин назад)
+- geckoterminal:solana: ok (ok 8590 / err 0, последний успех 1 мин назад)
+- goplus: ok (ok 13135 / err 8, последний успех 0 мин назад)
+- jupiter: 🔴 HTTP 400 https://lite-api.jup.ag/swap/v1/quote?inputMint=4dZGSWhYDLZVHQzdhh6PqRVLh5sTjppHEq1PK1p5W3Ju&outputMint=So11111111111111111111111111111111111111112&amount=1063642212&slippageBps=300 (ok 364421 / err 718, последний успех 4 мин назад)
+- rugcheck: ok (ok 127756 / err 383, последний успех 4 мин назад)
 
