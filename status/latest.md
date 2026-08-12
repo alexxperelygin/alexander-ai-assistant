@@ -1,10 +1,10 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-12T12:43:46.677Z (UTC)
+Сгенерирован: 2026-08-12T12:44:52.324Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 441257; снапшотов за 24ч: 42559
+- Токенов в базе: 441260; снапшотов за 24ч: 42559
 - Ошибок в audit log за 24ч: 0
 
 ## Действующие пороги
@@ -13,10 +13,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 21153
-- robinhood: 7441
-- bsc: 2313
-- base: 566
+- solana: 21137
+- robinhood: 7435
+- bsc: 2312
+- base: 567
 - ethereum: 226
 - arbitrum: 87
 
@@ -30,39 +30,39 @@
 ## Топ-5 по score (не отбракованные)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 6.4 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 7.0 дн назад)
+- PRISM: READY, score 64.6, risk 10.0, conf 88% (обновлено 1 мин назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 9.3 дн назад)
-- PRISM: READY, score 62.9, risk 10.0, conf 88% (обновлено 1 мин назад)
-- Cupsey: CANDIDATE, score 59.8, risk 1.8, conf 100% (обновлено 1 мин назад)
+- Cupsey: CANDIDATE, score 60.0, risk 1.8, conf 100% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- PRISM — 2026-08-12T12:37:04.965Z (7 мин назад)
-- Cupsey — 2026-08-12T12:24:08.997Z (20 мин назад)
-- PRISM — 2026-08-12T12:13:05.098Z (31 мин назад)
-- Cupsey — 2026-08-12T12:03:03.100Z (41 мин назад)
-- PRISM — 2026-08-12T12:02:59.642Z (41 мин назад)
+- PRISM — 2026-08-12T12:37:04.965Z (8 мин назад)
+- Cupsey — 2026-08-12T12:24:08.997Z (21 мин назад)
+- PRISM — 2026-08-12T12:13:05.098Z (32 мин назад)
+- Cupsey — 2026-08-12T12:03:03.100Z (42 мин назад)
+- PRISM — 2026-08-12T12:02:59.642Z (42 мин назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- USDe: CANDIDATE → WATCH (1 мин назад) — Opportunity Score 43.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- Cupsey: READY → CANDIDATE (2 мин назад) — Opportunity Score 59.9/100, Risk 2.0/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- PRISM: CANDIDATE → READY (7 мин назад) — Opportunity Score 66.6/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- Cupsey: CANDIDATE → READY (20 мин назад) — Opportunity Score 66.1/100, Risk 1.2/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- USDe: WATCH → CANDIDATE (23 мин назад) — Opportunity Score 51.2/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- PRISM: READY → CANDIDATE (25 мин назад) — Opportunity Score 59.7/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: READY → CANDIDATE (27 мин назад) — Opportunity Score 59.8/100, Risk 7.0/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- PRISM: CANDIDATE → READY (31 мин назад) — Opportunity Score 66.0/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- PRISM: READY → CANDIDATE (36 мин назад) — Opportunity Score 59.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: CANDIDATE → READY (41 мин назад) — Opportunity Score 66.5/100, Risk 1.6/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- PRISM: CANDIDATE → READY (41 мин назад) — Opportunity Score 66.6/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- USDe: CANDIDATE → WATCH (2 мин назад) — Opportunity Score 43.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Cupsey: READY → CANDIDATE (3 мин назад) — Opportunity Score 59.9/100, Risk 2.0/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- PRISM: CANDIDATE → READY (8 мин назад) — Opportunity Score 66.6/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- Cupsey: CANDIDATE → READY (21 мин назад) — Opportunity Score 66.1/100, Risk 1.2/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- USDe: WATCH → CANDIDATE (24 мин назад) — Opportunity Score 51.2/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- PRISM: READY → CANDIDATE (26 мин назад) — Opportunity Score 59.7/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- Cupsey: READY → CANDIDATE (28 мин назад) — Opportunity Score 59.8/100, Risk 7.0/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- PRISM: CANDIDATE → READY (32 мин назад) — Opportunity Score 66.0/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- PRISM: READY → CANDIDATE (37 мин назад) — Opportunity Score 59.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- Cupsey: CANDIDATE → READY (42 мин назад) — Opportunity Score 66.5/100, Risk 1.6/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- PRISM: CANDIDATE → READY (42 мин назад) — Opportunity Score 66.6/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
 - Cupsey: READY → CANDIDATE (1.2 ч назад) — Opportunity Score 58.9/100, Risk 7.6/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
 
 ## Позиции
 - Открытых: 5; всего: 28; realized P&L: $-558.69
 - из них закрыто по устаревшей цене (результат недостоверен): 3 шт на $2.34 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): Mog (1 мин назад), PRISM (22 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): Mog (2 мин назад), PRISM (23 мин назад)
 
 ## Последние позиции (детально)
 - Cupsey [paper/OPEN] вход $0.01053 × 1890 = $20.00, остаток 100%, realized $0.00
@@ -96,18 +96,18 @@
     · 11:44:45 [ALERT] Прямой запрос цены не отвечает, снапшот сканера устарел (2026-08-09T05:48:45.637Z): проверяются только стоп и обвал ликвидности, трейлинг — 
 
 ## Последний backtest
-- DONE (0 мин назад): NO EDGE: expectancy -7.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (1 мин назад): NO EDGE: expectancy -7.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 659375 / err 26, последний успех 0 мин назад)
+- dexscreener: ok (ok 659416 / err 26, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 6.3 дн назад)
-- geckoterminal:arbitrum: ok (ok 5219 / err 3852, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 9063 / err 12, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 8838 / err 236, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 5854 / err 3219, последний успех 0 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 4012 / err 5044, последний успех 14 мин назад)
-- geckoterminal:solana: ok (ok 9075 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 14104 / err 8, последний успех 2 мин назад)
-- jupiter: ok (ok 364805 / err 736, последний успех 1 мин назад)
-- rugcheck: ok (ok 127794 / err 383, последний успех 8 мин назад)
+- geckoterminal:arbitrum: ok (ok 5221 / err 3852, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 9064 / err 12, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 8839 / err 236, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 5855 / err 3219, последний успех 0 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 4012 / err 5045, последний успех 15 мин назад)
+- geckoterminal:solana: ok (ok 9076 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 14105 / err 8, последний успех 1 мин назад)
+- jupiter: ok (ok 364808 / err 736, последний успех 1 мин назад)
+- rugcheck: ok (ok 127794 / err 383, последний успех 9 мин назад)
 
