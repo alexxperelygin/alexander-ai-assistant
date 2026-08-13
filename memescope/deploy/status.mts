@@ -92,6 +92,29 @@ lines.push(`- Ошибок в audit log за 24ч: ${errors24h}`);
   } catch (e) {
     lines.push(`- состояние pm2 недоступно: ${String(e).slice(0, 120)}`);
   }
+
+  // Состояние процесса — не то же самое, что работоспособность сервиса.
+  // 13 августа pm2 сообщал «online, перезапусков 0», пока панель отдавала 503
+  // на каждый запрос: процесс жил, но не отвечал. Проверка, добавленная днём
+  // раньше, этого не ловила, потому что спрашивала не то. Единственный
+  // честный признак — реальный HTTP-запрос к приложению.
+  try {
+    const { readFileSync } = await import("node:fs");
+    let port = "3000";
+    for (const p of ["../.web-port", ".web-port", "/opt/alexander-ai-assistant/.web-port"]) {
+      try { port = readFileSync(p, "utf8").trim(); break; } catch { /* следующий путь */ }
+    }
+    const t0 = Date.now();
+    const res = await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(8000) });
+    const ms = Date.now() - t0;
+    lines.push(
+      res.ok || res.status === 401
+        ? `- дашборд: ✅ отвечает (HTTP ${res.status}, ${ms} мс, порт ${port})`
+        : `- дашборд: 🔴 HTTP ${res.status} за ${ms} мс (порт ${port})`,
+    );
+  } catch (e) {
+    lines.push(`- дашборд: 🔴 НЕ ОТВЕЧАЕТ — ${String(e).slice(0, 100)}`);
+  }
 }
 lines.push(``);
 
