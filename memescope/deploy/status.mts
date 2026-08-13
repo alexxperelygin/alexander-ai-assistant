@@ -63,6 +63,36 @@ lines.push(`## Ядро`);
 lines.push(`- Worker: ${workerOk ? "✅ работает" : "🔴 НЕ РАБОТАЕТ"} (последний цикл: ${ago(lastScan?.createdAt)})`);
 lines.push(`- Токенов в базе: ${tokenCount}; снапшотов за 24ч: ${snaps24h}`);
 lines.push(`- Ошибок в audit log за 24ч: ${errors24h}`);
+
+// Состояние ВЕБ-процесса. Раньше отчёт следил только за воркером, и когда
+// 12 августа дашборд четыре часа отдавал 503, отчёт всё это время бодро
+// сообщал «worker работает» — потому что воркер и правда работал, а панель
+// лежала. Пробел закрыт: pm2 знает и число перезапусков, и потребление
+// памяти, а именно перезапуски по лимиту 500 МБ — главный подозреваемый.
+{
+  const { execFileSync } = await import("node:child_process");
+  try {
+    const raw = execFileSync("pm2", ["jlist"], { encoding: "utf8", timeout: 10_000 });
+    const procs = JSON.parse(raw) as {
+      name: string;
+      pm2_env?: { status?: string; restart_time?: number };
+      monit?: { memory?: number };
+    }[];
+    for (const name of ["memescope-web", "memescope-worker"]) {
+      const p = procs.find((x) => x.name === name);
+      if (!p) { lines.push(`- ${name}: 🔴 процесса нет в pm2`); continue; }
+      const mb = Math.round((p.monit?.memory ?? 0) / 1024 / 1024);
+      const restarts = p.pm2_env?.restart_time ?? 0;
+      const st = p.pm2_env?.status ?? "?";
+      // Много перезапусков при памяти у лимита = процесс циклически падает,
+      // и одиночный restart вылечит это лишь до следующего раза.
+      const warn = st !== "online" ? "🔴" : restarts > 20 ? "⚠️" : "";
+      lines.push(`- ${name}: ${warn} ${st}, память ${mb} МБ, перезапусков ${restarts}`);
+    }
+  } catch (e) {
+    lines.push(`- состояние pm2 недоступно: ${String(e).slice(0, 120)}`);
+  }
+}
 lines.push(``);
 
 // Разбивка по сетям: подтверждает, что мультичейн-сканирование реально
