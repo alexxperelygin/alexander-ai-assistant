@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-13T20:40:38.373Z (UTC)
+Сгенерирован: 2026-08-13T20:41:38.441Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 474976; снапшотов за 24ч: 42649
+- Токенов в базе: 475017; снапшотов за 24ч: 42650
 - Ошибок в audit log за 24ч: 0
 - memescope-web:  online, память 76 МБ, перезапусков 0
 - memescope-worker:  online, память 77 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 166 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 182 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -17,9 +17,9 @@
 
 ## Новые токены за 24ч по сетям
 - solana: 20456
-- robinhood: 2820
-- bsc: 1855
-- base: 573
+- robinhood: 2840
+- bsc: 1854
+- base: 574
 - ethereum: 174
 - arbitrum: 5
 
@@ -33,14 +33,14 @@
 ## Топ-5 по score (не отбракованные)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 7.8 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 8.3 дн назад)
-- USTF: CANDIDATE, score 63.8, risk 0.3, conf 100% (обновлено 1 мин назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 10.6 дн назад)
+- USTF: CANDIDATE, score 63.0, risk 1.3, conf 100% (обновлено 1 мин назад)
 - GLOW: CANDIDATE, score 59.0, risk 7.7, conf 100% (обновлено 7.7 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
 - Mog — 2026-08-13T18:05:52.701Z (2.6 ч назад)
 - Cupsey — 2026-08-13T15:01:49.007Z (5.7 ч назад)
-- Mog — 2026-08-13T14:19:44.117Z (6.3 ч назад)
+- Mog — 2026-08-13T14:19:44.117Z (6.4 ч назад)
 - Cupsey — 2026-08-13T13:18:49.894Z (7.4 ч назад)
 - Cupsey — 2026-08-13T12:34:54.897Z (8.1 ч назад)
 
@@ -48,18 +48,18 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- NOYA: CANDIDATE → WATCH (17 мин назад) — Opportunity Score 43.1/100, Risk 17.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- NOYA: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.3/100, Risk 17.2/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- DERP: CANDIDATE → WATCH (21 мин назад) — Opportunity Score 44.8/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- NOYA: AVOID → WATCH (26 мин назад) — Opportunity Score 46.3/100, Risk 17.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- utility: — → WATCH (49 мин назад) — Opportunity Score 32.8/100, Risk 10.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- GTABANK: — → AVOID (51 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- RL: — → AVOID (51 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- FLOCK: WATCH → CANDIDATE (52 мин назад) — Opportunity Score 50.2/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- AERO: WATCH → CANDIDATE (52 мин назад) — Opportunity Score 50.3/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- Rent: — → AVOID (53 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- BSC: — → AVOID (54 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- rwage: — → AVOID (55 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- NOYA: CANDIDATE → WATCH (18 мин назад) — Opportunity Score 43.1/100, Risk 17.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- NOYA: WATCH → CANDIDATE (22 мин назад) — Opportunity Score 50.3/100, Risk 17.2/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- DERP: CANDIDATE → WATCH (22 мин назад) — Opportunity Score 44.8/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- NOYA: AVOID → WATCH (27 мин назад) — Opportunity Score 46.3/100, Risk 17.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- utility: — → WATCH (51 мин назад) — Opportunity Score 32.8/100, Risk 10.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
+- GTABANK: — → AVOID (52 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- RL: — → AVOID (52 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- FLOCK: WATCH → CANDIDATE (53 мин назад) — Opportunity Score 50.2/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- AERO: WATCH → CANDIDATE (53 мин назад) — Opportunity Score 50.3/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- Rent: — → AVOID (54 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- BSC: — → AVOID (55 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- rwage: — → AVOID (56 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
 
 ## Позиции
 - Открытых: 4; всего: 29; realized P&L: $-567.35
@@ -67,7 +67,7 @@
   · из них прибыльных 3 из 9; вход по-прежнему по конвейеру READY, а не по правилу из проверки
 - из них закрыто по устаревшей цене (результат недостоверен): 3 шт на $2.34 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): Mog (56 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): Mog (57 мин назад)
 
 ## Последние позиции (детально)
 - PRISM [paper/STOPPED] вход $1012 × 0 = $20.00, остаток 0%, realized $-4.34, закрыта: Stop: цена $803.400 ≤ стопа $809.642
@@ -101,18 +101,18 @@
     · 10:43:45 [ALERT] Прямой запрос цены не отвечает, снапшот сканера устарел (2026-08-09T04:57:45.187Z): проверяются только стоп и обвал ликвидности, трейлинг — 
 
 ## Последний backtest
-- DONE (0 мин назад): NO EDGE: expectancy -7.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (1 мин назад): NO EDGE: expectancy -7.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 735203 / err 26, последний успех 0 мин назад)
+- dexscreener: ok (ok 735242 / err 26, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 7.6 дн назад)
-- geckoterminal:arbitrum: ok (ok 6731 / err 4257, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 10979 / err 13, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 10613 / err 378, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 6843 / err 4147, последний успех 0 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 4506 / err 6464, последний успех 2 мин назад)
-- geckoterminal:solana: ok (ok 10992 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 17516 / err 8, последний успех 1 мин назад)
-- jupiter: ok (ok 376627 / err 769, последний успех 1 мин назад)
-- rugcheck: ok (ok 128236 / err 396, последний успех 3 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 6731 / err 4258, последний успех 2 мин назад)
+- geckoterminal:base: ok (ok 10980 / err 13, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 10614 / err 378, последний успех 0 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 6843 / err 4148, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 4507 / err 6464, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 10993 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 17517 / err 8, последний успех 1 мин назад)
+- jupiter: ok (ok 376630 / err 769, последний успех 1 мин назад)
+- rugcheck: ok (ok 128236 / err 396, последний успех 4 мин назад)
 
