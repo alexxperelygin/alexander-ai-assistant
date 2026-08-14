@@ -151,7 +151,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Отчёты — сгенерированные артефакты, а не правки, которые надо
+          # сливать. Прежний `git pull --rebase` пытался слить свою версию
+          # status/latest.md с чужой и падал конфликтом, когда два прогона шли
+          # подряд: 14 августа так потерялся отчёт, снятый специально в момент
+          # сбоя. Правильная стратегия здесь — «последний перезаписывает».
+          #
+          # reset --mixed переносит базу на свежий main, НЕ трогая рабочее
+          # дерево: только что сгенерированные файлы остаются на месте и
+          # добавляются уже поверх актуального состояния. Конфликт при этом
+          # невозможен в принципе, а push всегда fast-forward.
+          git fetch -q origin main
+          git reset -q --mixed origin/main
           git add status/
           git commit -m "status: ${{ steps.task.outputs.task }} report [skip ci]" || echo "нет изменений"
-          git pull --rebase origin main
           git push
