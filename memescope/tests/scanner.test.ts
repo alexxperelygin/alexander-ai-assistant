@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { roundRobinByChain } from "../src/lib/ingestion/scanner";
 
 const t = (chain: string, n: number) => ({ chain, id: `${chain}-${n}` });
@@ -29,5 +29,44 @@ describe("roundRobinByChain", () => {
 
   it("handles an empty input", () => {
     expect(roundRobinByChain([], 5)).toEqual([]);
+  });
+});
+
+// --- Прямой запрос цены и сеть ---
+//
+// Регрессия, найденная 17 августа: монитор позиций вызывал getMarketSnapshot
+// без сети. У провайдера параметр был необязательным со значением "solana", а
+// внутри стоит фильтр по chainId — поэтому по каждой позиции в base, bsc,
+// ethereum и arbitrum прямой запрос возвращал null. Ошибка компилировалась,
+// тесты проходили, и половина портфеля тихо жила на запасном источнике, где
+// трейлинг-стоп считается только пока снапшот свежее 30 минут.
+describe("DexScreenerMarketData.getMarketSnapshot", () => {
+  const pair = (chainId: string, priceUsd: string, liq: number) => ({
+    chainId, dexId: "x", pairAddress: "p" + chainId,
+    baseToken: { address: "a", name: "n", symbol: "S" },
+    priceUsd, liquidity: { usd: liq },
+  });
+
+  it("возвращает пару запрошенной сети, а не solana по умолчанию", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ pairs: [pair("solana", "1", 10_000), pair("base", "2", 90_000)] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { DexScreenerMarketData } = await import("../src/lib/providers/dexscreener");
+    const snap = await new DexScreenerMarketData().getMarketSnapshot("0xabc", "base");
+    expect(snap?.priceUsd).toBe(2);
+    vi.unstubAllGlobals();
+  });
+
+  it("отдаёт null, когда в ответе нет пар запрошенной сети", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ pairs: [pair("solana", "1", 10_000)] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { DexScreenerMarketData } = await import("../src/lib/providers/dexscreener");
+    expect(await new DexScreenerMarketData().getMarketSnapshot("0xabc", "bsc")).toBeNull();
+    vi.unstubAllGlobals();
   });
 });

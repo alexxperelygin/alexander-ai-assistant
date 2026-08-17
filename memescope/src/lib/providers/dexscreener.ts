@@ -24,7 +24,7 @@ interface DsPair {
 export class DexScreenerMarketData implements MarketDataProvider {
   readonly name = "dexscreener";
 
-  async getMarketSnapshot(mint: string, chain = "solana"): Promise<MarketSnapshot | null> {
+  async getMarketSnapshot(mint: string, chain: string): Promise<MarketSnapshot | null> {
     const json = await fetchJson<{ pairs: DsPair[] | null }>(
       `https://api.dexscreener.com/latest/dex/tokens/${mint}`,
       { source: this.name, minIntervalMs: 250 },

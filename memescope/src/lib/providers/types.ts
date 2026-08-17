@@ -17,7 +17,16 @@ export interface DiscoveryProvider {
 export interface MarketDataProvider {
   readonly name: string;
   /** Current market state for a token (by mint/address on the given chain). Null = not found. */
-  getMarketSnapshot(mint: string, chain?: string): Promise<MarketSnapshot | null>;
+  /**
+   * Сеть ОБЯЗАТЕЛЬНА. Раньше параметр был необязательным, а в реализации стоял
+   * `chain = "solana"` — и монитор позиций, забывший его передать, молча
+   * получал null по каждому токену в base, bsc, ethereum и arbitrum: внутри
+   * ответ фильтруется по chainId. Ошибка компилировалась и не падала, просто
+   * половина портфеля переставала получать прямую цену. Необязательный
+   * параметр со значением по умолчанию — это ровно та форма, в которой такая
+   * ошибка не видна ни компилятору, ни тестам.
+   */
+  getMarketSnapshot(mint: string, chain: string): Promise<MarketSnapshot | null>;
 }
 
 export interface RiskProvider {
