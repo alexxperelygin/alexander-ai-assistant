@@ -18,7 +18,7 @@ export default async function Overview() {
   const dayAgo = new Date(Date.now() - DAY_MS);
   const [
     lastScan, topOpps, openPositions, notifications, todayClosed, sources, recentOpps,
-    snaps24h, newTokens24h, errors24h, closedAll,
+    snaps24h, newTokens24h, errors24h, closedAll, evaluated24h, avoided24h,
   ] = await Promise.all([
     prisma.auditLog.findFirst({ where: { action: "scan.cycle" }, orderBy: { createdAt: "desc" } }),
     prisma.opportunity.findMany({
@@ -35,6 +35,10 @@ export default async function Overview() {
     prisma.notification.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
     prisma.position.findMany({ where: { closedAt: { gte: startOfToday() } } }),
     prisma.sourceHealth.findMany(),
+    // ВЫБОРКА, а не полный список: тысяча записей нужна только чтобы посчитать
+    // частоты причин отбраковки. Общее число и число отбраковок берутся
+    // отдельными count'ами — иначе `take: 1000` печатался бы как «разобрано
+    // 1 000 токенов», то есть лимит запроса выдавался бы за измерение.
     prisma.opportunity.findMany({
       where: { updatedAt: { gte: dayAgo } },
       select: { status: true, rejections: true },
@@ -46,6 +50,10 @@ export default async function Overview() {
     prisma.position.findMany({
       where: { status: { in: ["CLOSED", "STOPPED"] } },
       select: { entryRule: true, realizedPnlUsd: true },
+    }),
+    prisma.opportunity.count({ where: { updatedAt: { gte: dayAgo } } }),
+    prisma.opportunity.count({
+      where: { updatedAt: { gte: dayAgo }, status: { in: ["AVOID", "DATA_UNAVAILABLE"] } },
     }),
   ]);
 
@@ -59,10 +67,11 @@ export default async function Overview() {
 
   const ready = topOpps.filter((o) => o.status === "READY");
   const nearest = topOpps.filter((o) => o.status !== "READY").slice(0, 3);
+  // Частоты причин считаются по выборке — это честно и достаточно: нужен
+  // порядок «что чаще режет», а не точный счёт. Сами же итоги (разобрано,
+  // отбраковано) берутся из count'ов по всей сутке.
   const rejCounts = new Map<string, number>();
-  let avoidCount = 0;
   for (const o of recentOpps) {
-    if (o.status === "AVOID" || o.status === "DATA_UNAVAILABLE") avoidCount++;
     if (o.rejections) {
       try {
         for (const r of JSON.parse(o.rejections) as { rule: string }[]) {
@@ -111,14 +120,14 @@ export default async function Overview() {
     {
       title: "Оценка",
       subtitle: "разобрано за 24ч",
-      value: recentOpps.length > 0 ? recentOpps.length.toLocaleString("ru") : null,
-      state: recentOpps.length > 0 ? "think" : "idle",
+      value: evaluated24h > 0 ? evaluated24h.toLocaleString("ru") : null,
+      state: evaluated24h > 0 ? "think" : "idle",
     },
     {
       title: "Иммунитет",
       subtitle: "отбраковано за 24ч",
-      value: recentOpps.length ? `${Math.round((avoidCount / recentOpps.length) * 100)}%` : null,
-      state: recentOpps.length === 0 ? "idle" : avoidCount / recentOpps.length > 0.5 ? "good" : "warn",
+      value: evaluated24h ? `${Math.round((avoided24h / evaluated24h) * 100)}%` : null,
+      state: evaluated24h === 0 ? "idle" : avoided24h / evaluated24h > 0.5 ? "good" : "warn",
     },
     {
       title: "Кровоток",
@@ -187,12 +196,12 @@ export default async function Overview() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Vital
           label="Иммунный ответ"
-          value={recentOpps.length ? `${Math.round((avoidCount / recentOpps.length) * 100)}%` : null}
-          state={recentOpps.length === 0 ? "idle" : "good"}
-          fill={recentOpps.length ? avoidCount / recentOpps.length : undefined}
+          value={evaluated24h ? `${Math.round((avoided24h / evaluated24h) * 100)}%` : null}
+          state={evaluated24h === 0 ? "idle" : "good"}
+          fill={evaluated24h ? avoided24h / evaluated24h : undefined}
           note={
             topRejections.length
-              ? <>отбраковано {avoidCount} из {recentOpps.length}. Причины: {topRejections.map(([r, n]) => `${RU_RULES[r] ?? r} (${n})`).join(", ")}</>
+              ? <>отбраковано {avoided24h.toLocaleString("ru")} из {evaluated24h.toLocaleString("ru")}. Частые причины (по выборке из {recentOpps.length}): {topRejections.map(([r, n]) => `${RU_RULES[r] ?? r} (${n})`).join(", ")}</>
               : "нечего отбраковывать — оценок за сутки не было"
           }
         />
@@ -241,7 +250,8 @@ export default async function Overview() {
             Покой: покупать нечего
           </h2>
           <p className="text-sm" style={{ color: "var(--txt-dim)" }}>
-            За сутки разобрано {recentOpps.length} токенов, отбраковано {avoidCount}. Это норма:
+            За сутки разобрано {evaluated24h.toLocaleString("ru")} токенов, отбраковано{" "}
+            {avoided24h.toLocaleString("ru")}. Это норма:
             почти все новые мем-коины — мусор или ловушки, и фильтры обязаны их резать. Сигнал —
             редкое событие, а не ежедневное.
           </p>
