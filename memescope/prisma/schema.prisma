@@ -178,6 +178,14 @@ model Position {
   opportunityId String?
   opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
   mode          String // paper | live (live = user-confirmed manual trade, tracked only)
+  /**
+   * Каким правилом открыта позиция: ready-pipeline (конвейер скоринга) или
+   * validated-liquidity (правило из docs/PREREGISTRATION.md). Без этого поля
+   * два трека смешиваются в одном P&L, и результат проверенного правила
+   * невозможно отличить от результата непроверенного. Пусто у позиций,
+   * открытых до появления второго трека — все они ready-pipeline.
+   */
+  entryRule     String?
   status        String // OPEN | PARTIAL_EXIT | CLOSED | STOPPED | INVALIDATED
   openedAt      DateTime @default(now())
   closedAt      DateTime?

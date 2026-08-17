@@ -18,6 +18,26 @@ export default async function PositionsPage() {
   const closed = positions.filter((p) => p.status !== "OPEN" && p.status !== "PARTIAL_EXIT");
   const totalRealized = positions.reduce((s, p) => s + p.realizedPnlUsd, 0);
 
+  // Портфель ведёт два РАЗНЫХ правила входа, и общая сумма P&L их складывает.
+  // По ней невозможно понять, работает ли проверенное правило: его результат
+  // тонет в убытке конвейера READY, про который уже известно, что он NO EDGE.
+  // Поэтому итог показывается ещё и раздельно (docs/PREREGISTRATION.md).
+  const TRACKS = [
+    { rule: "validated-liquidity", title: "Проверенное правило (ликвидность > $50k)" },
+    { rule: "ready-pipeline", title: "Конвейер READY (backtest: NO EDGE)" },
+  ] as const;
+  const tracks = TRACKS.map((t) => {
+    const mine = positions.filter((p) => (p.entryRule ?? "ready-pipeline") === t.rule);
+    const done = mine.filter((p) => p.status !== "OPEN" && p.status !== "PARTIAL_EXIT");
+    return {
+      ...t,
+      open: mine.length - done.length,
+      closed: done.length,
+      pnl: done.reduce((s, p) => s + p.realizedPnlUsd, 0),
+      wins: done.filter((p) => p.realizedPnlUsd > 0).length,
+    };
+  }).filter((t) => t.open + t.closed > 0);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -27,6 +47,32 @@ export default async function PositionsPage() {
           <b className={totalRealized >= 0 ? "text-emerald-400" : "text-red-400"}>{fmtUsd(totalRealized, 2)}</b>
         </div>
       </div>
+
+      {tracks.length > 1 && (
+        <Card title="По правилам входа">
+          <table className="table-base">
+            <thead>
+              <tr><th>Правило</th><th>Открыто</th><th>Закрыто</th><th>Прибыльных</th><th>Realized</th></tr>
+            </thead>
+            <tbody>
+              {tracks.map((t) => (
+                <tr key={t.rule}>
+                  <td className="text-xs">{t.title}</td>
+                  <td>{t.open}</td>
+                  <td>{t.closed}</td>
+                  <td>{t.closed ? `${t.wins} из ${t.closed}` : "—"}</td>
+                  <td className={t.pnl >= 0 ? "text-emerald-400" : "text-red-400"}>{fmtUsd(t.pnl, 2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs text-zinc-400">
+            Это два разных правила входа, а не два портфеля одной стратегии. До 100 закрытых
+            сделок по проверенному правилу его проценты читать как результат нельзя: на
+            распределении с толстым хвостом одна сделка двигает среднее на сотни процентов.
+          </p>
+        </Card>
+      )}
 
       <Card title={`Открытые (${open.length})`}>
         {open.length === 0 ? (
