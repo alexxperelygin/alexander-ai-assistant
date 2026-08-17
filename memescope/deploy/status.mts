@@ -5,6 +5,7 @@
 import { prisma } from "../src/lib/db";
 import { FREEZE_AT } from "../src/lib/paper/exit-policy";
 import { STALE_ALERT_INTERVAL_MS } from "../src/lib/monitor/positions";
+import { VALIDATED_ENTRY } from "../src/lib/strategy/validated-entry";
 
 function ago(d: Date | null | undefined): string {
   if (!d) return "—";
@@ -286,11 +287,28 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     // Пропущенные входы — единственное известное расхождение живого прогона с
     // пересчётом по истории. Молча их не показывать нельзя: без этой строки
     // трек выглядит полной копией проверенного правила, а он ею не является.
-    const skipped = await prisma.auditLog.count({
+    // Считаются РАЗНЫЕ токены, а не записи. Одна запись на попытку давала
+    // 353 отказа за сутки при 25 слотах — почти все повторные, по одним и тем
+    // же токенам, и цифра читалась как «правило дало 353 входа». Столько
+    // разных токенов не было; повторы теперь и не возникают (токен, однажды
+    // отклонённый, больше не рассматривается), но считать всё равно надо по
+    // токенам: иначе старые записи в окне продолжают завышать число.
+    const skips = await prisma.auditLog.findMany({
       where: { action: "validated.entry.skipped", createdAt: { gte: since24h } },
+      select: { details: true },
     });
-    if (skipped)
-      lines.push(`  · пропущено входов за 24ч (нет свободного слота): ${skipped} — выборка трека этим смещена, см. docs/PREREGISTRATION.md`);
+    const skippedTokens = new Set<string>();
+    for (const s of skips) {
+      try {
+        const id = (JSON.parse(s.details ?? "{}") as { tokenId?: string }).tokenId;
+        if (id) skippedTokens.add(id);
+      } catch { /* битая запись — просто не учитываем */ }
+    }
+    if (skippedTokens.size)
+      lines.push(
+        `  · пропущено токенов за 24ч (нет свободного слота): ${skippedTokens.size} при ${VALIDATED_ENTRY.maxOpenPositions} слотах — ` +
+        `выборка трека этим смещена, см. docs/PREREGISTRATION.md`,
+      );
   }
 
   const unreliable = positions.filter((p) => p.closeReason?.includes("НЕДОСТОВЕРЕН"));
