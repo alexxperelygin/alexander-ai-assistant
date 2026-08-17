@@ -3,21 +3,19 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MemeScope AI — панель организма",
+  title: "MemeScope AI",
   description:
     "Исследовательский сканер мем-коинов: прозрачный скоринг и бумажная торговля. Не инвестиционная рекомендация.",
 };
 
-// Разделы названы по функции органа, но в подписи всегда стоит техническое имя:
-// метафора помогает ориентироваться, а понимать надо реальную систему.
 const NAV = [
-  { href: "/", label: "Жизненные показатели", hint: "общее состояние" },
-  { href: "/scanner", label: "Поле зрения", hint: "живой поток сканера" },
-  { href: "/positions", label: "Кровоток", hint: "позиции и P&L" },
-  { href: "/signals", label: "Память", hint: "история сигналов" },
+  { href: "/", label: "Обзор", hint: "состояние системы" },
+  { href: "/scanner", label: "Сканер", hint: "живой поток оценок" },
+  { href: "/positions", label: "Позиции", hint: "сделки и P&L" },
+  { href: "/signals", label: "История сигналов", hint: "переходы статусов" },
   { href: "/backtests", label: "Проверка гипотез", hint: "backtest" },
-  { href: "/settings", label: "Пороги", hint: "настройки риска" },
-  { href: "/health", label: "Диагностика", hint: "здоровье источников" },
+  { href: "/settings", label: "Настройки", hint: "пороги риска и отбора" },
+  { href: "/health", label: "Здоровье системы", hint: "источники и процессы" },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -40,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </span>
               </div>
               <div className="mt-1 text-[11px]" style={{ color: "var(--txt-faint)" }}>
-                исследовательский организм · только бумага
+                исследовательский стенд · только бумага
               </div>
             </div>
 

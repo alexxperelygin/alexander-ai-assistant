@@ -131,39 +131,41 @@ body::before {
   box-shadow: 0 0 12px currentColor;
 }
 
-/* --- Синапсы и узлы карты --- */
+/* --- Нейроны и синапсы --- */
 
-.synapse {
-  fill: none;
-  stroke-linecap: round;
-  animation: flow 2.6s linear infinite;
-}
-@keyframes flow {
-  to { stroke-dashoffset: -34; }
+.impulse {
+  filter: drop-shadow(0 0 6px currentColor);
 }
 
-.node-halo { animation: breathe 3.4s ease-in-out infinite; transform-origin: center; }
+.soma-halo { animation: breathe 3.6s ease-in-out infinite; transform-origin: center; }
 @keyframes breathe {
-  0%, 100% { opacity: 0.24; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.14); }
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
-.node-core { animation: spark 3.4s ease-in-out infinite; }
+.soma-core { animation: spark 3.6s ease-in-out infinite; }
 @keyframes spark {
-  0%, 100% { filter: drop-shadow(0 0 5px currentColor); }
-  50% { filter: drop-shadow(0 0 15px currentColor); }
+  0%, 100% { filter: drop-shadow(0 0 4px currentColor); }
+  50% { filter: drop-shadow(0 0 14px currentColor); }
 }
+
+/* Разный сдвиг фазы у соседних нейронов: синхронное мигание выглядит как
+   гирлянда, а не как живая сеть. Данные от этого не зависят. */
+.neuron:nth-child(3n) .soma-halo,
+.neuron:nth-child(3n) .soma-core { animation-delay: 1.2s; }
+.neuron:nth-child(3n + 1) .soma-halo,
+.neuron:nth-child(3n + 1) .soma-core { animation-delay: 0.6s; }
 
 /* Узел без потока не должен дышать: замерший организм обязан выглядеть
    замершим, иначе анимация врёт о состоянии системы. */
-.node-still .node-halo,
-.node-still .node-core,
-.synapse-still {
+.neuron-still .soma-halo,
+.neuron-still .soma-core {
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .synapse, .node-halo, .node-core { animation: none; }
+  .soma-halo, .soma-core { animation: none; }
+  .impulse { display: none; }
 }
 
 /* --- Таблицы --- */

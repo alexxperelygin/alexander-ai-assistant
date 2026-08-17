@@ -13,8 +13,8 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Пороги</h1>
-        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>границы риска и отбора</p>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Настройки</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>пороги риска и отбора</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
