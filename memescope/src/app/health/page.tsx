@@ -22,7 +22,10 @@ export default async function HealthPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">System Health</h1>
+        <div>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Диагностика</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>здоровье источников данных и процессов</p>
+      </div>
         <DataModeBadge mode={config.dataMode} />
       </div>
 

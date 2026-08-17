@@ -5,7 +5,17 @@ import { Card, DataModeBadge, Empty, ScoreBar, StatusBadge, fmtUsd, timeAgo } fr
 export const dynamic = "force-dynamic";
 
 const FILTERS = ["INTERESTING", "ALL", "READY", "CANDIDATE", "WATCH", "AVOID", "DATA_UNAVAILABLE"] as const;
-const FILTER_LABELS: Record<string, string> = { INTERESTING: "ИНТЕРЕСНЫЕ", ALL: "ВСЕ" };
+// Подписи фильтров на русском. Технические имена статусов остаются в title
+// у бейджа: панель читает человек, но связь с кодом терять нельзя.
+const FILTER_LABELS: Record<string, string> = {
+  INTERESTING: "интересные",
+  ALL: "все",
+  READY: "готовые",
+  CANDIDATE: "кандидаты",
+  WATCH: "наблюдение",
+  AVOID: "отбраковано",
+  DATA_UNAVAILABLE: "нет данных",
+};
 
 export default async function ScannerPage({
   searchParams,
@@ -31,21 +41,29 @@ export default async function ScannerPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Live Scanner</h1>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Поле зрения</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>живой поток оценок сканера</p>
+      </div>
 
       <div className="flex gap-2">
         {FILTERS.map((f) => (
           <Link
             key={f}
             href={f === "INTERESTING" ? "/scanner" : `/scanner?status=${f}`}
-            className={`rounded px-2 py-1 text-xs ${filter === f ? "bg-zinc-700 text-zinc-100" : "bg-zinc-900 text-zinc-500 hover:text-zinc-300"}`}
+            className="rounded-md border px-2 py-1 text-xs transition-colors"
+            style={
+              filter === f
+                ? { color: "#22d3ee", borderColor: "rgba(34,211,238,0.5)", background: "rgba(34,211,238,0.1)", boxShadow: "0 0 14px -6px #22d3ee" }
+                : { color: "var(--txt-faint)", borderColor: "var(--line)", background: "transparent" }
+            }
           >
             {FILTER_LABELS[f] ?? f.replace("_", " ")}
           </Link>
         ))}
       </div>
       {filter === "INTERESTING" && (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs" style={{ color: "var(--txt-dim)" }}>
           Показаны только токены, прошедшие hard-фильтры (WATCH/CANDIDATE/READY), по убыванию score.
           Отбракованные — во вкладке AVOID. Значок ↗ открывает монету на DexScreener для проверки.
         </p>
@@ -85,7 +103,7 @@ export default async function ScannerPage({
                       >
                         ↗
                       </a>{" "}
-                      <DataModeBadge mode={o.dataMode} />
+                      <DataModeBadge mode={o.dataMode} compact />
                     </td>
                     <td><StatusBadge status={o.status} /></td>
                     <td><ScoreBar value={o.opportunityScore} /></td>

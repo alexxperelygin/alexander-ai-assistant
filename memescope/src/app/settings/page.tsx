@@ -12,7 +12,10 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Settings</h1>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Пороги</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>границы риска и отбора</p>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Капитал и риск">

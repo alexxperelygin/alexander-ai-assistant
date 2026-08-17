@@ -16,7 +16,10 @@ export default async function BacktestsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Backtests</h1>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Проверка гипотез</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>прогон стратегии по истории наблюдений</p>
+      </div>
       <p className="max-w-3xl text-xs text-zinc-500">
         Backtest считается по данным, которые собрала сама система (без look-ahead: вход по последнему
         снапшоту до сигнала, исход — только по последующим снапшотам, издержки — комиссия DEX +

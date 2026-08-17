@@ -26,55 +26,108 @@ export function timeAgo(d: Date | null | undefined): string {
   return `${Math.floor(s / 86400)}д`;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  WATCH: "bg-zinc-700/60 text-zinc-300",
-  CANDIDATE: "bg-sky-900/60 text-sky-300",
-  READY: "bg-emerald-900/60 text-emerald-300",
-  BUY: "bg-emerald-800/80 text-emerald-200",
-  HOLD: "bg-amber-900/60 text-amber-300",
-  TAKE_PROFIT: "bg-lime-900/60 text-lime-300",
-  EXIT: "bg-orange-900/60 text-orange-300",
-  INVALIDATED: "bg-zinc-800 text-zinc-500",
-  AVOID: "bg-red-900/60 text-red-300",
-  DATA_UNAVAILABLE: "bg-purple-900/50 text-purple-300",
-  OPEN: "bg-emerald-900/60 text-emerald-300",
-  PARTIAL_EXIT: "bg-lime-900/60 text-lime-300",
-  CLOSED: "bg-zinc-700/60 text-zinc-300",
-  STOPPED: "bg-red-900/60 text-red-300",
+// Статус светится своим цветом: в тёмной камере заливка читается хуже, чем
+// контур со свечением, а по цвету состояние узнаётся раньше, чем по тексту.
+const STATUS_TONE: Record<string, string> = {
+  WATCH: "#64748b",
+  CANDIDATE: "#22d3ee",
+  READY: "#4ade80",
+  BUY: "#4ade80",
+  HOLD: "#fbbf24",
+  TAKE_PROFIT: "#a3e635",
+  EXIT: "#fb923c",
+  INVALIDATED: "#475569",
+  AVOID: "#fb7185",
+  DATA_UNAVAILABLE: "#a78bfa",
+  OPEN: "#4ade80",
+  PARTIAL_EXIT: "#a3e635",
+  CLOSED: "#64748b",
+  STOPPED: "#fb7185",
+};
+
+/** Русские подписи статусов: панель читает человек, а не машина. */
+const STATUS_RU: Record<string, string> = {
+  WATCH: "наблюдение",
+  CANDIDATE: "кандидат",
+  READY: "готов",
+  BUY: "покупка",
+  HOLD: "держим",
+  TAKE_PROFIT: "фиксация",
+  EXIT: "выход",
+  INVALIDATED: "отменён",
+  AVOID: "отбраковано",
+  DATA_UNAVAILABLE: "нет данных",
+  OPEN: "открыта",
+  PARTIAL_EXIT: "частично",
+  CLOSED: "закрыта",
+  STOPPED: "по стопу",
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const c = STATUS_TONE[status] ?? "#64748b";
   return (
     <span
-      className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-zinc-700 text-zinc-300"}`}
+      className="inline-block rounded-md px-1.5 py-0.5 text-[11px] font-medium"
+      style={{
+        color: c,
+        border: `1px solid ${c}59`,
+        background: `${c}14`,
+        boxShadow: `0 0 12px -6px ${c}`,
+      }}
+      title={status}
     >
-      {status.replace("_", " ")}
+      {STATUS_RU[status] ?? status.replace("_", " ")}
     </span>
   );
 }
 
-export function DataModeBadge({ mode }: { mode: string }) {
-  return mode === "mock" ? (
-    <span className="inline-block rounded bg-fuchsia-900/70 px-1.5 py-0.5 text-xs font-bold text-fuchsia-200">
-      MOCK DATA
-    </span>
-  ) : (
-    <span className="inline-block rounded bg-emerald-950 px-1.5 py-0.5 text-xs text-emerald-400">
-      live
+export function DataModeBadge({ mode, compact = false }: { mode: string; compact?: boolean }) {
+  // Режим mock подсвечен резко и намеренно, и в компактном виде тоже: спутать
+  // выдуманные данные с живыми — самая дорогая ошибка этой панели. А вот
+  // «живые данные» в каждой строке таблицы — шум: сто одинаковых зелёных
+  // плашек ничего не сообщают и мешают читать числа. В таблицах живой режим
+  // сжимается до точки с подсказкой.
+  if (mode === "mock")
+    return (
+      <span
+        className="inline-block rounded-md px-2 py-0.5 text-xs font-bold"
+        style={{ color: "#f0abfc", border: "1px solid #e879f9", background: "rgba(232,121,249,0.14)", boxShadow: "0 0 16px -4px #e879f9" }}
+        title="Данные сгенерированы, а не получены с рынка"
+      >
+        {compact ? "ВЫДУМАНО" : "ВЫДУМАННЫЕ ДАННЫЕ"}
+      </span>
+    );
+  if (compact)
+    return (
+      <span
+        className="inline-block h-1.5 w-1.5 rounded-full align-middle"
+        style={{ background: "#4ade80", boxShadow: "0 0 8px #4ade80" }}
+        title="живые данные с рынка"
+      />
+    );
+  return (
+    <span
+      className="inline-block rounded-md px-2 py-0.5 text-xs"
+      style={{ color: "#4ade80", border: "1px solid rgba(74,222,128,0.45)", background: "rgba(74,222,128,0.08)" }}
+    >
+      живые данные
     </span>
   );
 }
 
 export function ScoreBar({ value, danger = false }: { value: number; danger?: boolean }) {
   const color = danger
-    ? value > 60 ? "bg-red-500" : value > 30 ? "bg-amber-500" : "bg-emerald-500"
-    : value >= 65 ? "bg-emerald-500" : value >= 50 ? "bg-sky-500" : "bg-zinc-500";
+    ? value > 60 ? "#fb7185" : value > 30 ? "#fbbf24" : "#4ade80"
+    : value >= 65 ? "#4ade80" : value >= 50 ? "#22d3ee" : "#64748b";
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-16 overflow-hidden rounded bg-zinc-800">
-        <div className={`h-full ${color}`} style={{ width: `${Math.min(100, value)}%` }} />
+      <div className="h-1.5 w-16 overflow-hidden rounded-full" style={{ background: "rgba(120,160,220,0.12)" }}>
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${Math.min(100, value)}%`, background: color, boxShadow: `0 0 10px ${color}` }}
+        />
       </div>
-      <span className="text-xs tabular-nums">{value.toFixed(0)}</span>
+      <span className="text-xs tabular-nums" style={{ color }}>{value.toFixed(0)}</span>
     </div>
   );
 }
@@ -82,8 +135,8 @@ export function ScoreBar({ value, danger = false }: { value: number; danger?: bo
 export function Card({ title, children, right }: { title: string; children: ReactNode; right?: ReactNode }) {
   return (
     <div className="card">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-zinc-300">{title}</h2>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold" style={{ color: "var(--txt)" }}>{title}</h2>
         {right}
       </div>
       {children}
@@ -92,5 +145,5 @@ export function Card({ title, children, right }: { title: string; children: Reac
 }
 
 export function Empty({ text }: { text: string }) {
-  return <p className="py-6 text-center text-sm text-zinc-600">{text}</p>;
+  return <p className="py-6 text-center text-sm" style={{ color: "var(--txt-faint)" }}>{text}</p>;
 }
