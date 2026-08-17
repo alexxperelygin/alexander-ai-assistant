@@ -5,7 +5,7 @@
 import { prisma } from "../src/lib/db";
 import { FREEZE_AT } from "../src/lib/paper/exit-policy";
 import { STALE_ALERT_INTERVAL_MS } from "../src/lib/monitor/positions";
-import { VALIDATED_ENTRY } from "../src/lib/strategy/validated-entry";
+import { LOTTERY_ENTRY, VALIDATED_ENTRY } from "../src/lib/strategy/validated-entry";
 
 function ago(d: Date | null | undefined): string {
   if (!d) return "—";
@@ -264,6 +264,7 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     const sum = (xs: typeof closed) => xs.reduce((s, p) => s + p.realizedPnlUsd, 0);
     for (const [rule, title] of [
       ["validated-liquidity", "проверенное правило (ликвидность > $50k)"],
+      ["low-liquidity-lottery", "низкая ликвидность $10k–$50k (лотерейный трек)"],
       ["ready-pipeline", "конвейер READY (backtest: NO EDGE)"],
     ] as const) {
       const c = track(rule);
@@ -283,6 +284,13 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     const vClosed = track("validated-liquidity").length;
     if (vClosed > 0 && vClosed < 100)
       lines.push(`  · ⚠️ по проверенному правилу закрыто ${vClosed} сделок из 100 минимально нужных — читать этот процент как результат нельзя`);
+    // У лотерейного трека порог осмысленности выше: там весь результат решают
+    // редкие хвосты, и до 300 сделок среднее скачет на сотни процентов от
+    // одного события. Меньший порог означал бы, что цифру начнут читать раньше,
+    // чем она вообще что-то значит.
+    const lClosed = track("low-liquidity-lottery").length;
+    if (lClosed > 0 && lClosed < 300)
+      lines.push(`  · ⚠️ по лотерейному треку закрыто ${lClosed} сделок из 300 минимально нужных — на хвостовом распределении это ещё не результат`);
 
     // Пропущенные входы — единственное известное расхождение живого прогона с
     // пересчётом по истории. Молча их не показывать нельзя: без этой строки
@@ -306,8 +314,9 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     }
     if (skippedTokens.size)
       lines.push(
-        `  · пропущено токенов за 24ч (нет свободного слота): ${skippedTokens.size} при ${VALIDATED_ENTRY.maxOpenPositions} слотах — ` +
-        `выборка трека этим смещена, см. docs/PREREGISTRATION.md`,
+        `  · пропущено токенов за 24ч (нет свободного слота): ${skippedTokens.size} при ` +
+        `${VALIDATED_ENTRY.maxOpenPositions}+${LOTTERY_ENTRY.maxOpenPositions} слотах — ` +
+        `выборка треков этим смещена, см. docs/PREREGISTRATION.md`,
       );
   }
 

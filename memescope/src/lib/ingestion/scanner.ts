@@ -9,7 +9,8 @@ import { buildTradePlan, computePositionSizeUsd, decideStatus } from "../strateg
 import { getRiskSettings } from "../settings";
 import { notify } from "../notify/notifier";
 import { openPosition } from "../paper/portfolio";
-import { VALIDATED_ENTRY, validatedEntryFires } from "../strategy/validated-entry";
+import { LOTTERY_ENTRY, VALIDATED_ENTRY, lotteryEntryFires, validatedEntryFires } from "../strategy/validated-entry";
+import type { EntryRule } from "../strategy/validated-entry";
 import type { ContractRiskReport, MarketSnapshot, OpportunityStatus, RiskSettings, RouteQuote } from "../types";
 
 // One full scan cycle:
@@ -563,19 +564,30 @@ async function maybeOpenValidatedEntry(ctx: {
   const s = ctx.snapshot;
   if (!s) return;
 
-  const verdict = validatedEntryFires({
+  const obs = {
     liquidityUsd: s.liquidityUsd,
     priceUsd: s.priceUsd,
     priceChange1h: s.priceChange1h,
     priceChange24h: s.priceChange24h,
-  });
-  if (!verdict.fires) return;
+  };
+  // Треки не пересекаются по диапазону ликвидности, поэтому сработать может
+  // только одно правило. Порядок проверки на результат не влияет.
+  let rule: EntryRule | null = null;
+  let sizeUsd = 0;
+  if (validatedEntryFires(obs).fires) {
+    rule = "validated-liquidity";
+    sizeUsd = VALIDATED_ENTRY.positionSizeUsd;
+  } else if (lotteryEntryFires(obs).fires) {
+    rule = "low-liquidity-lottery";
+    sizeUsd = LOTTERY_ENTRY.positionSizeUsd;
+  }
+  if (!rule) return;
 
   // Одна сделка на токен — это часть замороженного правила, а не удобство:
   // без него один и тот же удачный токен попадал бы в выборку по несколько
   // раз и в одиночку определял бы средний результат.
   const already = await prisma.position.findFirst({
-    where: { tokenId: ctx.tokenId, entryRule: "validated-liquidity" },
+    where: { tokenId: ctx.tokenId, entryRule: rule },
   });
   if (already) return;
   // Открытая позиция другого трека по этому же токену — тоже стоп. Две
@@ -599,8 +611,19 @@ async function maybeOpenValidatedEntry(ctx: {
   // 25 слотах — почти все они были повторными попытками по одним и тем же
   // токенам, и цифра выглядела как «правило дало 353 входа», хотя столько
   // разных токенов не было.
+  //
+  // Проверка привязана К ТРЕКУ. Токен, которому не хватило слота в треке низкой
+  // ликвидности, позже может дорасти до диапазона проверенного правила — и там
+  // это будет его ПЕРВОЕ подходящее наблюдение, а не повторная попытка. Общая
+  // проверка по одному tokenId закрыла бы ему второй трек без всяких оснований.
   const consideredBefore = await prisma.auditLog.findFirst({
-    where: { action: "validated.entry.skipped", details: { contains: `"tokenId":"${ctx.tokenId}"` } },
+    where: {
+      action: "validated.entry.skipped",
+      AND: [
+        { details: { contains: `"tokenId":"${ctx.tokenId}"` } },
+        { details: { contains: `"rule":"${rule}"` } },
+      ],
+    },
   });
   if (consideredBefore) return;
 
@@ -609,9 +632,9 @@ async function maybeOpenValidatedEntry(ctx: {
       tokenId: ctx.tokenId,
       opportunityId: ctx.opportunityId,
       mode: "paper",
-      entryRule: "validated-liquidity",
+      entryRule: rule,
       priceUsd: s.priceUsd as number,
-      sizeUsd: VALIDATED_ENTRY.positionSizeUsd,
+      sizeUsd,
       liquidityUsd: s.liquidityUsd ?? null,
       observedImpactPct: ctx.sellQuote?.priceImpactPct ?? null,
       plan: null,
@@ -627,7 +650,7 @@ async function maybeOpenValidatedEntry(ctx: {
       data: {
         actor: "worker",
         action: "validated.entry.skipped",
-        details: JSON.stringify({ symbol: ctx.symbol, tokenId: ctx.tokenId, reason: String(err) }),
+        details: JSON.stringify({ symbol: ctx.symbol, tokenId: ctx.tokenId, rule, reason: String(err) }),
       },
     }).catch(() => {});
   }

@@ -2,7 +2,7 @@ import { prisma } from "../db";
 import { getProviders } from "../providers";
 import { notify } from "../notify/notifier";
 import { sellPosition } from "../paper/portfolio";
-import { FROZEN_EXIT, FREEZE_AT } from "../paper/exit-policy";
+import { FROZEN_EXIT, VENTURE_EXIT, FREEZE_AT } from "../paper/exit-policy";
 
 // Position monitoring pass: refresh market state for every open position,
 // enforce stops / take-profits / liquidity-drain exits, and alert on risk
@@ -194,11 +194,23 @@ export async function monitorPositionsOnce(): Promise<void> {
           .catch(() => {}); // позиция могла закрыться параллельно
       }
 
+      // Политика выхода зависит от ТРЕКА, а не только от даты открытия.
+      // Определяется ДО первой проверки: если часть выходов считать по одной
+      // политике, а часть по другой, позиция будет жить по правилам, которых
+      // нет ни в одном документе.
+      //
+      // Трек низкой ликвидности живёт по венчурным правилам: трейлинг-стоп там
+      // убран намеренно. Он закрывает позицию при откате на 30% от максимума,
+      // то есть обрубает ровно тот рост в десятки раз, ради которого трек и
+      // существует. Жёсткий стоп и аварийный выход по ликвидности остаются:
+      // именно они держат тело распределения, а без этого хвост не окупается.
+      const exit = pos.entryRule === "low-liquidity-lottery" ? VENTURE_EXIT : FROZEN_EXIT;
+
       // 1) Liquidity drain → emergency exit (rug in progress).
-      if (entryLiq != null && liq != null && liq < entryLiq * FROZEN_EXIT.liquidityFloorRatio) {
+      if (entryLiq != null && liq != null && liq < entryLiq * exit.liquidityFloorRatio) {
         await sellPosition({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
-          reason: `Ликвидность упала до $${Math.round(liq).toLocaleString()} (<${Math.round(FROZEN_EXIT.liquidityFloorRatio * 100)}% от входа) — аварийный выход`,
+          reason: `Ликвидность упала до $${Math.round(liq).toLocaleString()} (<${Math.round(exit.liquidityFloorRatio * 100)}% от входа) — аварийный выход`,
           kind: "STOP_HIT",
         }).catch(async (e) => notify("critical", "Аварийный выход не исполнен", String(e)));
         continue;
@@ -229,11 +241,14 @@ export async function monitorPositionsOnce(): Promise<void> {
       // максимумом, а «текущей» у нас в этот момент нет. Жёсткий стоп и обвал
       // ликвидности выше — считаются, потому что они говорят «стало плохо»,
       // и сработать поздно там лучше, чем не сработать совсем.
-      const trailStop = peak * (1 - FROZEN_EXIT.trailPct);
-      if (frozenRules && !stalePrice && peak > pos.entryPriceUsd && price <= trailStop) {
+      const trailStop = peak * (1 - exit.trailPct);
+      // exit.trailPct === 0 означает «трейлинга нет». Без явной проверки
+      // trailStop совпал бы с пиком, и позиция закрывалась бы при первом же
+      // тике ниже максимума — то есть венчурный трек резался бы жёстче всех.
+      if (exit.trailPct > 0 && frozenRules && !stalePrice && peak > pos.entryPriceUsd && price <= trailStop) {
         await sellPosition({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
-          reason: `Трейлинг: цена $${price.toPrecision(6)} ≤ ${Math.round((1 - FROZEN_EXIT.trailPct) * 100)}% от максимума $${peak.toPrecision(6)}`,
+          reason: `Трейлинг: цена $${price.toPrecision(6)} ≤ ${Math.round((1 - exit.trailPct) * 100)}% от максимума $${peak.toPrecision(6)}`,
           kind: "STOP_HIT",
         }).catch(async (e) => notify("critical", "Трейлинг не исполнен", String(e)));
         continue;
@@ -244,10 +259,10 @@ export async function monitorPositionsOnce(): Promise<void> {
       // портфель должен закрываться там же, иначе отчёт и портфель измеряют
       // разные вещи.
       const heldMin = (Date.now() - pos.openedAt.getTime()) / 60_000;
-      if (frozenRules && heldMin >= FROZEN_EXIT.maxHoldMin) {
+      if (frozenRules && heldMin >= exit.maxHoldMin) {
         await sellPosition({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
-          reason: `Достигнут предельный срок удержания ${Math.round(FROZEN_EXIT.maxHoldMin / 1440)} сут — выход по времени`,
+          reason: `Достигнут предельный срок удержания ${Math.round(exit.maxHoldMin / 1440)} сут — выход по времени`,
           kind: "CLOSE",
         }).catch(async (e) => notify("warning", "Выход по времени не исполнен", String(e)));
         continue;
