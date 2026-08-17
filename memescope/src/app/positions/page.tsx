@@ -42,9 +42,12 @@ export default async function PositionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Positions</h1>
+        <div>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Кровоток</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>открытые и закрытые позиции, бумажные деньги</p>
+      </div>
         <div className="text-sm">
-          Realized P&L всего:{" "}
+          Итог по всем ветвям:{" "}
           <b className={totalRealized >= 0 ? "text-emerald-400" : "text-red-400"}>{fmtUsd(totalRealized, 2)}</b>
         </div>
       </div>
@@ -62,7 +65,11 @@ export default async function PositionsPage() {
                   <td>{t.open}</td>
                   <td>{t.closed}</td>
                   <td>{t.closed ? `${t.wins} из ${t.closed}` : "—"}</td>
-                  <td className={t.pnl >= 0 ? "text-emerald-400" : "text-red-400"}>{fmtUsd(t.pnl, 2)}</td>
+                  {/* Без закрытых сделок «$0» зелёным читается как «вышли в
+                      ноль» — это не результат, а его отсутствие. */}
+                  <td className={t.closed === 0 ? "glow-idle" : t.pnl >= 0 ? "glow-good" : "glow-bad"}>
+                    {t.closed === 0 ? "нет закрытых" : fmtUsd(t.pnl, 2)}
+                  </td>
                 </tr>
               ))}
             </tbody>

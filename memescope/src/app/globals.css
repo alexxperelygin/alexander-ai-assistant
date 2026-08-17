@@ -1,41 +1,250 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Визуальный язык: «панель живого организма».
+   Тёмная камера, неоновые синапсы, свечение вместо заливок.
+
+   Правило, которому подчинён весь файл: свечение НЕСЁТ СМЫСЛ. Цвет узла — это
+   его состояние, яркость — активность, скорость импульса — темп. Украшательства
+   без данных за ними здесь нет: иначе панель начинает выглядеть живой в тот
+   момент, когда система мертва, а это худшее, что может сделать дашборд.
+--------------------------------------------------------------------------- */
+
 :root {
   color-scheme: dark;
+
+  --bg: #04060c;
+  --bg-deep: #020307;
+  --surface: rgba(13, 18, 32, 0.72);
+  --surface-hi: rgba(20, 27, 45, 0.85);
+  --line: rgba(120, 160, 220, 0.14);
+  --line-hi: rgba(140, 200, 255, 0.3);
+
+  --txt: #c9d6ea;
+  --txt-dim: #6b7c96;
+  --txt-faint: #46566e;
+
+  /* Нейронная палитра. Каждый цвет закреплён за состоянием, а не за красотой. */
+  --n-live: #22d3ee; /* работает, поток идёт */
+  --n-think: #a78bfa; /* обработка, оценка */
+  --n-good: #4ade80; /* здоровье, прибыль */
+  --n-warn: #fbbf24; /* внимание */
+  --n-bad: #fb7185; /* отказ, убыток */
+  --n-idle: #64748b; /* нет данных, покой */
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-200 antialiased;
+  background:
+    radial-gradient(1100px 620px at 12% -12%, rgba(34, 211, 238, 0.09), transparent 60%),
+    radial-gradient(900px 560px at 92% 8%, rgba(167, 139, 250, 0.08), transparent 62%),
+    radial-gradient(800px 800px at 50% 115%, rgba(74, 222, 128, 0.05), transparent 60%),
+    var(--bg);
+  color: var(--txt);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
+
+/* Сетка-подложка: ощущение приборной камеры, а не веб-страницы. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(120, 170, 230, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 170, 230, 0.045) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 35%, transparent 100%);
+}
+
+/* --- Поверхности --- */
 
 .card {
-  @apply rounded-lg border border-zinc-800 bg-zinc-900/60 p-4;
+  position: relative;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+  backdrop-filter: blur(7px);
+  box-shadow:
+    inset 0 1px 0 rgba(190, 225, 255, 0.05),
+    0 10px 34px -22px rgba(0, 0, 0, 0.95);
 }
+
+/* Тонкая световая жила по верхней кромке — «мембрана». */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0 12% auto 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-hi), transparent);
+}
+
+.card-live { border-color: rgba(34, 211, 238, 0.28); }
+.card-good { border-color: rgba(74, 222, 128, 0.3); }
+.card-warn { border-color: rgba(251, 191, 36, 0.32); }
+.card-bad { border-color: rgba(251, 113, 133, 0.34); }
 
 .stat-label {
-  @apply text-xs uppercase tracking-wide text-zinc-500;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--txt-faint);
 }
 
-.table-base {
-  @apply w-full text-sm;
+/* --- Показатель жизнедеятельности --- */
+
+.vital-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
+.vital-note {
+  font-size: 11px;
+  color: var(--txt-dim);
+  line-height: 1.35;
+}
+
+.glow-live { color: var(--n-live); text-shadow: 0 0 18px rgba(34, 211, 238, 0.55); }
+.glow-think { color: var(--n-think); text-shadow: 0 0 18px rgba(167, 139, 250, 0.5); }
+.glow-good { color: var(--n-good); text-shadow: 0 0 18px rgba(74, 222, 128, 0.5); }
+.glow-warn { color: var(--n-warn); text-shadow: 0 0 18px rgba(251, 191, 36, 0.5); }
+.glow-bad { color: var(--n-bad); text-shadow: 0 0 18px rgba(251, 113, 133, 0.55); }
+.glow-idle { color: var(--n-idle); }
+
+/* --- Кардиограмма темпа: ширина полосы = доля от нормы --- */
+
+.pulsebar {
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(120, 160, 220, 0.12);
+  overflow: hidden;
+}
+.pulsebar > i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+/* --- Синапсы и узлы карты --- */
+
+.synapse {
+  fill: none;
+  stroke-linecap: round;
+  animation: flow 2.6s linear infinite;
+}
+@keyframes flow {
+  to { stroke-dashoffset: -34; }
+}
+
+.node-halo { animation: breathe 3.4s ease-in-out infinite; transform-origin: center; }
+@keyframes breathe {
+  0%, 100% { opacity: 0.24; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.14); }
+}
+
+.node-core { animation: spark 3.4s ease-in-out infinite; }
+@keyframes spark {
+  0%, 100% { filter: drop-shadow(0 0 5px currentColor); }
+  50% { filter: drop-shadow(0 0 15px currentColor); }
+}
+
+/* Узел без потока не должен дышать: замерший организм обязан выглядеть
+   замершим, иначе анимация врёт о состоянии системы. */
+.node-still .node-halo,
+.node-still .node-core,
+.synapse-still {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .synapse, .node-halo, .node-core { animation: none; }
+}
+
+/* --- Таблицы --- */
+
+.table-base { width: 100%; font-size: 0.875rem; }
 .table-base th {
-  @apply border-b border-zinc-800 px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-zinc-500;
+  border-bottom: 1px solid var(--line);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--txt-faint);
 }
 .table-base td {
-  @apply border-b border-zinc-800/60 px-3 py-2;
+  border-bottom: 1px solid rgba(120, 160, 220, 0.08);
+  padding: 0.5rem 0.75rem;
 }
+.table-base tbody tr:hover { background: rgba(90, 140, 210, 0.06); }
+
+/* --- Управление --- */
 
 .btn {
-  @apply inline-flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700 disabled:opacity-50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 8px;
+  border: 1px solid var(--line-hi);
+  background: var(--surface-hi);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.875rem;
+  color: var(--txt);
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
-.btn-primary {
-  @apply border-emerald-700 bg-emerald-800/60 hover:bg-emerald-700/60;
-}
-.btn-danger {
-  @apply border-red-800 bg-red-900/50 hover:bg-red-800/50;
-}
+.btn:hover { border-color: rgba(34, 211, 238, 0.5); box-shadow: 0 0 18px -4px rgba(34, 211, 238, 0.5); }
+.btn:disabled { opacity: 0.45; box-shadow: none; }
+.btn-primary { border-color: rgba(74, 222, 128, 0.45); color: #bbf7d0; }
+.btn-primary:hover { border-color: rgba(74, 222, 128, 0.75); box-shadow: 0 0 18px -4px rgba(74, 222, 128, 0.6); }
+.btn-danger { border-color: rgba(251, 113, 133, 0.45); color: #fecdd3; }
+.btn-danger:hover { border-color: rgba(251, 113, 133, 0.75); box-shadow: 0 0 18px -4px rgba(251, 113, 133, 0.6); }
 
 .input {
-  @apply w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-sm text-zinc-200 focus:border-zinc-500 focus:outline-none;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(6, 10, 20, 0.8);
+  padding: 0.35rem 0.55rem;
+  font-size: 0.875rem;
+  color: var(--txt);
+}
+.input:focus { outline: none; border-color: rgba(34, 211, 238, 0.55); box-shadow: 0 0 14px -4px rgba(34, 211, 238, 0.6); }
+
+/* --- Навигация --- */
+
+.nav-link {
+  position: relative;
+  display: block;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem 0.4rem 1.1rem;
+  font-size: 0.875rem;
+  color: var(--txt-dim);
+  transition: color 0.15s, background 0.15s;
+}
+.nav-link::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--n-idle);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.nav-link:hover {
+  color: var(--txt);
+  background: rgba(90, 140, 210, 0.07);
+}
+.nav-link:hover::before {
+  background: var(--n-live);
+  box-shadow: 0 0 10px var(--n-live);
 }

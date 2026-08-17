@@ -133,7 +133,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
             </div>
             <div>
               <div className="stat-label mb-1">Инструкция покупки</div>
-              <pre className="whitespace-pre-wrap rounded bg-zinc-950 p-3 text-xs leading-relaxed text-zinc-300">{plan.buyInstruction}</pre>
+              <pre className="whitespace-pre-wrap rounded-lg border p-3 text-xs leading-relaxed" style={{ borderColor: "var(--line)", background: "rgba(2,4,10,0.7)", color: "var(--txt)" }}>{plan.buyInstruction}</pre>
             </div>
           </div>
           <div className="mt-4">

@@ -13,7 +13,10 @@ export default async function SignalsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">Signal History</h1>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Память</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>история переходов статусов</p>
+      </div>
       <p className="text-xs text-zinc-500">
         Все переходы статусов с причинами. "Результат после" — изменение цены с момента сигнала до
         последнего наблюдения (грубая метрика качества; строгие метрики считает Backtests).
@@ -42,7 +45,7 @@ export default async function SignalsPage() {
                       <Link href={`/opportunity/${e.opportunityId}`} className="text-sky-400 hover:underline">
                         {e.opportunity.token.symbol}
                       </Link>{" "}
-                      <DataModeBadge mode={e.opportunity.dataMode} />
+                      <DataModeBadge mode={e.opportunity.dataMode} compact />
                     </td>
                     <td>
                       <span className="flex items-center gap-1">
