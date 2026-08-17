@@ -14,8 +14,8 @@ export default async function SignalsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Память</h1>
-        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>история переходов статусов</p>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>История сигналов</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>переходы статусов</p>
       </div>
       <p className="text-xs text-zinc-500">
         Все переходы статусов с причинами. "Результат после" — изменение цены с момента сигнала до

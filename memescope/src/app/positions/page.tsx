@@ -24,7 +24,7 @@ export default async function PositionsPage() {
   // Поэтому итог показывается ещё и раздельно (docs/PREREGISTRATION.md).
   const TRACKS = [
     { rule: "validated-liquidity", title: "Проверенное правило (ликвидность > $50k)" },
-    { rule: "low-liquidity-lottery", title: "Низкая ликвидность $10k–$50k (лотерейный трек)" },
+    { rule: "low-liquidity-lottery", title: "Низкая ликвидность $10k–$50k · лотерейное" },
     { rule: "ready-pipeline", title: "Конвейер READY (backtest: NO EDGE)" },
   ] as const;
   const tracks = TRACKS.map((t) => {
@@ -43,11 +43,11 @@ export default async function PositionsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Кровоток</h1>
-        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>открытые и закрытые позиции, бумажные деньги</p>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Позиции</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>открытые и закрытые сделки, бумажные деньги</p>
       </div>
         <div className="text-sm">
-          Итог по всем ветвям:{" "}
+          Итог по всем правилам:{" "}
           <b className={totalRealized >= 0 ? "text-emerald-400" : "text-red-400"}>{fmtUsd(totalRealized, 2)}</b>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default async function PositionsPage() {
             </tbody>
           </table>
           <p className="mt-2 text-xs text-zinc-400">
-            Это разные правила входа, а не портфели одной стратегии. Складывать их P&L
+            Это разные правила входа, а не части одного портфеля. Складывать их P&L
             бессмысленно. До 100 закрытых сделок по проверенному правилу и до 300 по
             лотерейному их проценты читать как результат нельзя: на распределении с толстым
             хвостом одна сделка двигает среднее на сотни процентов.

@@ -42,8 +42,8 @@ export default async function ScannerPage({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Поле зрения</h1>
-        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>живой поток оценок сканера</p>
+        <h1 className="text-xl font-bold tracking-tight" style={{ color: "var(--txt)" }}>Сканер</h1>
+        <p className="text-[11px]" style={{ color: "var(--txt-dim)" }}>живой поток оценок</p>
       </div>
 
       <div className="flex gap-2">
