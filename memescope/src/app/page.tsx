@@ -126,7 +126,7 @@ export default async function Overview() {
     {
       title: "Иммунитет",
       subtitle: "отбраковано за 24ч",
-      value: evaluated24h ? `${Math.round((avoided24h / evaluated24h) * 100)}%` : null,
+      value: evaluated24h ? share(avoided24h, evaluated24h) : null,
       state: evaluated24h === 0 ? "idle" : avoided24h / evaluated24h > 0.5 ? "good" : "warn",
     },
     {
@@ -196,7 +196,7 @@ export default async function Overview() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Vital
           label="Иммунный ответ"
-          value={evaluated24h ? `${Math.round((avoided24h / evaluated24h) * 100)}%` : null}
+          value={evaluated24h ? share(avoided24h, evaluated24h) : null}
           state={evaluated24h === 0 ? "idle" : "good"}
           fill={evaluated24h ? avoided24h / evaluated24h : undefined}
           note={
@@ -396,6 +396,22 @@ function temperatureState(regime: string | null): NodeState {
   if (v <= -5) return "bad";
   if (v < 0) return "warn";
   return "good";
+}
+
+/**
+ * Доля в процентах, без округления до круглого, когда оно неправдиво.
+ *
+ * 4 845 отбраковано из 4 863 — это 99.6%, а обычное округление печатает
+ * «100%», то есть «не прошло вообще ничего». Прошло восемнадцать. Ровно
+ * такое незаметное округление и превращает панель фактов в панель
+ * впечатлений, поэтому у границ 0 и 100 добавляется знак после запятой.
+ */
+function share(part: number, whole: number): string {
+  if (whole <= 0) return "—";
+  const v = (part / whole) * 100;
+  const rounded = Math.round(v);
+  if ((rounded === 100 && v < 100) || (rounded === 0 && v > 0)) return `${v.toFixed(1)}%`;
+  return `${rounded}%`;
 }
 
 function startOfToday(): Date {
