@@ -9,7 +9,8 @@ import { buildTradePlan, computePositionSizeUsd, decideStatus } from "../strateg
 import { getRiskSettings } from "../settings";
 import { notify } from "../notify/notifier";
 import { openPosition } from "../paper/portfolio";
-import type { ContractRiskReport, MarketSnapshot, OpportunityStatus } from "../types";
+import { VALIDATED_ENTRY, validatedEntryFires } from "../strategy/validated-entry";
+import type { ContractRiskReport, MarketSnapshot, OpportunityStatus, RiskSettings, RouteQuote } from "../types";
 
 // One full scan cycle:
 //  1) discover new pools → upsert tokens
@@ -408,6 +409,15 @@ async function evaluateToken(
     ? await prisma.opportunity.update({ where: { id: existing.id }, data })
     : await prisma.opportunity.create({ data: { tokenId, ...data } });
 
+  // --- Трек проверенного правила (docs/PREREGISTRATION.md) ---
+  //
+  // Специально СНАРУЖИ проверки статуса и снаружи блока «статус изменился»:
+  // правило, прошедшее проверку, не смотрит ни на score, ни на READY, ни на
+  // риск-отчёт — только на ликвидность и на признак артефакта листинга.
+  // Пропустить его через конвейер скоринга значило бы проверять живьём не то
+  // правило, которое проверку прошло.
+  await maybeOpenValidatedEntry({ tokenId, symbol, opportunityId: opp.id, snapshot, sellQuote, settings });
+
   // Кого опрашивать. Сначала стояло «только READY и CANDIDATE» — по расходу это
   // безопасно, но для ИССЛЕДОВАНИЯ бесполезно: у горстки лучших по score
   // токенов почти нет разброса ни в соцактивности, ни в исходах, а без
@@ -514,5 +524,89 @@ async function evaluateToken(
         }
       }
     }
+  }
+}
+
+/**
+ * Живой прогон правила входа, прошедшего проверку из `docs/PREREGISTRATION.md`.
+ *
+ * До 17 августа бумажный портфель торговал ТОЛЬКО по конвейеру скоринга —
+ * стратегии, про которую backtest говорит NO EDGE и которая на живых сделках
+ * теряет деньги ровно так, как backtest предсказывает. Правило же, прошедшее
+ * все пять предзарегистрированных критериев, живой проверки не получало
+ * вообще: оно считалось пересчётом по записанным снапшотам. Единственный
+ * имеющийся живой стенд стоял под заведомо нерабочей стратегией.
+ *
+ * Чем этот прогон отличается от пересчёта — и почему это ценно:
+ *  · вход исполняется симулятором заявки (проскальзывание от размера позиции
+ *    к ликвидности, комиссия), а не берётся по котировке;
+ *  · выход считает монитор по прямому запросу цены раз в 30 секунд, то есть
+ *    трейлинг-стоп срабатывает по реальной наблюдаемости, а не по частоте,
+ *    с которой сканер случайно заглянул в токен;
+ *  · закрытие происходит вперёд по времени и переписать его задним числом
+ *    нельзя.
+ *
+ * Чем он ХУЖЕ пересчёта, названо заранее: есть потолок одновременно открытых
+ * позиций, поэтому берутся не все подходящие входы подряд, а те, что
+ * подвернулись при свободном слоте. Отказы по этой причине пишутся в журнал —
+ * по ним потом можно оценить, сколько входов пропущено и когда.
+ */
+async function maybeOpenValidatedEntry(ctx: {
+  tokenId: string;
+  symbol: string;
+  opportunityId: string;
+  snapshot: MarketSnapshot | null;
+  sellQuote: RouteQuote | null;
+  settings: RiskSettings;
+}): Promise<void> {
+  if (!ctx.settings.paperTradingEnabled) return;
+  const s = ctx.snapshot;
+  if (!s) return;
+
+  const verdict = validatedEntryFires({
+    liquidityUsd: s.liquidityUsd,
+    priceUsd: s.priceUsd,
+    priceChange1h: s.priceChange1h,
+    priceChange24h: s.priceChange24h,
+  });
+  if (!verdict.fires) return;
+
+  // Одна сделка на токен — это часть замороженного правила, а не удобство:
+  // без него один и тот же удачный токен попадал бы в выборку по несколько
+  // раз и в одиночку определял бы средний результат.
+  const already = await prisma.position.findFirst({
+    where: { tokenId: ctx.tokenId, entryRule: "validated-liquidity" },
+  });
+  if (already) return;
+  // Открытая позиция другого трека по этому же токену — тоже стоп. Две
+  // позиции на один токен запутали бы и мониторинг, и разбор результата.
+  const openAny = await prisma.position.findFirst({
+    where: { tokenId: ctx.tokenId, status: { in: ["OPEN", "PARTIAL_EXIT"] } },
+  });
+  if (openAny) return;
+
+  try {
+    await openPosition({
+      tokenId: ctx.tokenId,
+      opportunityId: ctx.opportunityId,
+      mode: "paper",
+      entryRule: "validated-liquidity",
+      priceUsd: s.priceUsd as number,
+      sizeUsd: VALIDATED_ENTRY.positionSizeUsd,
+      liquidityUsd: s.liquidityUsd ?? null,
+      observedImpactPct: ctx.sellQuote?.priceImpactPct ?? null,
+      plan: null,
+    });
+  } catch (err) {
+    // Отказ — нормальная работа, но он ИСКАЖАЕТ выборку, поэтому пишется
+    // весь: по этим записям видно, сколько входов правило дало бы без
+    // потолка слотов и в какие моменты они пропускались.
+    await prisma.auditLog.create({
+      data: {
+        actor: "worker",
+        action: "validated.entry.skipped",
+        details: JSON.stringify({ symbol: ctx.symbol, tokenId: ctx.tokenId, reason: String(err) }),
+      },
+    }).catch(() => {});
   }
 }

@@ -243,8 +243,53 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     );
     if (post.length) {
       const wins = post.filter((p) => p.realizedPnlUsd > 0).length;
-      lines.push(`  · из них прибыльных ${wins} из ${post.length}; вход по-прежнему по конвейеру READY, а не по правилу из проверки`);
+      lines.push(`  · из них прибыльных ${wins} из ${post.length}`);
     }
+  }
+
+  // ДВА ТРЕКА, И СМЕШИВАТЬ ИХ НЕЛЬЗЯ.
+  //
+  // ready-pipeline — вход по конвейеру скоринга. Про него backtest говорит
+  // NO EDGE, и живые сделки это подтверждают. validated-liquidity — правило,
+  // прошедшее предзарегистрированную проверку, запущено 17 августа.
+  // Общая сумма P&L складывает результаты двух РАЗНЫХ стратегий: по ней
+  // невозможно понять, работает ли проверенное правило, и легко приписать
+  // ему чужой убыток или чужую прибыль.
+  {
+    const closed = positions.filter((p) => p.status === "CLOSED" || p.status === "STOPPED");
+    const track = (rule: string) => closed.filter((p) => (p.entryRule ?? "ready-pipeline") === rule);
+    const openTrack = (rule: string) => open.filter((p) => (p.entryRule ?? "ready-pipeline") === rule);
+    const sum = (xs: typeof closed) => xs.reduce((s, p) => s + p.realizedPnlUsd, 0);
+    for (const [rule, title] of [
+      ["validated-liquidity", "проверенное правило (ликвидность > $50k)"],
+      ["ready-pipeline", "конвейер READY (backtest: NO EDGE)"],
+    ] as const) {
+      const c = track(rule);
+      const o = openTrack(rule);
+      if (!c.length && !o.length) continue;
+      const wins = c.filter((p) => p.realizedPnlUsd > 0).length;
+      const med = c.length
+        ? [...c].map((p) => p.realizedPnlUsd / (p.costUsd || 1)).sort((a, b) => a - b)[Math.floor(c.length / 2)]
+        : null;
+      lines.push(
+        `- трек «${title}»: открыто ${o.length}, закрыто ${c.length}, P&L $${sum(c).toFixed(2)}` +
+        (c.length ? `, прибыльных ${wins} из ${c.length}, медиана сделки ${((med ?? 0) * 100).toFixed(1)}%` : ""),
+      );
+    }
+    // Пока сделок мало, любые проценты по треку — шум. Об этом лучше сказать
+    // прямо, чем дать прочитать промежуточную цифру как результат.
+    const vClosed = track("validated-liquidity").length;
+    if (vClosed > 0 && vClosed < 100)
+      lines.push(`  · ⚠️ по проверенному правилу закрыто ${vClosed} сделок из 100 минимально нужных — читать этот процент как результат нельзя`);
+
+    // Пропущенные входы — единственное известное расхождение живого прогона с
+    // пересчётом по истории. Молча их не показывать нельзя: без этой строки
+    // трек выглядит полной копией проверенного правила, а он ею не является.
+    const skipped = await prisma.auditLog.count({
+      where: { action: "validated.entry.skipped", createdAt: { gte: since24h } },
+    });
+    if (skipped)
+      lines.push(`  · пропущено входов за 24ч (нет свободного слота): ${skipped} — выборка трека этим смещена, см. docs/PREREGISTRATION.md`);
   }
 
   const unreliable = positions.filter((p) => p.closeReason?.includes("НЕДОСТОВЕРЕН"));
