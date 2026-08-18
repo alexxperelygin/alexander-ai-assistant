@@ -393,7 +393,16 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     const label = `${p.token.symbol} (${mins} мин назад)`;
     if (latest.message.includes("устарел")) partial.push(label);
     else if (latest.message.startsWith("Прямой запрос")) onFallback.push(label);
-    else noPrice.push(label);
+    else {
+      // Для позиции без цены печатаем ВОЗРАСТ и точный текст предупреждения.
+      // 18 августа две такие позиции не закрывались, хотя механика закрытия
+      // есть, и по короткой строке нельзя было понять, какая ветка кода
+      // отрабатывает: «нет данных вообще» или «нет свежих данных N минут».
+      // Разница решает, где ошибка, а гадать по косвенным признакам —
+      // ровно то, из-за чего дефекты живут долго.
+      const ageH = ((Date.now() - p.openedAt.getTime()) / 3600_000).toFixed(1);
+      noPrice.push(`${p.token.symbol} (алерт ${mins} мин назад, позиции ${ageH} ч; «${latest.message.slice(0, 70)}»)`);
+    }
   }
   lines.push(
     noPrice.length
