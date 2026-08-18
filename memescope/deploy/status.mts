@@ -380,6 +380,7 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
   const noPrice: string[] = [];
   const onFallback: string[] = [];
   const partial: string[] = [];
+  const sellFailed: string[] = [];
   for (const p of open) {
     const alerts = await prisma.positionEvent.findMany({
       where: { positionId: p.id, kind: "ALERT", createdAt: { gte: since } },
@@ -393,6 +394,12 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     const label = `${p.token.symbol} (${mins} мин назад)`;
     if (latest.message.includes("устарел")) partial.push(label);
     else if (latest.message.startsWith("Прямой запрос")) onFallback.push(label);
+    // «Продажа не исполнена» — ОТДЕЛЬНОЕ состояние, а не «цены нет». Раньше
+    // оно попадало в общую кучу, и отчёт полтора часа показывал неверный
+    // диагноз: цена-то была, не исполнялся выход. Разные болезни нельзя
+    // печатать одной строкой, иначе лечишь не то.
+    else if (latest.message.startsWith("Продажа не исполнена"))
+      sellFailed.push(`${p.token.symbol} (позиции ${((Date.now() - p.openedAt.getTime()) / 3600_000).toFixed(1)} ч; «${latest.message.slice(0, 60)}»)`);
     else {
       // Для позиции без цены печатаем ВОЗРАСТ и точный текст предупреждения.
       // 18 августа две такие позиции не закрывались, хотя механика закрытия
@@ -411,6 +418,8 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
   );
   if (partial.length)
     lines.push(`- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: ${partial.join(", ")}`);
+  if (sellFailed.length)
+    lines.push(`- 🔴 выход НЕ ИСПОЛНЯЕТСЯ (симулятор отказывается моделировать сделку): ${sellFailed.join(", ")}`);
   if (onFallback.length)
     lines.push(`- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): ${onFallback.join(", ")}`);
 }
