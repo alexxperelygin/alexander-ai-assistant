@@ -84,7 +84,7 @@ async function noteFallback(positionId: string, at: Date, stale: boolean): Promi
  * пометкой, что результат недостоверен» — вторая хотя бы не притворяется
  * работающим мониторингом.
  */
-async function handleMissingPrice(positionId: string, tokenId: string): Promise<void> {
+async function handleMissingPrice(positionId: string, tokenId: string, openedAt: Date): Promise<void> {
   const last = await prisma.tokenSnapshot.findFirst({
     where: { tokenId, priceUsd: { gt: 0 } },
     orderBy: { fetchedAt: "desc" },
@@ -100,6 +100,47 @@ async function handleMissingPrice(positionId: string, tokenId: string): Promise<
         `Результат этой сделки НЕДОСТОВЕРЕН: реальная цена выхода неизвестна.`,
       kind: "CLOSE",
     }).catch(async (e) => notify("warning", "Закрытие по устаревшей цене не исполнено", String(e)));
+    return;
+  }
+
+  // ДЫРА, ЗАКРЫТАЯ 18 АВГУСТА.
+  //
+  // Ветка выше срабатывает только если снимок с ценой вообще существует
+  // (`last?.priceUsd != null`). Когда у токена нет НИ ОДНОГО снимка с ценой,
+  // `last` равен null, принудительное закрытие не срабатывает никогда, и
+  // позиция висит вечно: без стопа, без трейлинга, без предельного срока —
+  // все три проверки стоят после получения цены. Нашлось на живых позициях
+  // 牛来 и WMW, провисевших в этом состоянии больше полутора часов.
+  //
+  // Закрыть по цене нельзя — цены нет и придумывать её недопустимо. Поэтому
+  // сделка помечается INVALIDATED: исход неизмерим, и в статистику треков она
+  // не входит (там считаются только CLOSED и STOPPED).
+  //
+  // ВАЖНО про смещение. Молча выбрасывать неизмеримые сделки нельзя: источник
+  // чаще всего перестаёт котировать именно умершие токены, то есть выбрасывались
+  // бы худшие исходы и результат систематически завышался. Поэтому число таких
+  // сделок печатается в отчёте отдельной строкой с предупреждением.
+  if (last == null && Date.now() - openedAt.getTime() >= STALE_EXIT_MS) {
+    const hours = Math.round((Date.now() - openedAt.getTime()) / 3600_000);
+    await prisma.position.update({
+      where: { id: positionId },
+      data: {
+        status: "INVALIDATED",
+        remainingQty: 0,
+        closedAt: new Date(),
+        closeReason:
+          `За ${hours} ч у токена не появилось ни одного наблюдения с ценой — ` +
+          `закрыть по цене невозможно. Исход сделки НЕИЗМЕРИМ и в статистику не входит.`,
+        events: {
+          create: {
+            kind: "ALERT",
+            message:
+              `Позиция признана неизмеримой: цены нет ни в одном источнике и нет ` +
+              `ни одного сохранённого наблюдения с ценой за ${hours} ч после входа.`,
+          },
+        },
+      },
+    }).catch(async (e) => notify("warning", "Не удалось пометить позицию неизмеримой", String(e)));
     return;
   }
 
@@ -158,7 +199,7 @@ export async function monitorPositionsOnce(): Promise<void> {
       } else {
         const fallback = await lastUsableSnapshot(pos.tokenId);
         if (!fallback) {
-          await handleMissingPrice(pos.id, pos.tokenId);
+          await handleMissingPrice(pos.id, pos.tokenId, pos.openedAt);
           continue;
         }
         price = fallback.snap.priceUsd as number;
