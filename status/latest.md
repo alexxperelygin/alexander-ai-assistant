@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-18T08:39:39.787Z (UTC)
+Сгенерирован: 2026-08-18T08:44:48.053Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 595274; снапшотов за 24ч: 42679
+- Worker: ✅ работает (последний цикл: 2 мин назад)
+- Токенов в базе: 595322; снапшотов за 24ч: 42654
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 77 МБ, перезапусков 0
-- memescope-worker:  online, память 77 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 298 мс, порт 3000)
+- memescope-web:  online, память 65 МБ, перезапусков 0
+- memescope-worker:  online, память 66 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 644 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,10 +16,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 16094
-- bsc: 2811
-- robinhood: 1547
-- base: 1245
+- solana: 16069
+- bsc: 2802
+- robinhood: 1537
+- base: 1250
 - ethereum: 206
 - arbitrum: 6
 
@@ -31,35 +31,35 @@
 - READY: 3
 
 ## Топ-5 по score (не отбракованные)
-- Jimothy: READY, score 71.5, risk 0.9, conf 100% (обновлено 1 мин назад)
+- Jimothy: READY, score 71.0, risk 0.7, conf 100% (обновлено 2 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 12.3 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 12.8 дн назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 15.1 дн назад)
-- FWA: READY, score 61.9, risk 4.0, conf 88% (обновлено 1 мин назад)
+- FWA: READY, score 61.2, risk 10.0, conf 88% (обновлено 2 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- FWA — 2026-08-18T08:24:04.208Z (16 мин назад)
-- FWA — 2026-08-18T07:47:03.332Z (53 мин назад)
-- FWA — 2026-08-18T04:28:01.784Z (4.2 ч назад)
-- Jimothy — 2026-08-18T04:09:05.015Z (4.5 ч назад)
-- Jimothy — 2026-08-18T03:51:05.574Z (4.8 ч назад)
+- FWA — 2026-08-18T08:24:04.208Z (21 мин назад)
+- FWA — 2026-08-18T07:47:03.332Z (58 мин назад)
+- FWA — 2026-08-18T04:28:01.784Z (4.3 ч назад)
+- Jimothy — 2026-08-18T04:09:05.015Z (4.6 ч назад)
+- Jimothy — 2026-08-18T03:51:05.574Z (4.9 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- FWA: CANDIDATE → READY (16 мин назад) — Opportunity Score 66.6/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- 安卓人生: WATCH → AVOID (48 мин назад) — [insufficient-liquidity] Ликвидность $3 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
-- RST: CANDIDATE → WATCH (48 мин назад) — Opportunity Score 27.1/100, Risk 4.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- FWA: READY → CANDIDATE (49 мин назад) — Opportunity Score 59.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- BLUAI: WATCH → CANDIDATE (50 мин назад) — Opportunity Score 51.0/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- 小牛来: AVOID → CANDIDATE (50 мин назад) — Opportunity Score 53.1/100, Risk 20.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- FWA: CANDIDATE → READY (53 мин назад) — Opportunity Score 66.8/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- FWA: READY → CANDIDATE (55 мин назад) — Opportunity Score 59.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- 安卓人生: — → WATCH (56 мин назад) — Opportunity Score 36.4/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- GIKO: — → AVOID (57 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- 牛牪犇: — → AVOID (58 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- QuantGirl: — → AVOID (59 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- FWA: CANDIDATE → READY (21 мин назад) — Opportunity Score 66.6/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- 安卓人生: WATCH → AVOID (53 мин назад) — [insufficient-liquidity] Ликвидность $3 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
+- RST: CANDIDATE → WATCH (53 мин назад) — Opportunity Score 27.1/100, Risk 4.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
+- FWA: READY → CANDIDATE (54 мин назад) — Opportunity Score 59.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- BLUAI: WATCH → CANDIDATE (55 мин назад) — Opportunity Score 51.0/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- 小牛来: AVOID → CANDIDATE (55 мин назад) — Opportunity Score 53.1/100, Risk 20.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- FWA: CANDIDATE → READY (58 мин назад) — Opportunity Score 66.8/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- FWA: READY → CANDIDATE (1.0 ч назад) — Opportunity Score 59.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- 安卓人生: — → WATCH (1.0 ч назад) — Opportunity Score 36.4/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- GIKO: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- 牛牪犇: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- QuantGirl: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
 
 ## Позиции
 - Открытых: 41; всего: 101; realized P&L: $-854.02
@@ -98,18 +98,18 @@
     · 19:55:17 [OPEN] Paper вход по проверенному правилу: 34446.39 шт по $0.00144645 (комиссии $0.17, impact 0.01%)
 
 ## Последний backtest
-- DONE (4.0 ч назад): NO EDGE: expectancy -6.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (4.1 ч назад): NO EDGE: expectancy -6.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 1098839 / err 27, последний успех 0 мин назад)
+- dexscreener: ok (ok 1099351 / err 27, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 12.1 дн назад)
-- geckoterminal:arbitrum: ok (ok 10058 / err 7405, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 17434 / err 33, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 16261 / err 1204, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 12339 / err 5126, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 8089 / err 9355, последний успех 9.9 ч назад)
-- geckoterminal:solana: ok (ok 17468 / err 0, последний успех 1 мин назад)
-- goplus: ok (ok 29180 / err 12, последний успех 1 мин назад)
-- jupiter: ok (ok 399753 / err 823, последний успех 0 мин назад)
-- rugcheck: ok (ok 129106 / err 397, последний успех 4 мин назад)
+- geckoterminal:arbitrum: ok (ok 10063 / err 7405, последний успех 1 мин назад)
+- geckoterminal:base: ok (ok 17440 / err 33, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 16266 / err 1204, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 12344 / err 5126, последний успех 1 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 8089 / err 9359, последний успех 10.0 ч назад)
+- geckoterminal:solana: ok (ok 17474 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 29182 / err 12, последний успех 5 мин назад)
+- jupiter: ok (ok 399780 / err 823, последний успех 2 мин назад)
+- rugcheck: ok (ok 129107 / err 397, последний успех 3 мин назад)
 
