@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-18T00:39:07.779Z (UTC)
+Сгенерирован: 2026-08-18T01:50:07.444Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 589069; снапшотов за 24ч: 42269
+- Токенов в базе: 590275; снапшотов за 24ч: 42400
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 74 МБ, перезапусков 0
-- memescope-worker:  online, память 75 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 547 мс, порт 3000)
+- memescope-web:  online, память 75 МБ, перезапусков 0
+- memescope-worker:  online, память 76 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 310 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,62 +16,62 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17557
-- robinhood: 2818
-- bsc: 2437
-- base: 1562
-- ethereum: 206
+- solana: 17541
+- robinhood: 2689
+- bsc: 2467
+- base: 1540
+- ethereum: 201
 - arbitrum: 8
 
 ## Статусы возможностей
 - AVOID: 114396
 - DATA_UNAVAILABLE: 34057
-- CANDIDATE: 17
-- WATCH: 15
+- CANDIDATE: 16
+- WATCH: 16
 - READY: 3
 
 ## Топ-5 по score (не отбракованные)
-- Jimothy: READY, score 72.3, risk 0.0, conf 100% (обновлено 1 мин назад)
-- FWA: READY, score 69.0, risk 4.0, conf 88% (обновлено 0 мин назад)
-- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 11.9 дн назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 12.5 дн назад)
+- Jimothy: READY, score 76.8, risk 0.3, conf 100% (обновлено 0 мин назад)
+- FWA: READY, score 69.2, risk 4.0, conf 88% (обновлено 1 мин назад)
+- CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 12.0 дн назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 12.6 дн назад)
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 14.8 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- STONK — 2026-08-17T22:30:12.938Z (2.1 ч назад)
-- STONK — 2026-08-17T20:53:14.860Z (3.8 ч назад)
-- STONK — 2026-08-17T20:41:06.265Z (4.0 ч назад)
-- Jimothy — 2026-08-17T19:30:18.885Z (5.2 ч назад)
-- Stickman — 2026-08-17T19:20:07.974Z (5.3 ч назад)
+- STONK — 2026-08-17T22:30:12.938Z (3.3 ч назад)
+- STONK — 2026-08-17T20:53:14.860Z (5.0 ч назад)
+- STONK — 2026-08-17T20:41:06.265Z (5.2 ч назад)
+- Jimothy — 2026-08-17T19:30:18.885Z (6.3 ч назад)
+- Stickman — 2026-08-17T19:20:07.974Z (6.5 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- DOGE✈: WATCH → CANDIDATE (10 мин назад) — Opportunity Score 50.8/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- memes: CANDIDATE → WATCH (38 мин назад) — Opportunity Score 42.5/100, Risk 16.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BLUAI: WATCH → CANDIDATE (41 мин назад) — Opportunity Score 51.3/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BLUAI: CANDIDATE → WATCH (42 мин назад) — Opportunity Score 43.6/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- memes: WATCH → CANDIDATE (1.1 ч назад) — Opportunity Score 51.1/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BLUAI: WATCH → CANDIDATE (1.3 ч назад) — Opportunity Score 50.2/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BLUAI: CANDIDATE → WATCH (1.3 ч назад) — Opportunity Score 45.0/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- 小牛来: CANDIDATE → AVOID (1.4 ч назад) — [liquidity-draining] Ликвидность упала на 7.0% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- BLUAI: WATCH → CANDIDATE (1.7 ч назад) — Opportunity Score 51.6/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- 小牛来: AVOID → CANDIDATE (1.8 ч назад) — Opportunity Score 54.4/100, Risk 12.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- STONK: READY → CANDIDATE (2.0 ч назад) — Opportunity Score 59.4/100, Risk 11.5/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данн
-- STONK: CANDIDATE → READY (2.1 ч назад) — Opportunity Score 66.6/100, Risk 10.1/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки 
+- STONK: CANDIDATE → AVOID (2 мин назад) — [liquidity-draining] Ликвидность упала на 5.2% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- memes: CANDIDATE → WATCH (7 мин назад) — Opportunity Score 41.0/100, Risk 16.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BLUAI: CANDIDATE → WATCH (23 мин назад) — Opportunity Score 44.8/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BLUAI: WATCH → CANDIDATE (26 мин назад) — Opportunity Score 50.4/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- BLUAI: CANDIDATE → WATCH (41 мин назад) — Opportunity Score 44.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- 小牛来: AVOID → CANDIDATE (51 мин назад) — Opportunity Score 54.3/100, Risk 14.6/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- memes: WATCH → CANDIDATE (1.1 ч назад) — Opportunity Score 50.9/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- DOGE✈: WATCH → CANDIDATE (1.4 ч назад) — Opportunity Score 50.8/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- memes: CANDIDATE → WATCH (1.8 ч назад) — Opportunity Score 42.5/100, Risk 16.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BLUAI: WATCH → CANDIDATE (1.9 ч назад) — Opportunity Score 51.3/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- BLUAI: CANDIDATE → WATCH (1.9 ч назад) — Opportunity Score 43.6/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- memes: WATCH → CANDIDATE (2.3 ч назад) — Opportunity Score 51.1/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
 
 ## Позиции
-- Открытых: 40; всего: 93; realized P&L: $-808.98
-- по замороженным правилам (после 2026-08-08): 36 закрытых, $-280.19; по старым правилам: 17 закрытых, $-582.61
-  · из них прибыльных 5 из 36
-- трек «проверенное правило (ликвидность > $50k)»: открыто 23, закрыто 12, P&L $-107.51, прибыльных 2 из 12, медиана сделки -15.2%
+- Открытых: 39; всего: 93; realized P&L: $-809.63
+- по замороженным правилам (после 2026-08-08): 37 закрытых, $-280.84; по старым правилам: 17 закрытых, $-582.61
+  · из них прибыльных 5 из 37
+- трек «проверенное правило (ликвидность > $50k)»: открыто 22, закрыто 13, P&L $-108.16, прибыльных 2 из 13, медиана сделки -15.2%
 - трек «низкая ликвидность $10k–$50k (лотерейный трек)»: открыто 15, закрыто 4, P&L $-47.47, прибыльных 0 из 4, медиана сделки -21.9%
 - трек «конвейер READY (backtest: NO EDGE)»: открыто 2, закрыто 37, P&L $-707.82, прибыльных 4 из 37, медиана сделки -35.8%
-  · ⚠️ по проверенному правилу закрыто 12 сделок из 100 минимально нужных — читать этот процент как результат нельзя
+  · ⚠️ по проверенному правилу закрыто 13 сделок из 100 минимально нужных — читать этот процент как результат нельзя
   · ⚠️ по лотерейному треку закрыто 4 сделок из 300 минимально нужных — на хвостовом распределении это ещё не результат
   · пропущено токенов за 24ч (нет свободного слота): 76 при 25+15 слотах — выборка треков этим смещена, см. docs/PREREGISTRATION.md
-- из них закрыто по устаревшей цене (результат недостоверен): 7 шт на $-0.17 — эта часть суммы выше является допущением, а не измерением
+- из них закрыто по устаревшей цене (результат недостоверен): 8 шт на $-0.82 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
 
 ## Последние позиции (детально)
@@ -98,18 +98,18 @@
     · 15:32:44 [OPEN] Paper вход по правилу низкой ликвидности: 279192.70 шт по $0.000178461 (комиссии $0.17, impact 0.24%)
 
 ## Последний backtest
-- DONE (4.0 ч назад): NO EDGE: expectancy -6.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (5.2 ч назад): NO EDGE: expectancy -6.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 1045176 / err 27, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 11.8 дн назад)
-- geckoterminal:arbitrum: ok (ok 9578 / err 7405, последний успех 0 мин назад)
-- geckoterminal:base: ok (ok 16954 / err 33, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 15781 / err 1204, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 11859 / err 5126, последний успех 0 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 8089 / err 8875, последний успех 1.9 ч назад)
-- geckoterminal:solana: ok (ok 16988 / err 0, последний успех 0 мин назад)
-- goplus: ok (ok 28298 / err 12, последний успех 2 мин назад)
-- jupiter: ok (ok 396697 / err 823, последний успех 0 мин назад)
-- rugcheck: ok (ok 129005 / err 397, последний успех 1 мин назад)
+- dexscreener: ok (ok 1053018 / err 27, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 11.9 дн назад)
+- geckoterminal:arbitrum: ok (ok 9649 / err 7405, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 17025 / err 33, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 15852 / err 1204, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 11930 / err 5126, последний успех 0 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 8089 / err 8946, последний успех 3.1 ч назад)
+- geckoterminal:solana: ok (ok 17059 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 28428 / err 12, последний успех 1 мин назад)
+- jupiter: ok (ok 397282 / err 823, последний успех 0 мин назад)
+- rugcheck: ok (ok 129023 / err 397, последний успех 7 мин назад)
 
