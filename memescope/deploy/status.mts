@@ -353,6 +353,20 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     }
   }
 
+  // Полные списания: пул не смог принять позицию. Это измеренный плохой исход,
+  // он ВХОДИТ в итоги треков — но цена выхода взята нулевой как допущение, и
+  // об этом надо говорить, а не прятать внутри суммы.
+  {
+    const wiped = positions.filter((p) => p.closeReason?.includes("списан ПОЛНОСТЬЮ"));
+    if (wiped.length) {
+      const sum = wiped.reduce((s, p) => s + p.realizedPnlUsd, 0);
+      lines.push(
+        `- ⚠️ списано полностью (пул не может принять позицию): ${wiped.length} шт на $${sum.toFixed(2)} — ` +
+        `входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение`,
+      );
+    }
+  }
+
   const unreliable = positions.filter((p) => p.closeReason?.includes("НЕДОСТОВЕРЕН"));
   if (unreliable.length) {
     const sum = unreliable.reduce((s, p) => s + p.realizedPnlUsd, 0);
