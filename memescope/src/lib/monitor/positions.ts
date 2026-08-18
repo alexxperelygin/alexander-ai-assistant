@@ -1,7 +1,7 @@
 import { prisma } from "../db";
 import { getProviders } from "../providers";
 import { notify } from "../notify/notifier";
-import { sellPosition } from "../paper/portfolio";
+import { sellPosition, type SellArgs } from "../paper/portfolio";
 import { FROZEN_EXIT, VENTURE_EXIT, FREEZE_AT } from "../paper/exit-policy";
 
 // Position monitoring pass: refresh market state for every open position,
@@ -187,6 +187,49 @@ async function handleMissingPrice(positionId: string, tokenId: string, openedAt:
   });
 }
 
+/** Сколько терпим неисполняемый выход, прежде чем признать сделку неизмеримой. */
+const EXIT_GIVE_UP_MS = 60 * 60_000;
+
+/**
+ * Выход из позиции с признанием поражения.
+ *
+ * Каждый вызов sellPosition в мониторе раньше висел на `.catch(notify)`:
+ * ошибка уходила в уведомление, а позиция ОСТАВАЛАСЬ ОТКРЫТОЙ и повторяла
+ * попытку каждые 30 секунд. Для восстановимого сбоя это правильно. Но при
+ * неизвестной ликвидности simulateFill отказывается моделировать сделку
+ * всегда — и позиция висит без стопа, без трейлинга и без предельного срока
+ * бесконечно. Так 牛来 и WMW провисели 27 часов.
+ *
+ * Одна неудача ещё ничего не значит: источник мог моргнуть. Но если выход не
+ * исполняется больше часа, сделка фактически неуправляема, а её исход
+ * неизмерим — придумывать цену выхода нельзя.
+ */
+async function tryExit(args: SellArgs, level: "critical" | "warning", title: string): Promise<void> {
+  try {
+    await sellPosition(args);
+  } catch (e) {
+    // sellPosition уже записал ALERT «Продажа не исполнена» перед броском,
+    // поэтому первая запись найдётся здесь же и отсчёт начнётся с неё.
+    const firstFail = await prisma.positionEvent.findFirst({
+      where: {
+        positionId: args.positionId,
+        kind: "ALERT",
+        message: { startsWith: "Продажа не исполнена" },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    const stuckMs = firstFail ? Date.now() - firstFail.createdAt.getTime() : 0;
+    if (stuckMs >= EXIT_GIVE_UP_MS) {
+      await markUnmeasurable(
+        args.positionId,
+        `Выход не исполняется ${Math.round(stuckMs / 3600_000)} ч подряд: ${String(e)}.`,
+      );
+      return;
+    }
+    await notify(level, title, String(e));
+  }
+}
+
 export async function monitorPositionsOnce(): Promise<void> {
   const providers = getProviders();
   const open = await prisma.position.findMany({
@@ -275,21 +318,21 @@ export async function monitorPositionsOnce(): Promise<void> {
 
       // 1) Liquidity drain → emergency exit (rug in progress).
       if (entryLiq != null && liq != null && liq < entryLiq * exit.liquidityFloorRatio) {
-        await sellPosition({
+        await tryExit({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
           reason: `Ликвидность упала до $${Math.round(liq).toLocaleString()} (<${Math.round(exit.liquidityFloorRatio * 100)}% от входа) — аварийный выход`,
           kind: "STOP_HIT",
-        }).catch(async (e) => notify("critical", "Аварийный выход не исполнен", String(e)));
+        }, "critical", "Аварийный выход не исполнен");
         continue;
       }
 
       // 2) Stop-loss.
       if (pos.stopPriceUsd != null && price <= pos.stopPriceUsd) {
-        await sellPosition({
+        await tryExit({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
           reason: `Stop: цена $${price.toPrecision(6)} ≤ стопа $${pos.stopPriceUsd.toPrecision(6)}`,
           kind: "STOP_HIT",
-        }).catch(async (e) => notify("critical", "Stop не исполнен", String(e)));
+        }, "critical", "Stop не исполнен");
         continue;
       }
 
@@ -313,11 +356,11 @@ export async function monitorPositionsOnce(): Promise<void> {
       // trailStop совпал бы с пиком, и позиция закрывалась бы при первом же
       // тике ниже максимума — то есть венчурный трек резался бы жёстче всех.
       if (exit.trailPct > 0 && frozenRules && !stalePrice && peak > pos.entryPriceUsd && price <= trailStop) {
-        await sellPosition({
+        await tryExit({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
           reason: `Трейлинг: цена $${price.toPrecision(6)} ≤ ${Math.round((1 - exit.trailPct) * 100)}% от максимума $${peak.toPrecision(6)}`,
           kind: "STOP_HIT",
-        }).catch(async (e) => notify("critical", "Трейлинг не исполнен", String(e)));
+        }, "critical", "Трейлинг не исполнен");
         continue;
       }
 
@@ -327,11 +370,11 @@ export async function monitorPositionsOnce(): Promise<void> {
       // разные вещи.
       const heldMin = (Date.now() - pos.openedAt.getTime()) / 60_000;
       if (frozenRules && heldMin >= exit.maxHoldMin) {
-        await sellPosition({
+        await tryExit({
           positionId: pos.id, fraction: 1, priceUsd: price, liquidityUsd: liq,
           reason: `Достигнут предельный срок удержания ${Math.round(exit.maxHoldMin / 1440)} сут — выход по времени`,
           kind: "CLOSE",
-        }).catch(async (e) => notify("warning", "Выход по времени не исполнен", String(e)));
+        }, "warning", "Выход по времени не исполнен");
         continue;
       }
 
@@ -343,11 +386,11 @@ export async function monitorPositionsOnce(): Promise<void> {
       for (const tp of tps) {
         if (!tp.done && price >= tp.price) {
           const fracOfRemaining = Math.min(1, (tp.fraction * pos.quantity) / pos.remainingQty);
-          await sellPosition({
+          await tryExit({
             positionId: pos.id, fraction: fracOfRemaining, priceUsd: price, liquidityUsd: liq,
             reason: `Take-profit ${(tp.price / pos.entryPriceUsd).toFixed(1)}x достигнут`,
             kind: "TP_HIT",
-          }).catch(async (e) => notify("warning", "TP не исполнен", String(e)));
+          }, "warning", "TP не исполнен");
           tp.done = true;
           changed = true;
           // Re-read remaining qty for next TP in the ladder.
