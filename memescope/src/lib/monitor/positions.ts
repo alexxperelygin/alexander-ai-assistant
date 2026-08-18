@@ -187,6 +187,50 @@ async function handleMissingPrice(positionId: string, tokenId: string, openedAt:
   });
 }
 
+/**
+ * Закрыть позицию как полную потерю, когда пул физически не может её принять.
+ *
+ * ЗАЧЕМ ОТДЕЛЬНО ОТ НЕИЗМЕРИМЫХ. Причин неисполнимого выхода две, и путать их
+ * нельзя:
+ *
+ *  · «ликвидность неизвестна» — про рынок неизвестно ничего, исход честно
+ *    неизмерим, сделка исключается из статистики;
+ *  · «проскальзывание ≥50%, объём несопоставим с пулом» — ликвидность как раз
+ *    ИЗВЕСТНА, просто пул слишком мелкий. Это не отсутствие данных, а факт:
+ *    выйти нельзя, позиция ничего не стоит.
+ *
+ * Пометить второй случай неизмеримым означало бы систематически выбрасывать из
+ * статистики самые плохие исходы — схлопнувшиеся пулы, — и завышать результат
+ * всех треков. Ровно та выживаемость, против которой построено исследование.
+ *
+ * Точную цену выхода здесь взять неоткуда, поэтому берётся ноль. Это допущение,
+ * и выбрано оно намеренно в сторону, которая НЕ МОЖЕТ нам польстить: занизить
+ * собственный результат безопасно, завысить — нет.
+ */
+async function closeAsTotalLoss(positionId: string, reason: string): Promise<void> {
+  const pos = await prisma.position.findUnique({ where: { id: positionId } });
+  if (!pos) return;
+  const costBasis = (pos.remainingQty / pos.quantity) * pos.costUsd;
+  await prisma.position.update({
+    where: { id: positionId },
+    data: {
+      status: "STOPPED",
+      remainingQty: 0,
+      closedAt: new Date(),
+      realizedPnlUsd: pos.realizedPnlUsd - costBasis,
+      closeReason:
+        `${reason} Выйти невозможно ни по какой цене, поэтому остаток списан ПОЛНОСТЬЮ. ` +
+        `Это допущение в консервативную сторону, а не измеренная цена выхода.`,
+      events: {
+        create: {
+          kind: "STOP_HIT",
+          message: `Списано как полная потеря: пул не может принять позицию. ${reason}`,
+        },
+      },
+    },
+  }).catch(async (e) => notify("warning", "Не удалось списать позицию", String(e)));
+}
+
 /** Сколько терпим неисполняемый выход, прежде чем признать сделку неизмеримой. */
 const EXIT_GIVE_UP_MS = 60 * 60_000;
 
@@ -220,10 +264,16 @@ async function tryExit(args: SellArgs, level: "critical" | "warning", title: str
     });
     const stuckMs = firstFail ? Date.now() - firstFail.createdAt.getTime() : 0;
     if (stuckMs >= EXIT_GIVE_UP_MS) {
-      await markUnmeasurable(
-        args.positionId,
-        `Выход не исполняется ${Math.round(stuckMs / 3600_000)} ч подряд: ${String(e)}.`,
-      );
+      const hours = Math.round(stuckMs / 3600_000);
+      // Развилка по причине отказа. «Проскальзывание ≥50%» означает, что
+      // ликвидность известна и мала, то есть исход ИЗМЕРИМ и он плохой.
+      // Отправить его в неизмеримые — значит убрать худшие сделки из
+      // статистики и завысить результаты треков.
+      if (String(e).includes("проскальзывание")) {
+        await closeAsTotalLoss(args.positionId, `Выход не исполняется ${hours} ч подряд: ${String(e)}.`);
+      } else {
+        await markUnmeasurable(args.positionId, `Выход не исполняется ${hours} ч подряд: ${String(e)}.`);
+      }
       return;
     }
     await notify(level, title, String(e));
