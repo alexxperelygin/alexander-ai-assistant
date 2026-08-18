@@ -326,6 +326,27 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
       );
   }
 
+  // НЕИЗМЕРИМЫЕ СДЕЛКИ. Позиция, у которой за 6 часов после входа не появилось
+  // ни одного наблюдения с ценой, помечается INVALIDATED и в статистику треков
+  // не входит — исход неизвестен, и придумывать его нельзя.
+  //
+  // Но и молчать про них нельзя. Источник перестаёт котировать в первую очередь
+  // умершие токены, то есть выбрасываются преимущественно ХУДШИЕ исходы. Если
+  // доля таких сделок вырастет, все результаты треков окажутся завышены, и
+  // заметить это можно только по этой строке.
+  {
+    const unmeasurable = positions.filter((p) => p.status === "INVALIDATED");
+    const measured = positions.filter((p) => p.status === "CLOSED" || p.status === "STOPPED");
+    if (unmeasurable.length) {
+      const share = (unmeasurable.length / (unmeasurable.length + measured.length)) * 100;
+      lines.push(
+        `- ⚠️ исключено как НЕИЗМЕРИМЫЕ: ${unmeasurable.length} шт (${share.toFixed(1)}% от всех завершённых) — ` +
+        `цены не было ни в одном источнике. Эти сделки не входят ни в один итог выше. ` +
+        `Рост этой доли завышает результаты треков: источник перестаёт котировать прежде всего умершие токены`,
+      );
+    }
+  }
+
   const unreliable = positions.filter((p) => p.closeReason?.includes("НЕДОСТОВЕРЕН"));
   if (unreliable.length) {
     const sum = unreliable.reduce((s, p) => s + p.realizedPnlUsd, 0);
