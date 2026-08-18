@@ -84,6 +84,28 @@ async function noteFallback(positionId: string, at: Date, stale: boolean): Promi
  * пометкой, что результат недостоверен» — вторая хотя бы не притворяется
  * работающим мониторингом.
  */
+/**
+ * Пометить позицию неизмеримой: исход неизвестен, и придумывать его нельзя.
+ *
+ * INVALIDATED не входит в статистику треков (там считаются только CLOSED и
+ * STOPPED), но и молча исчезнуть не должен: источник перестаёт котировать
+ * прежде всего умершие токены, поэтому выбрасывались бы преимущественно
+ * ХУДШИЕ исходы, и все результаты оказались бы завышены. Отчёт печатает долю
+ * таких сделок отдельной строкой с предупреждением.
+ */
+async function markUnmeasurable(positionId: string, reason: string): Promise<void> {
+  await prisma.position.update({
+    where: { id: positionId },
+    data: {
+      status: "INVALIDATED",
+      remainingQty: 0,
+      closedAt: new Date(),
+      closeReason: `${reason} Исход сделки НЕИЗМЕРИМ и в статистику не входит.`,
+      events: { create: { kind: "ALERT", message: `Позиция признана неизмеримой. ${reason}` } },
+    },
+  }).catch(async (e) => notify("warning", "Не удалось пометить позицию неизмеримой", String(e)));
+}
+
 async function handleMissingPrice(positionId: string, tokenId: string, openedAt: Date): Promise<void> {
   const last = await prisma.tokenSnapshot.findFirst({
     where: { tokenId, priceUsd: { gt: 0 } },
@@ -93,13 +115,32 @@ async function handleMissingPrice(positionId: string, tokenId: string, openedAt:
 
   if (last?.priceUsd != null && ageMs >= STALE_EXIT_MS) {
     const hours = Math.round(ageMs / 3600_000);
-    await sellPosition({
-      positionId, fraction: 1, priceUsd: last.priceUsd, liquidityUsd: last.liquidityUsd,
-      reason: `Источник не отдаёт цену ${hours} ч — выход по последней известной цене ` +
-        `$${last.priceUsd.toPrecision(6)} от ${last.fetchedAt.toISOString()}. ` +
-        `Результат этой сделки НЕДОСТОВЕРЕН: реальная цена выхода неизвестна.`,
-      kind: "CLOSE",
-    }).catch(async (e) => notify("warning", "Закрытие по устаревшей цене не исполнено", String(e)));
+    try {
+      await sellPosition({
+        positionId, fraction: 1, priceUsd: last.priceUsd, liquidityUsd: last.liquidityUsd,
+        reason: `Источник не отдаёт цену ${hours} ч — выход по последней известной цене ` +
+          `$${last.priceUsd.toPrecision(6)} от ${last.fetchedAt.toISOString()}. ` +
+          `Результат этой сделки НЕДОСТОВЕРЕН: реальная цена выхода неизвестна.`,
+        kind: "CLOSE",
+      });
+    } catch (e) {
+      // АВАРИЙНЫЙ ВЫХОД БЫЛ ЗАБЛОКИРОВАН ТЕМ ЖЕ, ОТ ЧЕГО ЗАЩИЩАЛ.
+      //
+      // simulateFill отказывается моделировать сделку при неизвестной
+      // ликвидности — и правильно делает, качество исполнения там неизвестно.
+      // Но у токена, который источник перестал котировать, ликвидность как раз
+      // неизвестна ВСЕГДА. То есть предохранитель «источник умер — выходим»
+      // не срабатывал именно в том случае, ради которого написан, и позиция
+      // висела без стопа бесконечно: 牛来 и WMW провисели так 27 часов,
+      // повторяя «Продажа не исполнена» каждые 15 минут.
+      //
+      // Придумать цену выхода нельзя, значит исход неизмерим — и позиция
+      // помечается соответственно, а не остаётся открытой навсегда.
+      await markUnmeasurable(
+        positionId,
+        `Источник не отдаёт цену ${hours} ч, а закрыть сделку не удалось: ${String(e)}.`,
+      );
+    }
     return;
   }
 
@@ -122,25 +163,10 @@ async function handleMissingPrice(positionId: string, tokenId: string, openedAt:
   // сделок печатается в отчёте отдельной строкой с предупреждением.
   if (last == null && Date.now() - openedAt.getTime() >= STALE_EXIT_MS) {
     const hours = Math.round((Date.now() - openedAt.getTime()) / 3600_000);
-    await prisma.position.update({
-      where: { id: positionId },
-      data: {
-        status: "INVALIDATED",
-        remainingQty: 0,
-        closedAt: new Date(),
-        closeReason:
-          `За ${hours} ч у токена не появилось ни одного наблюдения с ценой — ` +
-          `закрыть по цене невозможно. Исход сделки НЕИЗМЕРИМ и в статистику не входит.`,
-        events: {
-          create: {
-            kind: "ALERT",
-            message:
-              `Позиция признана неизмеримой: цены нет ни в одном источнике и нет ` +
-              `ни одного сохранённого наблюдения с ценой за ${hours} ч после входа.`,
-          },
-        },
-      },
-    }).catch(async (e) => notify("warning", "Не удалось пометить позицию неизмеримой", String(e)));
+    await markUnmeasurable(
+      positionId,
+      `За ${hours} ч у токена не появилось ни одного наблюдения с ценой — закрыть по цене невозможно.`,
+    );
     return;
   }
 
