@@ -36,8 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     # Без явного предела GitHub ждёт 6 часов, а группа concurrency держит все
     # остальные задачи в очереди — одно зависание блокирует обслуживание
-    # сервера на полдня. Успешный прогон укладывается в минуту-две.
-    timeout-minutes: 20
+    # сервера на полдня. Успешный прогон укладывается в минуту-две; предел
+    # рассчитан на самый долгий сценарий — backtest по двум горизонтам.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -76,7 +77,14 @@ jobs:
           NEYNAR_API_KEY: ${{ secrets.NEYNAR_API_KEY }}
         run: |
           sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
-          run_ssh() { sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" "$1"; }
+          # -n: ssh не забирает stdin шага. Локальный timeout: ConnectTimeout
+          # ограничивает только установку соединения, а зависшая УЖЕ ЗАПУЩЕННАЯ
+          # команда держит канал сколько угодно — 19 августа так сгорел весь
+          # 20-минутный бюджет задачи, и шаг не напечатал ни строки.
+          run_ssh() {
+            timeout "${SSH_TIMEOUT:-900}" sshpass -e ssh -n \
+              -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" "$1"
+          }
           mkdir -p status
 
           case "$TASK" in
@@ -106,15 +114,38 @@ jobs:
               ;;
             backtest)
               echo "== Backtest 24h и 6h =="
+              # Вывод расчёта уходит в файл НА СЕРВЕРЕ, а не в ssh-канал. Если
+              # timeout убьёт расчёт, уцелевший потомок больше не удерживает
+              # канал открытым: ssh закрывается сразу после `cat`.
+              # `setsid` отвязывает расчёт от терминала сессии, -s KILL добивает
+              # зависший процесс, чтобы он не остался жить на общем VPS.
+              BT_LIMIT=600
+              SSH_TIMEOUT=$((BT_LIMIT + 120))
+              bt() { # $1 = горизонт
+                local started rc
+                started=$(date +%s)
+                # Шаг идёт под `bash -e`: без if провал ssh оборвал бы весь шаг,
+                # и отчёт остался бы обрезанным на середине.
+                if run_ssh "cd /opt/alexander-ai-assistant/memescope && \
+                  setsid timeout -s KILL $BT_LIMIT npx tsx src/lib/backtest/cli.ts \
+                    --horizon $1 --mode live > /tmp/bt-$1.log 2>&1 </dev/null; \
+                  echo \"exit=\$?\" >> /tmp/bt-$1.log; cat /tmp/bt-$1.log"
+                then rc=0; else rc=$?; fi
+                echo ""
+                # Время расчёта пишется в отчёт всегда: без него нельзя отличить
+                # «стратегия не считается» от «расчёт просто не успел».
+                echo "_Расчёт занял $(( $(date +%s) - started )) с при лимите ${BT_LIMIT} с; код ssh $rc._"
+              }
               {
                 echo "# Backtest ($(date -u +%FT%TZ))"
                 echo ""
                 echo "## Горизонт 24h"
-                run_ssh 'cd /opt/alexander-ai-assistant/memescope && timeout 300 npm run backtest --silent -- --horizon 24h --mode live' || echo "(ошибка или таймаут 5 мин)"
+                bt 24h
                 echo ""
                 echo "## Горизонт 6h"
-                run_ssh 'cd /opt/alexander-ai-assistant/memescope && timeout 300 npm run backtest --silent -- --horizon 6h --mode live' || echo "(ошибка или таймаут 5 мин)"
+                bt 6h
               } > status/backtest.md
+              unset SSH_TIMEOUT
               cat status/backtest.md
               ;;
             restart)
