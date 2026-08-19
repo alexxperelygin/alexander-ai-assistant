@@ -73,6 +73,7 @@ model TokenSnapshot {
   errors         String? // JSON array of field-level errors/gaps
 
   @@index([tokenId, fetchedAt])
+  @@index([fetchedAt]) // счётчик за сутки: ведущим tokenId индекс выше здесь бесполезен
 }
 
 // Социальный срез по токену. Отдельная таблица, а не поле в Opportunity:
@@ -254,6 +255,14 @@ model AuditLog {
   actor     String // system | worker | user | api
   action    String
   details   String? // JSON
+
+  // Таблица росла с каждым циклом сканера и к 19 августа не имела ни одного
+  // индекса. «Последний цикл воркера» — это findFirst по action со
+  // сортировкой по дате, то есть полный перебор с сортировкой всей таблицы:
+  // отчёт, занимавший минуту, стал занимать больше получаса и убил два
+  // прогона ops по таймауту.
+  @@index([action, createdAt]) // последний цикл, отказы входа за окно
+  @@index([createdAt]) // счётчик ошибок за 24ч: action ищется через LIKE
 }
 
 model BacktestRun {
