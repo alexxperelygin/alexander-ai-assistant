@@ -6,6 +6,7 @@ name: VPS ops
 #   update   — обновить код на сервере (installer) и снять отчёт
 #   backtest — запустить backtest (24h и 6h) → status/backtest.md + отчёт
 #   restart  — перезапустить сервисы pm2 и снять отчёт
+#   diag     — снять нагрузку, диск и список процессов сервера (без отчёта)
 # Требуются секреты VPS_HOST и VPS_SSH_PASSWORD (Settings → Secrets → Actions).
 # Запуск доступен только пользователям с правом записи в репозиторий.
 
@@ -17,7 +18,7 @@ on:
         required: true
         default: "status"
         type: choice
-        options: [status, update, backtest, restart, domain, research]
+        options: [status, update, backtest, restart, domain, research, diag]
   # Альтернативный способ запуска (для интеграций без права actions:write):
   # закоммитить нужную задачу первой строкой в ops/command.txt.
   push:
@@ -62,7 +63,7 @@ jobs:
           else
             TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
           fi
-          case "$TASK" in status|update|backtest|restart|domain|research) ;; *) TASK=status ;; esac
+          case "$TASK" in status|update|backtest|restart|domain|research|diag) ;; *) TASK=status ;; esac
           echo "task=$TASK" >> "$GITHUB_OUTPUT"
           echo "Задача: $TASK"
 
@@ -171,11 +172,59 @@ jobs:
               fi
               head -60 status/research.md
               ;;
+            diag)
+              # Отчёт status.mts 19 августа стал занимать более получаса вместо
+              # минуты. Ни один существующий вывод не отвечает на вопрос «что
+              # именно тормозит», поэтому здесь снимается сырое состояние
+              # машины. Задача только читает — ничего не запускает и не чинит.
+              echo "== Диагностика сервера =="
+              SSH_TIMEOUT=120
+              run_ssh 'echo "-- нагрузка --"; uptime;
+                echo; echo "-- память (МБ) --"; free -m | head -2;
+                echo; echo "-- диск --"; df -h / | tail -1;
+                echo; echo "-- 8 процессов по CPU --";
+                ps -eo pid,etime,pcpu,pmem,comm --sort=-pcpu | head -9;
+                echo; echo "-- node/tsx проекта --";
+                ps -eo pid,etime,pcpu,args | grep -E "tsx|node" | grep -v grep | head -20;
+                echo; echo "-- база --";
+                ls -lh /opt/alexander-ai-assistant/memescope/prisma/ 2>/dev/null' \
+                || echo "::warning::Диагностика не снялась полностью"
+              unset SSH_TIMEOUT
+              ;;
             status) ;; # только отчёт ниже
           esac
 
+          if [ "$TASK" = "diag" ]; then
+            echo "== Отчёт не снимается: задача diag только читает состояние =="
+            exit 0
+          fi
+
           echo "== Снимаю отчёт =="
-          run_ssh 'git -C /opt/alexander-ai-assistant pull -q origin main >/dev/null 2>&1 || true; cd /opt/alexander-ai-assistant/memescope && npx tsx deploy/status.mts' > status/latest.md
+          # `git pull` на сервере ходит в сеть без ограничения по времени —
+          # недоступный GitHub подвесил бы шаг целиком, а `|| true` от этого
+          # не спасает: он ловит код возврата, а не зависание.
+          # Сам отчёт пишется в файл НА СЕРВЕРЕ по той же причине, что и
+          # backtest: убитый по таймауту процесс не должен держать ssh-канал.
+          REPORT_LIMIT=600
+          SSH_TIMEOUT=$((REPORT_LIMIT + 120))
+          started=$(date +%s)
+          if run_ssh "GIT_TERMINAL_PROMPT=0 timeout 60 git -C /opt/alexander-ai-assistant pull -q origin main >/dev/null 2>&1 || true; \
+            cd /opt/alexander-ai-assistant/memescope && \
+            setsid timeout -s KILL $REPORT_LIMIT npx tsx deploy/status.mts > /tmp/status.md 2>/tmp/status.err </dev/null; \
+            cat /tmp/status.md" > /tmp/latest.md
+          then rc=0; else rc=$?; fi
+          echo "Отчёт снят за $(( $(date +%s) - started )) с (лимит ${REPORT_LIMIT} с), код ssh $rc."
+          unset SSH_TIMEOUT
+
+          # Пустой или обрезанный отчёт не должен заменять прежний: иначе
+          # единственный источник правды о сервере теряется ровно в тот момент,
+          # когда с сервером что-то не так.
+          if [ "$rc" -ne 0 ] || ! grep -q "^# MemeScope AI" /tmp/latest.md; then
+            echo "::error::Отчёт не снялся (код $rc, $(wc -c < /tmp/latest.md) байт) — прежний status/latest.md сохранён"
+            head -20 /tmp/latest.md
+            exit 1
+          fi
+          mv /tmp/latest.md status/latest.md
           cat status/latest.md
 
       - name: Commit reports

@@ -21,6 +21,10 @@ concurrency:
 jobs:
   status:
     runs-on: ubuntu-latest
+    # Без предела GitHub ждёт 6 часов. 19 августа этот прогон занял 35 минут
+    # вместо обычной минуты и никак об этом не сообщил — при следующем
+    # замедлении шаг должен упасть, а не тихо держать раннер полдня.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -41,9 +45,30 @@ jobs:
         run: |
           sudo apt-get update -q >/dev/null && sudo apt-get install -y -q sshpass >/dev/null
           mkdir -p status
-          sshpass -e ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" \
-            'git -C /opt/alexander-ai-assistant pull -q origin main || true; cd /opt/alexander-ai-assistant/memescope && npx tsx deploy/status.mts' \
-            > status/latest.md
+          # Те же три предосторожности, что и в ops.yml:
+          #   * `git pull` на сервере ограничен по времени — иначе недоступный
+          #     GitHub подвешивает шаг, и `|| true` от этого не спасает;
+          #   * отчёт пишется в файл НА СЕРВЕРЕ, чтобы убитый по таймауту
+          #     процесс не удерживал ssh-канал открытым;
+          #   * локальный timeout поверх ssh: ConnectTimeout ограничивает
+          #     только установку соединения, а не уже идущую команду.
+          started=$(date +%s)
+          if timeout 720 sshpass -e ssh -n -o StrictHostKeyChecking=no -o ConnectTimeout=15 "root@$VPS_HOST" \
+            'GIT_TERMINAL_PROMPT=0 timeout 60 git -C /opt/alexander-ai-assistant pull -q origin main >/dev/null 2>&1 || true;
+             cd /opt/alexander-ai-assistant/memescope &&
+             setsid timeout -s KILL 600 npx tsx deploy/status.mts > /tmp/status.md 2>/dev/null </dev/null;
+             cat /tmp/status.md' > /tmp/latest.md
+          then rc=0; else rc=$?; fi
+          echo "Отчёт снят за $(( $(date +%s) - started )) с, код ssh $rc."
+
+          # Пустой отчёт не должен заменять прежний: иначе единственный
+          # источник правды о сервере теряется ровно тогда, когда он нужен.
+          if [ "$rc" -ne 0 ] || ! grep -q "^# MemeScope AI" /tmp/latest.md; then
+            echo "::error::Отчёт не снялся (код $rc, $(wc -c < /tmp/latest.md) байт) — прежний status/latest.md сохранён"
+            head -20 /tmp/latest.md
+            exit 1
+          fi
+          mv /tmp/latest.md status/latest.md
           echo "---- отчёт ----"
           cat status/latest.md
 
@@ -51,7 +76,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # `git pull --rebase` пытался слить свою версию отчёта с чужой и
+          # падал конфликтом, когда прогон совпадал с ops.yml. Отчёт — это
+          # артефакт, а не правка: последний перезаписывает. reset --mixed
+          # переносит базу на свежий main, не трогая рабочее дерево.
+          git fetch -q origin main
+          git reset -q --mixed origin/main
           git add status/latest.md
           git commit -m "status: update VPS report [skip ci]" || echo "нет изменений"
-          git pull --rebase origin main
           git push
