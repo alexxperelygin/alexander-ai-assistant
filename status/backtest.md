@@ -1,4 +1,4 @@
-# Backtest (2026-08-20T08:39:19Z)
+# Backtest (2026-08-20T16:39:20Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -6,21 +6,21 @@ Status: DONE
 NO EDGE: expectancy -6.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 186,
+    "signals": 187,
     "horizon": "24h",
     "evaluable": 108,
-    "winRate": 0.37962962962962965,
-    "expectancy": -0.06693203271904724,
-    "medianReturn": -0.025457248939403987,
-    "profitFactor": 0.46473512730104666,
+    "winRate": 0.3888888888888889,
+    "expectancy": -0.06682521245482322,
+    "medianReturn": -0.026488661068825192,
+    "profitFactor": 0.4674963514663146,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.08333333333333333,
-    "rugMeasurable": 168,
-    "unclosablePct": 0.0967741935483871,
+    "rugRate": 0.08235294117647059,
+    "rugMeasurable": 170,
+    "unclosablePct": 0.09090909090909091,
     "byMonth": {
       "2026-08": {
         "n": 108,
-        "meanReturn": -0.06693203271904721
+        "meanReturn": -0.0668252124548232
       }
     }
   },
@@ -55,21 +55,21 @@ Status: DONE
 NO EDGE: expectancy -5.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 186,
+    "signals": 187,
     "horizon": "6h",
-    "evaluable": 145,
-    "winRate": 0.35172413793103446,
-    "expectancy": -0.0534262361714283,
-    "medianReturn": -0.018349828646443744,
-    "profitFactor": 0.48442959500169763,
+    "evaluable": 147,
+    "winRate": 0.3469387755102041,
+    "expectancy": -0.0533894522109798,
+    "medianReturn": -0.01887812210989326,
+    "profitFactor": 0.4811809262311991,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.04790419161676647,
-    "rugMeasurable": 167,
-    "unclosablePct": 0.10215053763440861,
+    "rugRate": 0.047337278106508875,
+    "rugMeasurable": 169,
+    "unclosablePct": 0.0962566844919786,
     "byMonth": {
       "2026-08": {
-        "n": 145,
-        "meanReturn": -0.053426236171428325
+        "n": 147,
+        "meanReturn": -0.05338945221097983
       }
     }
   },
