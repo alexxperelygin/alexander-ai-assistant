@@ -1,4 +1,4 @@
-# Backtest (2026-08-22T08:39:16Z)
+# Backtest (2026-08-22T16:38:58Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -6,7 +6,7 @@ Status: DONE
 NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 198,
+    "signals": 199,
     "horizon": "24h",
     "evaluable": 114,
     "winRate": 0.41228070175438597,
@@ -14,9 +14,9 @@ NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в �
     "medianReturn": -0.024917353795160857,
     "profitFactor": 0.5264627334805116,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.0782122905027933,
-    "rugMeasurable": 179,
-    "unclosablePct": 0.09595959595959595,
+    "rugRate": 0.07777777777777778,
+    "rugMeasurable": 180,
+    "unclosablePct": 0.09547738693467336,
     "byMonth": {
       "2026-08": {
         "n": 114,
@@ -47,7 +47,7 @@ NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 9 с при лимите 600 с; код ssh 0._
+_Расчёт занял 7 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -55,7 +55,7 @@ Status: DONE
 NO EDGE: expectancy -4.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 198,
+    "signals": 199,
     "horizon": "6h",
     "evaluable": 154,
     "winRate": 0.36363636363636365,
@@ -63,9 +63,9 @@ NO EDGE: expectancy -4.7% ≤ 0 после издержек. Сигналы в �
     "medianReturn": -0.01808127218318545,
     "profitFactor": 0.5274638309053185,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.0449438202247191,
-    "rugMeasurable": 178,
-    "unclosablePct": 0.10101010101010101,
+    "rugRate": 0.0446927374301676,
+    "rugMeasurable": 179,
+    "unclosablePct": 0.10050251256281408,
     "byMonth": {
       "2026-08": {
         "n": 154,
@@ -96,4 +96,4 @@ NO EDGE: expectancy -4.7% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 7 с при лимите 600 с; код ssh 0._
+_Расчёт занял 5 с при лимите 600 с; код ssh 0._
