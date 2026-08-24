@@ -469,7 +469,12 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     const latest = alerts[0];
     if (!latest) continue;
     const mins = Math.round((Date.now() - latest.createdAt.getTime()) / 60_000);
-    const label = `${p.token.symbol} (${mins} мин назад)`;
+    // Сеть в строке — не украшение. 24 августа 33 позиции из 38 держали алерт
+    // «прямой запрос цены не отвечает», и по одним символам нельзя было
+    // отличить «источник не покрывает эту сеть» от «токен умер». Ровно на
+    // такой развилке уже один раз потеряли неделю, гадая по косвенным
+    // признакам. Печатаем сеть сразу — тогда следующий отчёт закрывает вопрос.
+    const label = `${p.token.symbol}/${p.token.chain} (${mins} мин назад)`;
     if (latest.message.includes("устарел")) partial.push(label);
     else if (latest.message.startsWith("Прямой запрос")) onFallback.push(label);
     // «Продажа не исполнена» — ОТДЕЛЬНОЕ состояние, а не «цены нет». Раньше
