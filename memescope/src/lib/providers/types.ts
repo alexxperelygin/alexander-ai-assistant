@@ -27,6 +27,25 @@ export interface MarketDataProvider {
    * ошибка не видна ни компилятору, ни тестам.
    */
   getMarketSnapshot(mint: string, chain: string): Promise<MarketSnapshot | null>;
+  /**
+   * То же самое, но пачкой. Нужен не для скорости кода, а чтобы не упираться в
+   * лимит источника: 24 августа монитор при 39 открытых позициях и опросе раз
+   * в 30 секунд съедал 78 запросов в минуту из 240 доступных, сканер добирал
+   * остальное, и очередь вставала в собственный троттлинг. Процессор при этом
+   * простаивал, а цены по трети позиций устаревали, и трейлинг-стоп по ним
+   * переставал считаться.
+   *
+   * Метод необязательный: провайдер, который не умеет пачками, просто его не
+   * объявляет, и вызывающий сам сходит по одному.
+   */
+  getMarketSnapshots?(
+    tokens: { mint: string; chain: string }[],
+  ): Promise<Map<string, MarketSnapshot | null>>;
+}
+
+/** Ключ в карте, которую возвращает getMarketSnapshots. */
+export function marketKey(mint: string, chain: string): string {
+  return `${chain}:${mint}`;
 }
 
 export interface RiskProvider {
