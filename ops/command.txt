@@ -1,2 +1,2 @@
-backtest
-run: 67
+diag
+run: 68
