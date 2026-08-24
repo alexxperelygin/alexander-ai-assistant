@@ -1,9 +1,12 @@
 import type { MarketSnapshot } from "../types";
-import type { MarketDataProvider } from "./types";
+import { marketKey, type MarketDataProvider } from "./types";
 import { fetchJson } from "./http";
 
 // DexScreener public API (no key). Rate limit 300 req/min for /latest/dex.
 // Docs: https://docs.dexscreener.com/api/reference
+
+/** Сколько адресов кладём в один запрос: предел эндпоинта — 30. */
+const BATCH = 30;
 
 interface DsPair {
   chainId: string;
@@ -29,7 +32,47 @@ export class DexScreenerMarketData implements MarketDataProvider {
       `https://api.dexscreener.com/latest/dex/tokens/${mint}`,
       { source: this.name, minIntervalMs: 250 },
     );
-    const pairs = (json.pairs ?? []).filter((p) => p.chainId === chain);
+    return this.pick(json.pairs ?? [], mint, chain);
+  }
+
+  /**
+   * Пачкой. Эндпоинт принимает до 30 адресов через запятую и возвращает пары
+   * вперемешку, поэтому каждый токен выбирается из общего ответа своим
+   * фильтром — ровно тем же, что и при одиночном запросе.
+   *
+   * Адрес сравнивается без учёта регистра: EVM-адреса приходят то в
+   * checksum-виде, то строчными. Ключ карты при этом строится из ТОГО адреса,
+   * который просили, иначе вызывающий не найдёт свою запись.
+   */
+  async getMarketSnapshots(
+    tokens: { mint: string; chain: string }[],
+  ): Promise<Map<string, MarketSnapshot | null>> {
+    const out = new Map<string, MarketSnapshot | null>();
+    for (let i = 0; i < tokens.length; i += BATCH) {
+      const chunk = tokens.slice(i, i + BATCH);
+      let pairs: DsPair[] = [];
+      try {
+        const json = await fetchJson<{ pairs: DsPair[] | null }>(
+          `https://api.dexscreener.com/latest/dex/tokens/${chunk.map((t) => t.mint).join(",")}`,
+          { source: this.name, minIntervalMs: 250 },
+        );
+        pairs = json.pairs ?? [];
+      } catch {
+        // Одна неудачная пачка не должна ронять весь цикл монитора: вызывающий
+        // увидит отсутствие записи и сходит по этому токену отдельно.
+        continue;
+      }
+      for (const t of chunk) out.set(marketKey(t.mint, t.chain), this.pick(pairs, t.mint, t.chain));
+    }
+    return out;
+  }
+
+  /** Выбор канонической пары по токену: та же логика для одиночного и пачки. */
+  private pick(all: DsPair[], mint: string, chain: string): MarketSnapshot | null {
+    const want = mint.toLowerCase();
+    const pairs = all.filter(
+      (p) => p.chainId === chain && p.baseToken.address.toLowerCase() === want,
+    );
     if (pairs.length === 0) return null;
     // Use the deepest pool as the canonical market.
     const best = pairs.reduce((a, b) =>

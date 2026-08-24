@@ -1,5 +1,6 @@
 import { prisma } from "../db";
 import { getProviders } from "../providers";
+import { marketKey } from "../providers/types";
 import { notify } from "../notify/notifier";
 import { sellPosition, type SellArgs } from "../paper/portfolio";
 import { FROZEN_EXIT, VENTURE_EXIT, FREEZE_AT } from "../paper/exit-policy";
@@ -287,6 +288,22 @@ export async function monitorPositionsOnce(): Promise<void> {
     include: { token: true },
   });
 
+  // Цены на весь цикл берём одним заходом, пачками по 30 адресов. Данные и
+  // частота опроса те же самые — меняется только число запросов к источнику.
+  //
+  // 24 августа монитор при 39 открытых позициях слал 78 запросов в минуту при
+  // потолке источника 240; сканер добирал остальное, и очередь встала в
+  // собственный троттлинг. Со стороны это выглядело как «сервер тормозит»,
+  // хотя load average был 0.06: процесс просто ждал своей очереди. Цены по
+  // трети позиций устаревали, трейлинг-стоп по ним переставал считаться, а
+  // доля закрытий по устаревшей цене выросла с 29 из 116 до 49 из 142 за шесть
+  // часов — то есть портилась ровно та величина, ради которой трек и живёт.
+  const prefetched = providers.market.getMarketSnapshots
+    ? await providers.market.getMarketSnapshots(
+        open.map((p) => ({ mint: p.token.mint, chain: p.token.chain })),
+      )
+    : new Map<string, Awaited<ReturnType<typeof providers.market.getMarketSnapshot>>>();
+
   for (const pos of open) {
     try {
       // Прямой запрос — основной путь. Но если он не отвечает по этому токену,
@@ -307,7 +324,13 @@ export async function monitorPositionsOnce(): Promise<void> {
       // источник. Сам трек и строился ради того, чтобы выход считался по
       // прямому запросу цены, а не по частоте опроса сканера, — то есть без
       // этой строки он проверял бы ровно то же, что и пересчёт по истории.
-      const snap = await providers.market.getMarketSnapshot(pos.token.mint, pos.token.chain);
+      // Пачка могла не дойти целиком (сеть, 429) — тогда по этому токену
+      // спрашиваем отдельно, как раньше. Отсутствие записи и записанный null
+      // различаются: null означает «источник ответил, пары нет».
+      const key = marketKey(pos.token.mint, pos.token.chain);
+      const snap = prefetched.has(key)
+        ? prefetched.get(key) ?? null
+        : await providers.market.getMarketSnapshot(pos.token.mint, pos.token.chain);
       let price: number;
       let liq: number | null;
       // Цена устарела — решения «держим дальше» по ней принимать нельзя.

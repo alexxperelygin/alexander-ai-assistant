@@ -41,9 +41,9 @@ describe("roundRobinByChain", () => {
 // тесты проходили, и половина портфеля тихо жила на запасном источнике, где
 // трейлинг-стоп считается только пока снапшот свежее 30 минут.
 describe("DexScreenerMarketData.getMarketSnapshot", () => {
-  const pair = (chainId: string, priceUsd: string, liq: number) => ({
-    chainId, dexId: "x", pairAddress: "p" + chainId,
-    baseToken: { address: "a", name: "n", symbol: "S" },
+  const pair = (chainId: string, priceUsd: string, liq: number, addr = "0xabc") => ({
+    chainId, dexId: "x", pairAddress: "p" + chainId + addr,
+    baseToken: { address: addr, name: "n", symbol: "S" },
     priceUsd, liquidity: { usd: liq },
   });
 
@@ -56,6 +56,48 @@ describe("DexScreenerMarketData.getMarketSnapshot", () => {
     const { DexScreenerMarketData } = await import("../src/lib/providers/dexscreener");
     const snap = await new DexScreenerMarketData().getMarketSnapshot("0xabc", "base");
     expect(snap?.priceUsd).toBe(2);
+    vi.unstubAllGlobals();
+  });
+
+  // Пара, где наш токен стоит КОТИРУЕМЫМ, описывает цену другого токена.
+  // Раньше такая пара могла оказаться самой ликвидной и подменить цену собой.
+  it("не берёт пару, где запрошенный токен не базовый", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ pairs: [pair("base", "999", 900_000, "0xDEAD")] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { DexScreenerMarketData } = await import("../src/lib/providers/dexscreener");
+    expect(await new DexScreenerMarketData().getMarketSnapshot("0xabc", "base")).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  // Ради этого метода всё и затевалось: один запрос на 30 адресов вместо
+  // тридцати. Ответ приходит вперемешку, и развести его по токенам должен
+  // сам провайдер — иначе позиции получат чужие цены.
+  it("пачкой разводит перемешанный ответ по токенам и сетям", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        pairs: [
+          pair("base", "2", 90_000, "0xAAA"),
+          pair("bsc", "7", 50_000, "0xBBB"),
+          pair("base", "5", 10_000, "0xBBB"),
+        ],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { DexScreenerMarketData } = await import("../src/lib/providers/dexscreener");
+    const { marketKey } = await import("../src/lib/providers/types");
+    const got = await new DexScreenerMarketData().getMarketSnapshots([
+      { mint: "0xaaa", chain: "base" }, // регистр адреса другой — должно совпасть
+      { mint: "0xBBB", chain: "bsc" },
+      { mint: "0xCCC", chain: "base" }, // такого в ответе нет
+    ]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(got.get(marketKey("0xaaa", "base"))?.priceUsd).toBe(2);
+    expect(got.get(marketKey("0xBBB", "bsc"))?.priceUsd).toBe(7);
+    expect(got.get(marketKey("0xCCC", "base"))).toBeNull();
     vi.unstubAllGlobals();
   });
 
