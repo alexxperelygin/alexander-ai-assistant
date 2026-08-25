@@ -458,6 +458,7 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
   const noPrice: string[] = [];
   const onFallback: string[] = [];
   const partial: string[] = [];
+  const partialAddrs: string[] = [];
   const sellFailed: string[] = [];
   for (const p of open) {
     const alerts = await prisma.positionEvent.findMany({
@@ -475,7 +476,10 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     // такой развилке уже один раз потеряли неделю, гадая по косвенным
     // признакам. Печатаем сеть сразу — тогда следующий отчёт закрывает вопрос.
     const label = `${p.token.symbol}/${p.token.chain} (${mins} мин назад)`;
-    if (latest.message.includes("устарел")) partial.push(label);
+    if (latest.message.includes("устарел")) {
+      partial.push(label);
+      partialAddrs.push(`${p.token.chain}/${p.token.mint}`);
+    }
     else if (latest.message.startsWith("Прямой запрос")) onFallback.push(label);
     // «Продажа не исполнена» — ОТДЕЛЬНОЕ состояние, а не «цены нет». Раньше
     // оно попадало в общую кучу, и отчёт полтора часа показывал неверный
@@ -499,8 +503,16 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
       ? `- ⚠️ цены нет ни из одного источника, стоп и трейлинг НЕ проверяются: ${noPrice.join(", ")}`
       : `- цена доступна по всем открытым позициям`,
   );
-  if (partial.length)
+  if (partial.length) {
     lines.push(`- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: ${partial.join(", ")}`);
+    // Адреса первых пяти — чтобы проверить у источника напрямую, а не спорить
+    // с собственной базой. Разбивка по сетям 24 августа показала, что дело не
+    // в покрытии (страдают все сети сразу), и следующий вопрос — существует ли
+    // вообще пара по этим токенам. Ответить на него можно только по адресу.
+    lines.push(
+      `  · адреса первых пяти для проверки у источника: ${partialAddrs.slice(0, 5).join(", ")}`,
+    );
+  }
   if (sellFailed.length)
     lines.push(`- 🔴 выход НЕ ИСПОЛНЯЕТСЯ (симулятор отказывается моделировать сделку): ${sellFailed.join(", ")}`);
   if (onFallback.length)
