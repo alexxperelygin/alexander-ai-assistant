@@ -193,7 +193,17 @@ jobs:
                 echo; echo "-- node/tsx проекта --";
                 ps -eo pid,etime,pcpu,args | grep -E "tsx|node" | grep -v grep | head -20;
                 echo; echo "-- база --";
-                ls -lh /opt/alexander-ai-assistant/memescope/prisma/ 2>/dev/null' \
+                ls -lh /opt/alexander-ai-assistant/memescope/prisma/ 2>/dev/null;
+                echo; echo "-- источник цен, запрос С САМОГО СЕРВЕРА --";
+                echo "WETH на base (эталон, пары есть всегда):";
+                curl -fsS --max-time 20 -H "accept: application/json" \
+                  -H "user-agent: memescope-ai-research/0.1" \
+                  "https://api.dexscreener.com/latest/dex/tokens/0x4200000000000000000000000000000000000006" \
+                  | head -c 400; echo;
+                echo "он же без нашего user-agent:";
+                curl -fsS --max-time 20 -H "accept: application/json" \
+                  "https://api.dexscreener.com/latest/dex/tokens/0x4200000000000000000000000000000000000006" \
+                  | head -c 400; echo' \
                 || echo "::warning::Диагностика не снялась полностью"
               unset SSH_TIMEOUT
               ;;
