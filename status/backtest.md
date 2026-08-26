@@ -1,4 +1,4 @@
-# Backtest (2026-08-25T16:39:10Z)
+# Backtest (2026-08-26T00:38:58Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -6,7 +6,7 @@ Status: DONE
 NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 211,
+    "signals": 212,
     "horizon": "24h",
     "evaluable": 116,
     "winRate": 0.4224137931034483,
@@ -14,9 +14,9 @@ NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в �
     "medianReturn": -0.02361657186080446,
     "profitFactor": 0.5885518713702307,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.0797872340425532,
-    "rugMeasurable": 188,
-    "unclosablePct": 0.10900473933649289,
+    "rugRate": 0.07936507936507936,
+    "rugMeasurable": 189,
+    "unclosablePct": 0.10849056603773585,
     "byMonth": {
       "2026-08": {
         "n": 116,
@@ -47,7 +47,7 @@ NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 14 с при лимите 600 с; код ssh 0._
+_Расчёт занял 12 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -55,21 +55,21 @@ Status: DONE
 NO EDGE: expectancy -4.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 211,
+    "signals": 212,
     "horizon": "6h",
     "evaluable": 160,
     "winRate": 0.3625,
-    "expectancy": -0.04574079871074882,
+    "expectancy": -0.045646377287300435,
     "medianReturn": -0.01824444731528052,
-    "profitFactor": 0.5272264687156538,
+    "profitFactor": 0.5282024016038152,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.0481283422459893,
-    "rugMeasurable": 187,
-    "unclosablePct": 0.11374407582938388,
+    "rugRate": 0.047872340425531915,
+    "rugMeasurable": 188,
+    "unclosablePct": 0.11320754716981132,
     "byMonth": {
       "2026-08": {
         "n": 160,
-        "meanReturn": -0.04574079871074884
+        "meanReturn": -0.045646377287300456
       }
     }
   },
@@ -96,4 +96,4 @@ NO EDGE: expectancy -4.6% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 7 с при лимите 600 с; код ssh 0._
+_Расчёт занял 6 с при лимите 600 с; код ssh 0._
