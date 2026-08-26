@@ -1,6 +1,7 @@
 import { prisma } from "../db";
 import { getProviders } from "../providers";
 import { marketKey } from "../providers/types";
+import { readPoolState } from "../providers/onchain";
 import { notify } from "../notify/notifier";
 import { sellPosition, type SellArgs } from "../paper/portfolio";
 import { FROZEN_EXIT, VENTURE_EXIT, FREEZE_AT } from "../paper/exit-policy";
@@ -339,15 +340,34 @@ export async function monitorPositionsOnce(): Promise<void> {
         price = snap.priceUsd;
         liq = snap.liquidityUsd ?? null;
       } else {
-        const fallback = await lastUsableSnapshot(pos.tokenId);
-        if (!fallback) {
-          await handleMissingPrice(pos.id, pos.tokenId, pos.openedAt);
-          continue;
+        // ЧТЕНИЕ ПУЛА НАПРЯМУЮ. Котировочный источник замолкает раньше, чем
+        // токен перестаёт торговаться, и замолкает не случайно: первыми
+        // выпадают умирающие. Позиция закрывалась по последней известной цене,
+        // то есть по цене ДО обвала, и результат записывался лучше настоящего.
+        // К 26 августа так закрывалось 92 сделки из 203 в одном треке и 121 из
+        // 163 в другом.
+        //
+        // Резервы пула отдаёт сам блокчейн — ровно тогда, когда посредник молчит.
+        // Цена оттуда СВЕЖАЯ (состояние текущего блока), поэтому stalePrice
+        // остаётся false и трейлинг-стоп продолжает считаться. В этом и смысл:
+        // запасной снапшот сканера трейлинг отключал.
+        const onchain = pos.token.pairAddress
+          ? await readPoolState(pos.token.chain, pos.token.pairAddress, pos.token.mint)
+          : null;
+        if (onchain) {
+          price = onchain.priceUsd;
+          liq = onchain.liquidityUsd;
+        } else {
+          const fallback = await lastUsableSnapshot(pos.tokenId);
+          if (!fallback) {
+            await handleMissingPrice(pos.id, pos.tokenId, pos.openedAt);
+            continue;
+          }
+          price = fallback.snap.priceUsd as number;
+          liq = fallback.snap.liquidityUsd;
+          stalePrice = fallback.stale;
+          await noteFallback(pos.id, fallback.snap.fetchedAt, fallback.stale);
         }
-        price = fallback.snap.priceUsd as number;
-        liq = fallback.snap.liquidityUsd;
-        stalePrice = fallback.stale;
-        await noteFallback(pos.id, fallback.snap.fetchedAt, fallback.stale);
       }
 
       // Entry-time liquidity from OPEN event, for drain detection.

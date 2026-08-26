@@ -24,6 +24,18 @@ export interface ChainConfig {
   goplusChainId?: string;
   /** Есть ли агрегатор для симуляции продажи. */
   hasRouteProvider: boolean;
+  /**
+   * Публичный JSON-RPC для чтения состояния пула напрямую из блокчейна.
+   * Нужен там, где котировочный источник молчит: цена и ликвидность из
+   * резервов пула — это первичные данные, а не чей-то пересказ.
+   * Пусто = сеть читать не умеем, работает прежний путь.
+   */
+  rpcUrl?: string;
+  /**
+   * Обёрнутая нативная монета сети и её символ в котировках. Нужна, чтобы
+   * перевести цену токена из единиц второй стороны пары в доллары.
+   */
+  wrappedNative?: { address: string; symbol: string };
 }
 
 export const CHAINS: Record<string, ChainConfig> = {
@@ -34,18 +46,26 @@ export const CHAINS: Record<string, ChainConfig> = {
   base: {
     id: "base", label: "Base", geckoNetwork: "base", goplusChainId: "8453",
     hasRiskProvider: true, hasRouteProvider: false,
+    rpcUrl: process.env.BASE_RPC_URL ?? "https://mainnet.base.org",
+    wrappedNative: { address: "0x4200000000000000000000000000000000000006", symbol: "WETH" },
   },
   bsc: {
     id: "bsc", label: "BNB Chain", geckoNetwork: "bsc", goplusChainId: "56",
     hasRiskProvider: true, hasRouteProvider: false,
+    rpcUrl: process.env.BSC_RPC_URL ?? "https://bsc-dataseed.binance.org",
+    wrappedNative: { address: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", symbol: "WBNB" },
   },
   ethereum: {
     id: "ethereum", label: "Ethereum", geckoNetwork: "eth", goplusChainId: "1",
     hasRiskProvider: true, hasRouteProvider: false,
+    rpcUrl: process.env.ETH_RPC_URL ?? "https://ethereum-rpc.publicnode.com",
+    wrappedNative: { address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", symbol: "WETH" },
   },
   arbitrum: {
     id: "arbitrum", label: "Arbitrum", geckoNetwork: "arbitrum", goplusChainId: "42161",
     hasRiskProvider: true, hasRouteProvider: false,
+    rpcUrl: process.env.ARBITRUM_RPC_URL ?? "https://arb1.arbitrum.io/rpc",
+    wrappedNative: { address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", symbol: "WETH" },
   },
   // L2 от Robinhood. Проверено на живых данных 6 августа: ~20 новых пулов в
   // минуту и мем-токены с оборотом $10–20M за сутки, то есть это не витрина, а
