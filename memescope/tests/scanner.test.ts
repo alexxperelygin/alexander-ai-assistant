@@ -72,6 +72,30 @@ describe("DexScreenerMarketData.getMarketSnapshot", () => {
     vi.unstubAllGlobals();
   });
 
+  // Эндпоинт обслуживает за раз одно семейство адресов: минт Solana в списке
+  // молча выбрасывает из ответа все EVM-адреса. Пока пачки собирались
+  // вперемешку, одна позиция на Solana обнуляла цену всем EVM-позициям своей
+  // пачки, и снаружи это выглядело как «источник не отвечает».
+  it("не смешивает сети в одном запросе", async () => {
+    const urls: string[] = [];
+    const fetchMock = vi.fn(async (url: string) => {
+      urls.push(url);
+      return { ok: true, json: async () => ({ pairs: [] }) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { DexScreenerMarketData } = await import("../src/lib/providers/dexscreener");
+    await new DexScreenerMarketData().getMarketSnapshots([
+      { mint: "0xAAA", chain: "base" },
+      { mint: "SoLmint111", chain: "solana" },
+      { mint: "0xBBB", chain: "base" },
+    ]);
+    expect(urls).toHaveLength(2);
+    const evm = urls.find((u) => u.includes("0xAAA"));
+    expect(evm).toContain("0xBBB");
+    expect(evm).not.toContain("SoLmint111");
+    vi.unstubAllGlobals();
+  });
+
   // Ради этого метода всё и затевалось: один запрос на 30 адресов вместо
   // тридцати. Ответ приходит вперемешку, и развести его по токенам должен
   // сам провайдер — иначе позиции получат чужие цены.
@@ -94,7 +118,8 @@ describe("DexScreenerMarketData.getMarketSnapshot", () => {
       { mint: "0xBBB", chain: "bsc" },
       { mint: "0xCCC", chain: "base" }, // такого в ответе нет
     ]);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // Два запроса, а не один: base и bsc в одну пачку класть нельзя.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(got.get(marketKey("0xaaa", "base"))?.priceUsd).toBe(2);
     expect(got.get(marketKey("0xBBB", "bsc"))?.priceUsd).toBe(7);
     expect(got.get(marketKey("0xCCC", "base"))).toBeNull();
