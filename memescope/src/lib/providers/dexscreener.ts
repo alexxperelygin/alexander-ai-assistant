@@ -21,13 +21,19 @@ interface DsPair {
   fdv?: number;
   marketCap?: number;
   pairCreatedAt?: number;
-  info?: { websites?: { url: string }[]; socials?: { type: string; url: string }[] };
+  info?: {
+    websites?: { url: string }[];
+    socials?: { type: string; url: string }[];
+  };
 }
 
 export class DexScreenerMarketData implements MarketDataProvider {
   readonly name = "dexscreener";
 
-  async getMarketSnapshot(mint: string, chain: string): Promise<MarketSnapshot | null> {
+  async getMarketSnapshot(
+    mint: string,
+    chain: string,
+  ): Promise<MarketSnapshot | null> {
     const json = await fetchJson<{ pairs: DsPair[] | null }>(
       `https://api.dexscreener.com/latest/dex/tokens/${mint}`,
       { source: this.name, minIntervalMs: 250 },
@@ -48,27 +54,54 @@ export class DexScreenerMarketData implements MarketDataProvider {
     tokens: { mint: string; chain: string }[],
   ): Promise<Map<string, MarketSnapshot | null>> {
     const out = new Map<string, MarketSnapshot | null>();
-    for (let i = 0; i < tokens.length; i += BATCH) {
-      const chunk = tokens.slice(i, i + BATCH);
-      let pairs: DsPair[] = [];
-      try {
-        const json = await fetchJson<{ pairs: DsPair[] | null }>(
-          `https://api.dexscreener.com/latest/dex/tokens/${chunk.map((t) => t.mint).join(",")}`,
-          { source: this.name, minIntervalMs: 250 },
-        );
-        pairs = json.pairs ?? [];
-      } catch {
-        // Одна неудачная пачка не должна ронять весь цикл монитора: вызывающий
-        // увидит отсутствие записи и сходит по этому токену отдельно.
-        continue;
+    // ПАЧКА СОБИРАЕТСЯ ПО ОДНОЙ СЕТИ. Эндпоинт обслуживает за раз только одно
+    // семейство адресов: если в списке есть минт Solana, EVM-адреса из того же
+    // запроса выпадают молча — ответ 200, пар по ним просто нет.
+    //
+    // Проверено 26 августа: четыре EVM-адреса пачкой возвращаются все четыре;
+    // те же четыре плюс два минта Solana — возвращаются только Solana, EVM ноль.
+    //
+    // Пока пачки собирались вперемешку, одна позиция на Solana обнуляла цену
+    // всем EVM-позициям в своей пачке. Снаружи это выглядело как «источник не
+    // отвечает», хотя источник отвечал: не тому спрашивали.
+    const byChain = new Map<string, { mint: string; chain: string }[]>();
+    for (const t of tokens) {
+      const list = byChain.get(t.chain);
+      if (list) list.push(t);
+      else byChain.set(t.chain, [t]);
+    }
+    const groups = [...byChain.values()];
+    for (const group of groups) {
+      for (let i = 0; i < group.length; i += BATCH) {
+        const chunk = group.slice(i, i + BATCH);
+        let pairs: DsPair[] = [];
+        try {
+          const json = await fetchJson<{ pairs: DsPair[] | null }>(
+            `https://api.dexscreener.com/latest/dex/tokens/${chunk.map((t) => t.mint).join(",")}`,
+            { source: this.name, minIntervalMs: 250 },
+          );
+          pairs = json.pairs ?? [];
+        } catch {
+          // Одна неудачная пачка не должна ронять весь цикл монитора: вызывающий
+          // увидит отсутствие записи и сходит по этому токену отдельно.
+          continue;
+        }
+        for (const t of chunk)
+          out.set(
+            marketKey(t.mint, t.chain),
+            this.pick(pairs, t.mint, t.chain),
+          );
       }
-      for (const t of chunk) out.set(marketKey(t.mint, t.chain), this.pick(pairs, t.mint, t.chain));
     }
     return out;
   }
 
   /** Выбор канонической пары по токену: та же логика для одиночного и пачки. */
-  private pick(all: DsPair[], mint: string, chain: string): MarketSnapshot | null {
+  private pick(
+    all: DsPair[],
+    mint: string,
+    chain: string,
+  ): MarketSnapshot | null {
     const want = mint.toLowerCase();
     const pairs = all.filter(
       (p) => p.chainId === chain && p.baseToken.address.toLowerCase() === want,
