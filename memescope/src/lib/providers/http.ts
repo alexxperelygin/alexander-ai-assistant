@@ -18,6 +18,13 @@ export interface HttpOpts {
    */
   throttleKey?: string;
   timeoutMs?: number;
+  /**
+   * Тело запроса. Есть — идём POST'ом с JSON. Нужно для JSON-RPC узлов:
+   * чтение резервов пула — это eth_call, а он только POST. Заводить ради
+   * этого второй http-слой нельзя: учёт здоровья источников должен остаться
+   * в одном месте, иначе часть источников тихо выпадет из отчёта.
+   */
+  body?: unknown;
 }
 
 export async function fetchJson<T>(url: string, opts: HttpOpts): Promise<T> {
@@ -34,10 +41,18 @@ export async function fetchJson<T>(url: string, opts: HttpOpts): Promise<T> {
 
   const started = Date.now();
   try {
-    let res = await fetch(url, {
-      signal: AbortSignal.timeout(timeoutMs),
-      headers: { accept: "application/json", "user-agent": "memescope-ai-research/0.1" },
-    });
+    const init: RequestInit = opts.body === undefined
+      ? { headers: { accept: "application/json", "user-agent": "memescope-ai-research/0.1" } }
+      : {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/json",
+            "user-agent": "memescope-ai-research/0.1",
+          },
+          body: JSON.stringify(opts.body),
+        };
+    let res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
     // 429 — это «слишком часто», а не «нет данных». Один повтор с уважением к
     // Retry-After возвращает наблюдение вместо дыры в данных. Повтор ровно
     // один: если источник ограничивает всерьёз, долбиться в него вредно.
@@ -48,10 +63,7 @@ export async function fetchJson<T>(url: string, opts: HttpOpts): Promise<T> {
         : RETRY_PAUSE_MS;
       lastCallAt.set(throttleKey, Date.now() + pause);
       await new Promise((r) => setTimeout(r, pause));
-      res = await fetch(url, {
-        signal: AbortSignal.timeout(timeoutMs),
-        headers: { accept: "application/json", "user-agent": "memescope-ai-research/0.1" },
-      });
+      res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
     }
     const latencyMs = Date.now() - started;
     if (!res.ok) {
