@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-08-26T16:53:59.513Z (UTC)
+Сгенерирован: 2026-08-26T16:55:42.092Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 829813; снапшотов за 24ч: 42264
+- Worker: ✅ работает (последний цикл: 1 мин назад)
+- Токенов в базе: 829847; снапшотов за 24ч: 42236
 - Ошибок в audit log за 24ч: 0
 - memescope-web:  online, память 72 МБ, перезапусков 0
 - memescope-worker:  online, память 71 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 350 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 375 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,10 +16,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 21534
-- bsc: 2702
+- solana: 21536
+- bsc: 2706
 - robinhood: 2188
-- base: 1602
+- base: 1608
 - ethereum: 197
 - arbitrum: 15
 
@@ -39,7 +39,7 @@
 
 ## READY-сигналы (последние 5 за всё время)
 - WETH — 2026-08-26T12:26:03.244Z (4.5 ч назад)
-- WETH — 2026-08-26T10:51:04.594Z (6.0 ч назад)
+- WETH — 2026-08-26T10:51:04.594Z (6.1 ч назад)
 - DOLORES — 2026-08-26T08:24:10.580Z (8.5 ч назад)
 - MGEN — 2026-08-26T08:06:02.065Z (8.8 ч назад)
 - DOLORES — 2026-08-26T07:54:15.476Z (9.0 ч назад)
@@ -48,15 +48,15 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- TRADOOR: CANDIDATE → WATCH (45 мин назад) — Opportunity Score 44.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- TRADOOR: WATCH → CANDIDATE (48 мин назад) — Opportunity Score 50.1/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- TRADOOR: CANDIDATE → WATCH (47 мин назад) — Opportunity Score 44.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- TRADOOR: WATCH → CANDIDATE (50 мин назад) — Opportunity Score 50.1/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
 - UPS: WATCH → CANDIDATE (1.8 ч назад) — Opportunity Score 50.3/100, Risk 7.5/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
 - NITTER: — → WATCH (2.1 ч назад) — Opportunity Score 31.9/100, Risk 4.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
 - Shibacio: — → AVOID (2.1 ч назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
 - NINJ❤️: — → AVOID (2.1 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
 - 牛市: — → AVOID (2.1 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- Kubernetes: — → AVOID (2.1 ч назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- Basedeer: — → AVOID (2.1 ч назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- Kubernetes: — → AVOID (2.2 ч назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- Basedeer: — → AVOID (2.2 ч назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
 - CHUMP: — → AVOID (2.2 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
 - 熊猫: WATCH → AVOID (2.2 ч назад) — [insufficient-liquidity] Ликвидность $0 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 100.0% с прошлого наблю
 - 熊猫: — → WATCH (2.2 ч назад) — Opportunity Score 36.8/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
@@ -112,18 +112,18 @@
 - DONE (0 мин назад): NO EDGE: expectancy -4.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 2190287 / err 1634, последний успех 0 мин назад)
+- dexscreener: ok (ok 2190336 / err 1634, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 20.5 дн назад)
-- geckoterminal:arbitrum: ok (ok 16465 / err 12871, последний успех 0 мин назад)
-- geckoterminal:base: ok (ok 29308 / err 38, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 28089 / err 1252, последний успех 1 мин назад)
-- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 20523 / err 8816, последний успех 23 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 13785 / err 15530, последний успех 23 мин назад)
-- geckoterminal:solana: ok (ok 29347 / err 0, последний успех 1 мин назад)
-- goplus: ok (ok 50768 / err 24, последний успех 1 мин назад)
-- jupiter: ok (ok 457632 / err 964, последний успех 0 мин назад)
+- geckoterminal:arbitrum: ok (ok 16467 / err 12871, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 29310 / err 38, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 28091 / err 1252, последний успех 0 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 20523 / err 8818, последний успех 24 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 13785 / err 15532, последний успех 25 мин назад)
+- geckoterminal:solana: ok (ok 29349 / err 0, последний успех 0 мин назад)
+- goplus: ok (ok 50769 / err 24, последний успех 1 мин назад)
+- jupiter: ok (ok 457635 / err 964, последний успех 1 мин назад)
 - rpc:base: ok (ok 43 / err 2, последний успех 6.1 ч назад)
-- rpc:bsc: ok (ok 284 / err 0, последний успех 7.3 ч назад)
+- rpc:bsc: ok (ok 284 / err 0, последний успех 7.4 ч назад)
 - rpc:ethereum: ok (ok 1497 / err 0, последний успех 4.0 ч назад)
-- rugcheck: ok (ok 131243 / err 398, последний успех 5 мин назад)
+- rugcheck: ok (ok 131243 / err 398, последний успех 7 мин назад)
 
