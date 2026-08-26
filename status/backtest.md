@@ -1,26 +1,26 @@
-# Backtest (2026-08-26T00:38:58Z)
+# Backtest (2026-08-26T08:39:30Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
 Status: DONE
-NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 212,
+    "signals": 215,
     "horizon": "24h",
-    "evaluable": 116,
-    "winRate": 0.4224137931034483,
-    "expectancy": -0.048821915766906206,
-    "medianReturn": -0.02361657186080446,
-    "profitFactor": 0.5885518713702307,
+    "evaluable": 117,
+    "winRate": 0.4188034188034188,
+    "expectancy": -0.05695656360815523,
+    "medianReturn": -0.0247574653675966,
+    "profitFactor": 0.5486676090226057,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.07936507936507936,
-    "rugMeasurable": 189,
-    "unclosablePct": 0.10849056603773585,
+    "rugRate": 0.08333333333333333,
+    "rugMeasurable": 192,
+    "unclosablePct": 0.10697674418604651,
     "byMonth": {
       "2026-08": {
-        "n": 116,
-        "meanReturn": -0.04882191576690617
+        "n": 117,
+        "meanReturn": -0.056956563608155195
       }
     }
   },
@@ -43,11 +43,11 @@ NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в �
       }
     }
   },
-  "verdict": "NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
 }
 exit=0
 
-_Расчёт занял 12 с при лимите 600 с; код ssh 0._
+_Расчёт занял 9 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -55,7 +55,7 @@ Status: DONE
 NO EDGE: expectancy -4.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 212,
+    "signals": 215,
     "horizon": "6h",
     "evaluable": 160,
     "winRate": 0.3625,
@@ -63,9 +63,9 @@ NO EDGE: expectancy -4.6% ≤ 0 после издержек. Сигналы в �
     "medianReturn": -0.01824444731528052,
     "profitFactor": 0.5282024016038152,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.047872340425531915,
-    "rugMeasurable": 188,
-    "unclosablePct": 0.11320754716981132,
+    "rugRate": 0.04712041884816754,
+    "rugMeasurable": 191,
+    "unclosablePct": 0.11162790697674418,
     "byMonth": {
       "2026-08": {
         "n": 160,
