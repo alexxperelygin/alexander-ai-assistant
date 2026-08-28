@@ -24,12 +24,47 @@ interface PoolFixture {
   reserves?: [bigint, bigint];
   sqrtPriceX96?: bigint;
   balances?: Record<string, bigint>;
+  /** Пул Uniswap V4: своего контракта нет, состояние спрашивают по poolId. */
+  v4?: { liquidity: bigint };
+  /** Что котировочный источник знает по адресу: цена в долларах или ничего. */
+  marketUsd?: Record<string, number>;
 }
+
+const V4_STATE_VIEW = "0xa3c0c9b65bad0b08107aa264b0f3db444b867a71";
+const V4_INIT_TOPIC = "0xdd466e674ea557f56295e2d0218a125ea4b4f0f6f3307b95f85e6110838d6438";
+const wt = (a: string) => "0x" + wa(a);
 
 /** Подменяет сеть: отвечает на eth_call так, как ответил бы узел. */
 function stubRpc(pool: PoolFixture) {
-  const fetchMock = vi.fn(async (_url: string, init?: { body?: string }) => {
+  const fetchMock = vi.fn(async (url: string, init?: { body?: string }) => {
+    // Котировочный источник спрашивается только про ВТОРУЮ сторону пары: она
+    // ликвидна и котируется даже тогда, когда по нашему токену источник молчит.
+    if (String(url).includes("dexscreener.com")) {
+      const addr = String(url).split("/").pop()?.toLowerCase() ?? "";
+      const usd = pool.marketUsd?.[addr];
+      return {
+        ok: true,
+        json: async () => ({
+          pairs: usd == null ? [] : [{ chainId: "base", priceUsd: String(usd), liquidity: { usd: 1e6 } }],
+        }),
+      };
+    }
     const body = JSON.parse(init?.body ?? "{}");
+    if (body.method === "eth_blockNumber") {
+      return { ok: true, json: async () => ({ result: "0x" + (1_000_000).toString(16) }) };
+    }
+    if (body.method === "eth_getLogs") {
+      const wanted = body.params?.[0]?.topics?.[1];
+      const hit = pool.v4 && wanted;
+      return {
+        ok: true,
+        json: async () => ({
+          result: hit
+            ? [{ topics: [V4_INIT_TOPIC, wanted, wt(pool.token0), wt(pool.token1)] }]
+            : [],
+        }),
+      };
+    }
     const { to, data } = body.params?.[0] ?? {};
     const sel = String(data).slice(0, 10);
     const target = String(to).toLowerCase();
@@ -53,6 +88,14 @@ function stubRpc(pool: PoolFixture) {
       return reply("0x" + w(pool.sqrtPriceX96) + w(0) + w(0) + w(0));
     }
     if (sel === "0x70a08231") return reply("0x" + w(pool.balances?.[target] ?? 0n));
+    // StateView: цена и активная ликвидность пула V4 по его poolId.
+    if (sel === "0xc815641c" && target === V4_STATE_VIEW) {
+      if (pool.sqrtPriceX96 == null) return reply(null);
+      return reply("0x" + w(pool.sqrtPriceX96) + w(0) + w(0) + w(0));
+    }
+    if (sel === "0xfa6793d5" && target === V4_STATE_VIEW) {
+      return reply("0x" + w(pool.v4?.liquidity ?? 0n));
+    }
     return reply(null);
   });
   vi.stubGlobal("fetch", fetchMock);
@@ -120,8 +163,9 @@ describe("readPoolState", () => {
       reserves: [1000n * 10n ** 18n, 2000n * 10n ** 18n],
     });
     const read = await load();
-    // Курс такой стороны к доллару взять неоткуда. Подставить единицу значило
-    // бы выдумать цену — молчание честнее.
+    // Ни стейбл, ни нативная монета, и котировочный источник о ней тоже
+    // молчит (marketUsd не задан). Подставить единицу значило бы выдумать
+    // цену — молчание честнее.
     expect(await read("base", "0xpair000000000000000000000000000000000004", token)).toBeNull();
     vi.unstubAllGlobals();
   });
@@ -155,6 +199,72 @@ describe("readPoolState", () => {
     const read = await load();
     expect(await read("solana", "poolAddr", "someMint")).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+  it("вторая сторона пары считается по её собственному курсу", async () => {
+    const token = "0x9999999999999999999999999999999999999999";
+    const exotic = "0xaaaa000000000000000000000000000000000001";
+    stubRpc({
+      token0: token, token1: exotic, dec0: 18, dec1: 18,
+      // 1000 токенов против 2000 единиц второй стороны по $3 → токен стоит $6.
+      reserves: [1000n * 10n ** 18n, 2000n * 10n ** 18n],
+      marketUsd: { [exotic]: 3 },
+    });
+    const read = await load();
+    const r = await read("base", "0xpair000000000000000000000000000000000007", token);
+    // 28 августа выяснилось, что на base мем-токены часто заводят пул не к
+    // доллару и не к ETH. Прежде мы в этом месте отказывались считать, и
+    // сделка закрывалась по устаревшей цене — то есть по допущению.
+    expect(r?.priceUsd).toBeCloseTo(6, 9);
+    expect(r?.liquidityUsd).toBeCloseTo(12000, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: цена и глубина берутся по poolId, а не по адресу пула", async () => {
+    const token = "0xbbbb000000000000000000000000000000000001";
+    const poolId = "0x" + "1c".repeat(32);
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n, // цена token0 в token1 = 4
+      v4: { liquidity: 500n * 10n ** 18n },
+    });
+    const read = await load();
+    const r = await read("base", poolId, token, new Date());
+    expect(r?.kind).toBe("v4");
+    expect(r?.priceUsd).toBeCloseTo(4, 6);
+    // Виртуальные резервы стороны котировки: y = L * sqrtP = 500 * 2 = 1000.
+    expect(r?.liquidityUsd).toBeCloseTo(2000, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: нативная монета обозначается нулевым адресом", async () => {
+    const token = "0xcccc000000000000000000000000000000000001";
+    const poolId = "0x" + "2d".repeat(32);
+    const NATIVE = "0x0000000000000000000000000000000000000000";
+    stubRpc({
+      // Нативная монета сортируется первой, наш токен — второй.
+      token0: NATIVE, token1: token, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n, // цена native в токенах = 4 → токен = 1/4 ETH
+      v4: { liquidity: 500n * 10n ** 18n },
+      // decimals() у нулевого адреса не спрашивается, курс берётся как у WETH.
+      marketUsd: { [WETH_BASE]: 4000 },
+    });
+    const read = await load();
+    const r = await read("base", poolId, token, new Date());
+    expect(r?.kind).toBe("v4");
+    expect(r?.priceUsd).toBeCloseTo(1000, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: без события Initialize состав пары неизвестен и цены нет", async () => {
+    const token = "0xdddd000000000000000000000000000000000001";
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      // v4 не задан — журнал пуст, восстановить валюты неоткуда.
+    });
+    const read = await load();
+    expect(await read("base", "0x" + "3e".repeat(32), token, new Date())).toBeNull();
     vi.unstubAllGlobals();
   });
 });

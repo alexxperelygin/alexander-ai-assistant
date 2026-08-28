@@ -26,7 +26,27 @@ const SIG = {
   decimals: "0x313ce567",
   slot0: "0x3850c7bd",
   balanceOf: "0x70a08231",
+  /** StateView.getSlot0(bytes32) — цена пула Uniswap V4 по его poolId. */
+  v4Slot0: "0xc815641c",
+  /** StateView.getLiquidity(bytes32) — активная ликвидность пула V4. */
+  v4Liquidity: "0xfa6793d5",
 } as const;
+
+/**
+ * Нативная монета внутри Uniswap V4 обозначается нулевым адресом: пул может
+ * держать ETH напрямую, без обёртки. Спрашивать decimals() у нулевого адреса
+ * бессмысленно — у нативной монеты их всегда 18.
+ */
+const NATIVE_CURRENCY = "0x0000000000000000000000000000000000000000";
+
+/** Тема события PoolManager.Initialize — по ней восстанавливается состав пары. */
+const V4_INITIALIZE_TOPIC =
+  "0xdd466e674ea557f56295e2d0218a125ea4b4f0f6f3307b95f85e6110838d6438";
+
+/** «Адрес пары» длиной 32 байта — это не контракт, а poolId Uniswap V4. */
+function isPoolId(value: string): boolean {
+  return /^0x[0-9a-fA-F]{64}$/.test(value);
+}
 
 /** Стейблкоины по сетям: для них курс к доллару принимается за единицу. */
 const STABLES: Record<string, Set<string>> = {
@@ -55,8 +75,8 @@ const STABLES: Record<string, Set<string>> = {
 export interface PoolState {
   priceUsd: number;
   liquidityUsd: number;
-  /** Как получена цена: по резервам (v2) или по текущему тику (v3). */
-  kind: "v2" | "v3";
+  /** Как получена цена: по резервам (v2), по тику пула (v3) или по тику V4. */
+  kind: "v2" | "v3" | "v4";
 }
 
 interface PoolMeta {
@@ -64,32 +84,47 @@ interface PoolMeta {
   token1: string;
   dec0: number;
   dec1: number;
-  kind: "v2" | "v3";
+  kind: "v2" | "v3" | "v4";
 }
 
-/** Состав пары неизменен, поэтому кешируется навсегда. */
-const metaCache = new Map<string, PoolMeta | null>();
-/** Курс обёрнутой нативной монеты живёт минуту: этого хватает для оценки. */
-const nativeUsdCache = new Map<string, { usd: number; at: number }>();
-const NATIVE_TTL_MS = 60_000;
+/**
+ * Состав пары неизменен, поэтому удачный ответ кешируется навсегда.
+ *
+ * А вот НЕУДАЧУ навсегда запоминать нельзя. Раньше так и было, и для пар V2/V3
+ * это сходило с рук: там неудача означала «это не пул». Для V4 состав пары
+ * ищется сканированием журнала событий, а оно может не дойти по сети — и пул,
+ * не прочитанный один раз из-за таймаута, молча оставался нечитаемым до
+ * перезапуска воркера. Это ровно тот тихий отказ, ради устранения которого
+ * чтение пулов и писалось. Поэтому у отрицательного ответа есть срок.
+ */
+const metaCache = new Map<string, { meta: PoolMeta | null; at: number }>();
+const META_MISS_TTL_MS = 30 * 60_000;
+/** Курс второй стороны пары живёт минуту: этого хватает для оценки. */
+const quoteUsdCache = new Map<string, { usd: number; at: number }>();
+const QUOTE_TTL_MS = 60_000;
 
-async function ethCall(chain: string, to: string, data: string): Promise<string | null> {
+async function rpc<T>(chain: string, method: string, params: unknown[]): Promise<T | null> {
   const cfg = chainConfig(chain);
   if (!cfg?.rpcUrl) return null;
   try {
-    const res = await fetchJson<{ result?: string; error?: { message: string } }>(cfg.rpcUrl, {
+    const res = await fetchJson<{ result?: T; error?: { message: string } }>(cfg.rpcUrl, {
       source: `rpc:${chain}`,
       minIntervalMs: 120,
       timeoutMs: 8_000,
-      body: { jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to, data }, "latest"] },
+      body: { jsonrpc: "2.0", id: 1, method, params },
     });
     // Revert — это ответ, а не сбой связи: у пула V3 нет getReserves, и мы
     // узнаём об этом именно так. Наверх идёт null, вызывающий пробует иначе.
-    if (res.error || !res.result || res.result === "0x") return null;
+    if (res.error || res.result == null) return null;
     return res.result;
   } catch {
     return null;
   }
+}
+
+async function ethCall(chain: string, to: string, data: string): Promise<string | null> {
+  const res = await rpc<string>(chain, "eth_call", [{ to, data }, "latest"]);
+  return res && res !== "0x" ? res : null;
 }
 
 /** Слово N (32 байта) из ответа eth_call. */
@@ -125,10 +160,99 @@ function scaled(v: bigint, decimals: number): number {
   return Number(`${int}.${frac}`);
 }
 
-async function poolMeta(chain: string, pair: string): Promise<PoolMeta | null> {
-  const key = `${chain}:${pair.toLowerCase()}`;
+function cachedMeta(key: string): PoolMeta | null | undefined {
   const hit = metaCache.get(key);
+  if (hit === undefined) return undefined;
+  if (hit.meta) return hit.meta;
+  return Date.now() - hit.at < META_MISS_TTL_MS ? null : undefined;
+}
+
+function rememberMeta(key: string, meta: PoolMeta | null): PoolMeta | null {
+  metaCache.set(key, { meta, at: Date.now() });
+  return meta;
+}
+
+/** Знаков после запятой у валюты пула; у нативной монеты их всегда 18. */
+async function currencyDecimals(chain: string, currency: string): Promise<number> {
+  if (currency === NATIVE_CURRENCY) return 18;
+  const raw = await ethCall(chain, currency, SIG.decimals);
+  return raw ? Number(wordToBigInt(raw, 0) ?? 18n) : 18;
+}
+
+/**
+ * Состав пула Uniswap V4 по его poolId.
+ *
+ * poolId — это keccak от ключа пула, обратно он не разбирается. Единственный
+ * способ узнать валюты — найти событие Initialize, которым пул заведён. Журнал
+ * у публичных узлов отдаётся окнами не больше 10 000 блоков, поэтому окно
+ * наводится по времени создания пула, если оно известно, и лишь иначе журнал
+ * просматривается назад от текущего блока.
+ */
+async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): Promise<PoolMeta | null> {
+  const cfg = chainConfig(chain);
+  if (!cfg?.v4) return null;
+  const { poolManager, blockTimeSec } = cfg.v4;
+
+  const headHex = await rpc<string>(chain, "eth_blockNumber", []);
+  if (!headHex) return null;
+  const head = Number(BigInt(headHex));
+  if (!Number.isFinite(head) || head <= 0) return null;
+
+  const SPAN = 9_500;
+  const windows: [number, number][] = [];
+  if (createdAt) {
+    // Прицел по времени создания: оценка блока плюс запас в обе стороны.
+    // Промах по времени возможен, поэтому соседние окна тоже просматриваются.
+    const ageBlocks = Math.floor((Date.now() - createdAt.getTime()) / 1000 / blockTimeSec);
+    const est = Math.max(0, head - ageBlocks);
+    for (const shift of [0, -SPAN, SPAN, -2 * SPAN, 2 * SPAN]) {
+      const hi = Math.min(head, est + Math.floor(SPAN / 2) + shift);
+      windows.push([Math.max(0, hi - SPAN), hi]);
+    }
+  }
+  // Запасной проход: сплошь назад от головы. Нужен, когда времени создания нет
+  // или оно разошлось с реальным блоком — например, если источник записал его
+  // приблизительно. Дороже прицельного, но случается только при промахе, а
+  // тихо остаться без цены дороже: именно этим и была вызвана вся правка.
+  // Токены старше недели в работу не берутся, дальше искать незачем.
+  const maxBlocks = Math.ceil((7 * 24 * 3600) / blockTimeSec);
+  for (let back = 0; back < maxBlocks; back += SPAN) {
+    const hi = head - back;
+    if (hi <= 0) break;
+    windows.push([Math.max(0, hi - SPAN), hi]);
+  }
+
+  for (const [from, to] of windows) {
+    const logs = await rpc<{ topics: string[] }[]>(chain, "eth_getLogs", [
+      {
+        address: poolManager,
+        fromBlock: "0x" + from.toString(16),
+        toBlock: "0x" + to.toString(16),
+        topics: [V4_INITIALIZE_TOPIC, poolId.toLowerCase()],
+      },
+    ]);
+    const topics = logs?.[0]?.topics;
+    if (!topics || topics.length < 4) continue;
+    const c0 = topics[2] && "0x" + topics[2].slice(26);
+    const c1 = topics[3] && "0x" + topics[3].slice(26);
+    if (!c0 || !c1) continue;
+    const token0 = c0.toLowerCase();
+    const token1 = c1.toLowerCase();
+    const [dec0, dec1] = await Promise.all([
+      currencyDecimals(chain, token0),
+      currencyDecimals(chain, token1),
+    ]);
+    return { token0, token1, dec0, dec1, kind: "v4" };
+  }
+  return null;
+}
+
+async function poolMeta(chain: string, pair: string, createdAt?: Date | null): Promise<PoolMeta | null> {
+  const key = `${chain}:${pair.toLowerCase()}`;
+  const hit = cachedMeta(key);
   if (hit !== undefined) return hit;
+
+  if (isPoolId(pair)) return rememberMeta(key, await v4Meta(chain, pair, createdAt));
 
   const [t0raw, t1raw] = await Promise.all([
     ethCall(chain, pair, SIG.token0),
@@ -136,10 +260,7 @@ async function poolMeta(chain: string, pair: string): Promise<PoolMeta | null> {
   ]);
   const token0 = t0raw && wordToAddress(t0raw, 0);
   const token1 = t1raw && wordToAddress(t1raw, 0);
-  if (!token0 || !token1) {
-    metaCache.set(key, null);
-    return null;
-  }
+  if (!token0 || !token1) return rememberMeta(key, null);
   const [d0raw, d1raw, reserves] = await Promise.all([
     ethCall(chain, token0, SIG.decimals),
     ethCall(chain, token1, SIG.decimals),
@@ -156,19 +277,25 @@ async function poolMeta(chain: string, pair: string): Promise<PoolMeta | null> {
     // значит V2-подобный пул, промолчал — считаем по тику V3.
     kind: reserves ? "v2" : "v3",
   };
-  metaCache.set(key, meta);
-  return meta;
+  return rememberMeta(key, meta);
 }
 
-/** Курс обёрнутой нативной монеты в долларах — через котировочный источник. */
-async function nativeUsd(chain: string): Promise<number | null> {
-  const cfg = chainConfig(chain);
-  if (!cfg?.wrappedNative) return null;
-  const hit = nativeUsdCache.get(chain);
-  if (hit && Date.now() - hit.at < NATIVE_TTL_MS) return hit.usd;
+/**
+ * Курс произвольного токена в долларах через котировочный источник.
+ *
+ * Здесь это НЕ противоречие с самой идеей читать пул из блокчейна. Молчит
+ * источник по нашему мем-токену — по нему и нет ни пар, ни объёма. Вторая же
+ * сторона пары (нативная монета, стейбл или крупный токен сети) котируется
+ * нормально: именно её курс и нужен, чтобы перевести цену из единиц пары
+ * в доллары.
+ */
+async function marketUsd(chain: string, address: string): Promise<number | null> {
+  const key = `${chain}:${address}`;
+  const hit = quoteUsdCache.get(key);
+  if (hit && Date.now() - hit.at < QUOTE_TTL_MS) return hit.usd;
   try {
     const json = await fetchJson<{ pairs: { chainId: string; priceUsd?: string; liquidity?: { usd?: number } }[] | null }>(
-      `https://api.dexscreener.com/latest/dex/tokens/${cfg.wrappedNative.address}`,
+      `https://api.dexscreener.com/latest/dex/tokens/${address}`,
       { source: "dexscreener", minIntervalMs: 250 },
     );
     const best = (json.pairs ?? [])
@@ -176,7 +303,7 @@ async function nativeUsd(chain: string): Promise<number | null> {
       .sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0];
     const usd = best?.priceUsd ? parseFloat(best.priceUsd) : NaN;
     if (!Number.isFinite(usd) || usd <= 0) return hit?.usd ?? null;
-    nativeUsdCache.set(chain, { usd, at: Date.now() });
+    quoteUsdCache.set(key, { usd, at: Date.now() });
     return usd;
   } catch {
     // Просроченный курс лучше отсутствия: он двигается на проценты в час,
@@ -185,16 +312,30 @@ async function nativeUsd(chain: string): Promise<number | null> {
   }
 }
 
+/** Курс обёрнутой нативной монеты в долларах. */
+async function nativeUsd(chain: string): Promise<number | null> {
+  const cfg = chainConfig(chain);
+  if (!cfg?.wrappedNative) return null;
+  return marketUsd(chain, cfg.wrappedNative.address);
+}
+
 /** Курс второй стороны пары в долларах. */
 async function quoteUsd(chain: string, quote: string): Promise<number | null> {
   if (STABLES[chain]?.has(quote)) return 1;
   const cfg = chainConfig(chain);
+  // В Uniswap V4 нативная монета лежит в пуле без обёртки и обозначается
+  // нулевым адресом. Для курса это та же самая монета.
+  if (quote === NATIVE_CURRENCY) return nativeUsd(chain);
   if (cfg?.wrappedNative && cfg.wrappedNative.address.toLowerCase() === quote) {
     return nativeUsd(chain);
   }
-  // Пара не к доллару и не к нативной монете: пересчитать не из чего.
-  // Молча подставить единицу было бы хуже отказа — это выдумать цену.
-  return null;
+  // Пара не к доллару и не к нативной монете. 28 августа выяснилось, что таких
+  // пар среди наших позиций много: на base мем-токены заводят пулы к другим
+  // токенам сети. Прежде мы в этом месте просто отказывались считать — и
+  // сделка закрывалась по устаревшей цене, то есть по допущению. Спросить курс
+  // второй стороны честнее: она ликвидна и котируется. Если источник не знает
+  // и её — отказ остаётся, выдумывать единицу нельзя.
+  return marketUsd(chain, quote);
 }
 
 /**
@@ -205,11 +346,13 @@ export async function readPoolState(
   chain: string,
   pairAddress: string,
   tokenAddress: string,
+  /** Время создания пары: наводит поиск события Initialize у пулов V4. */
+  pairCreatedAt?: Date | null,
 ): Promise<PoolState | null> {
   const cfg = chainConfig(chain);
   if (!cfg?.rpcUrl) return null;
 
-  const meta = await poolMeta(chain, pairAddress);
+  const meta = await poolMeta(chain, pairAddress, pairCreatedAt);
   if (!meta) return null;
 
   const token = tokenAddress.toLowerCase();
@@ -239,9 +382,16 @@ export async function readPoolState(
     return { priceUsd, liquidityUsd: resQuote * qUsd * 2, kind: "v2" };
   }
 
-  // V3: цена берётся из текущего тика, а не из отношения остатков — при
-  // сосредоточенной ликвидности это разные величины.
-  const raw = await ethCall(chain, pairAddress, SIG.slot0);
+  // V3 и V4: цена берётся из текущего тика, а не из отношения остатков — при
+  // сосредоточенной ликвидности это разные величины. Отличается только то, у
+  // кого спрашивать: у V4 своего контракта нет, состояние лежит в общем
+  // хранилище и запрашивается по poolId.
+  const v4 = meta.kind === "v4" ? cfg.v4 : null;
+  if (meta.kind === "v4" && !v4) return null;
+  const poolArg = pairAddress.toLowerCase().replace("0x", "").padStart(64, "0");
+  const raw = v4
+    ? await ethCall(chain, v4.stateView, SIG.v4Slot0 + poolArg)
+    : await ethCall(chain, pairAddress, SIG.slot0);
   const sqrtX96 = raw ? wordToBigInt(raw, 0) : null;
   if (sqrtX96 == null || sqrtX96 === 0n) return null;
   // (sqrt/2^96)^2 = цена token0, выраженная в token1, в их «сырых» единицах.
@@ -255,6 +405,27 @@ export async function readPoolState(
   const priceInQuote = tokenIsZero ? price0in1 : 1 / price0in1;
   const priceUsd = priceInQuote * qUsd;
   if (!Number.isFinite(priceUsd) || priceUsd <= 0) return null;
+
+  if (v4) {
+    // У пула V4 нет своего адреса, поэтому остатки на нём не спросишь: средства
+    // всех пулов лежат в общем хранилище одной кучей. Считаем по активной
+    // ликвидности: x = L / sqrtP, y = L * sqrtP — это «виртуальные резервы»,
+    // то есть та пара V2, которая вела бы себя у текущей цены так же.
+    //
+    // ЭТО ОЦЕНКА СВЕРХУ, и молчать об этом нельзя: виртуальные резервы
+    // описывают диапазон вплоть до нуля, а настоящая ликвидность стоит в узкой
+    // полосе вокруг цены. Завышенная глубина делает аварийный выход по обвалу
+    // ликвидности менее чутким. Выбор здесь между этой оценкой и закрытием по
+    // устаревшей цене — то есть по числу, которое вообще ничего не измеряет.
+    const lraw = await ethCall(chain, v4.stateView, SIG.v4Liquidity + poolArg);
+    const L = lraw ? wordToBigInt(lraw, 0) : null;
+    if (L == null || L === 0n) return { priceUsd, liquidityUsd: 0, kind: "v4" };
+    const lNum = scaled(L, 0);
+    // ratio = sqrtP в сырых единицах; сторона котировки зависит от порядка.
+    const quoteRaw = tokenIsZero ? lNum * ratio : lNum / ratio;
+    const liquidityUsd = (quoteRaw / 10 ** decQuote) * qUsd * 2;
+    return { priceUsd, liquidityUsd: Number.isFinite(liquidityUsd) ? liquidityUsd : 0, kind: "v4" };
+  }
 
   // Глубина V3 считается по реальным остаткам на адресе пула. Это ВЕРХНЯЯ
   // оценка доступного объёма: часть ликвидности стоит вне текущего диапазона
