@@ -36,6 +36,15 @@ export interface ChainConfig {
    * перевести цену токена из единиц второй стороны пары в доллары.
    */
   wrappedNative?: { address: string; symbol: string };
+  /**
+   * Uniswap V4. У пула V4 нет собственного контракта: состояние всех пулов
+   * лежит в PoolManager, а «адрес пары» — это 32-байтный poolId. Читать его
+   * надо через StateView по этому id, а состав пары восстанавливать из события
+   * Initialize, потому что poolId — это хеш ключа пула и обратно не разбирается.
+   * blockTimeSec нужен, чтобы по времени создания пула прицелиться в диапазон
+   * блоков: eth_getLogs у публичных узлов ограничен 10 000 блоков за запрос.
+   */
+  v4?: { poolManager: string; stateView: string; blockTimeSec: number };
 }
 
 export const CHAINS: Record<string, ChainConfig> = {
@@ -48,6 +57,11 @@ export const CHAINS: Record<string, ChainConfig> = {
     hasRiskProvider: true, hasRouteProvider: false,
     rpcUrl: process.env.BASE_RPC_URL ?? "https://mainnet.base.org",
     wrappedNative: { address: "0x4200000000000000000000000000000000000006", symbol: "WETH" },
+    v4: {
+      poolManager: "0x498581fF718922c3f8e6A244956aF099B2652b2b",
+      stateView: "0xA3c0c9b65baD0b08107Aa264b0f3dB444b867A71",
+      blockTimeSec: 2,
+    },
   },
   bsc: {
     id: "bsc", label: "BNB Chain", geckoNetwork: "bsc", goplusChainId: "56",

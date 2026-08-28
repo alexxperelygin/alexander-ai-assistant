@@ -352,7 +352,7 @@ export async function monitorPositionsOnce(): Promise<void> {
         // остаётся false и трейлинг-стоп продолжает считаться. В этом и смысл:
         // запасной снапшот сканера трейлинг отключал.
         const onchain = pos.token.pairAddress
-          ? await readPoolState(pos.token.chain, pos.token.pairAddress, pos.token.mint)
+          ? await readPoolState(pos.token.chain, pos.token.pairAddress, pos.token.mint, pos.token.pairCreatedAt)
           : null;
         if (onchain) {
           price = onchain.priceUsd;
