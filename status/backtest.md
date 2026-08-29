@@ -1,4 +1,4 @@
-# Backtest (2026-08-29T00:38:09Z)
+# Backtest (2026-08-29T08:38:50Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -8,19 +8,19 @@ NO EDGE: expectancy -4.0% ≤ 0 после издержек. Сигналы в �
   "strategy": {
     "signals": 228,
     "horizon": "24h",
-    "evaluable": 124,
-    "winRate": 0.41935483870967744,
-    "expectancy": -0.0399894151483736,
-    "medianReturn": -0.021778991856080676,
-    "profitFactor": 0.6654728275066552,
+    "evaluable": 125,
+    "winRate": 0.416,
+    "expectancy": -0.03999706379911649,
+    "medianReturn": -0.022037280677103976,
+    "profitFactor": 0.6636396558531237,
     "maxDrawdown": 1.0000017674860007,
     "rugRate": 0.07804878048780488,
     "rugMeasurable": 205,
     "unclosablePct": 0.10087719298245613,
     "byMonth": {
       "2026-08": {
-        "n": 124,
-        "meanReturn": -0.03998941514837357
+        "n": 125,
+        "meanReturn": -0.03999706379911646
       }
     }
   },
@@ -47,7 +47,7 @@ NO EDGE: expectancy -4.0% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 16 с при лимите 600 с; код ssh 0._
+_Расчёт занял 9 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -96,4 +96,4 @@ NO EDGE: expectancy -4.2% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 7 с при лимите 600 с; код ssh 0._
+_Расчёт занял 8 с при лимите 600 с; код ssh 0._
