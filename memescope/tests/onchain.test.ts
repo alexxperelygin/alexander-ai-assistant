@@ -256,6 +256,22 @@ describe("readPoolState", () => {
     vi.unstubAllGlobals();
   });
 
+  it("V4: пустой пул даёт нулевую глубину, а не неизвестную", async () => {
+    const token = "0xeeee000000000000000000000000000000000001";
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 0n },
+    });
+    const read = await load();
+    const r = await read("base", "0x" + "4f".repeat(32), token, new Date());
+    // Ноль и «не прочитали» — разные ответы: по первому сделка списывается
+    // полностью и остаётся в статистике, по второму уходит в неизмеримые.
+    expect(r?.priceUsd).toBeCloseTo(4, 6);
+    expect(r?.liquidityUsd).toBe(0);
+    vi.unstubAllGlobals();
+  });
+
   it("V4: без события Initialize состав пары неизвестен и цены нет", async () => {
     const token = "0xdddd000000000000000000000000000000000001";
     stubRpc({

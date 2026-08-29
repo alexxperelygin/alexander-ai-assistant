@@ -74,7 +74,16 @@ const STABLES: Record<string, Set<string>> = {
 
 export interface PoolState {
   priceUsd: number;
-  liquidityUsd: number;
+  /**
+   * Глубина пула в долларах. null — глубину прочитать НЕ УДАЛОСЬ, и это не то
+   * же самое, что ноль: ноль означает «прочитали, пул пуст». Разница не
+   * косметическая. Симуляция сделки отказывается работать при неизвестной
+   * глубине, и такой отказ уводит сделку в «неизмеримые», то есть вон из
+   * статистики. А пустой пул — это измеренный и притом ХУДШИЙ исход, он обязан
+   * остаться в статистике полным списанием. Записывать одно числом другого
+   * значит систематически выбрасывать худшие сделки и завышать все итоги.
+   */
+  liquidityUsd: number | null;
   /** Как получена цена: по резервам (v2), по тику пула (v3) или по тику V4. */
   kind: "v2" | "v3" | "v4";
 }
@@ -419,6 +428,8 @@ export async function readPoolState(
     // устаревшей цене — то есть по числу, которое вообще ничего не измеряет.
     const lraw = await ethCall(chain, v4.stateView, SIG.v4Liquidity + poolArg);
     const L = lraw ? wordToBigInt(lraw, 0) : null;
+    // Вызов не прошёл — глубина неизвестна; вернулся ноль — пул пуст.
+    if (lraw == null) return { priceUsd, liquidityUsd: null, kind: "v4" };
     if (L == null || L === 0n) return { priceUsd, liquidityUsd: 0, kind: "v4" };
     const lNum = scaled(L, 0);
     // ratio = sqrtP в сырых единицах; сторона котировки зависит от порядка.
@@ -436,7 +447,9 @@ export async function readPoolState(
   const holder = pairAddress.toLowerCase().replace("0x", "").padStart(64, "0");
   const bq = await ethCall(chain, quote, SIG.balanceOf + holder);
   const quoteBal = bq ? wordToBigInt(bq, 0) : null;
-  const liquidityUsd = quoteBal == null ? 0 : scaled(quoteBal, decQuote) * qUsd * 2;
+  // Неудавшийся вызов раньше превращался в ноль, и «не смогли прочитать»
+  // становилось неотличимо от «пул пуст». Теперь это разные ответы.
+  const liquidityUsd = quoteBal == null ? null : scaled(quoteBal, decQuote) * qUsd * 2;
   return { priceUsd, liquidityUsd, kind: "v3" };
 }
 

@@ -2,6 +2,22 @@ import { describe, expect, it } from "vitest";
 import { simulateFill } from "../src/lib/paper/execution";
 
 describe("simulateFill", () => {
+  it("пустой пул — измеренный исход, а не отсутствие данных", () => {
+    // Ноль раньше попадал в ветку «ликвидность неизвестна», и сделка уходила в
+    // «неизмеримые», то есть вон из статистики. Пустой пул — это ХУДШИЙ
+    // исход, и он обязан остаться внутри неё полным списанием.
+    const f = simulateFill({ sideUsd: 100, priceUsd: 1, liquidityUsd: 0, direction: "sell" });
+    expect(f.executed).toBe(false);
+    expect(f.reason).toContain("проскальзывание");
+    expect(f.impactPct).toBe(100);
+  });
+
+  it("неизвестная глубина по-прежнему отличается от нулевой", () => {
+    const f = simulateFill({ sideUsd: 100, priceUsd: 1, liquidityUsd: null, direction: "sell" });
+    expect(f.executed).toBe(false);
+    expect(f.reason).toContain("liquidity unknown");
+  });
+
   it("buy fills above mid price (impact + latency drift are adverse)", () => {
     const f = simulateFill({ sideUsd: 100, priceUsd: 1, liquidityUsd: 100_000, direction: "buy" });
     expect(f.executed).toBe(true);
