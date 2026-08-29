@@ -1,4 +1,4 @@
-# Backtest (2026-08-28T16:38:17Z)
+# Backtest (2026-08-29T00:38:09Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -8,19 +8,19 @@ NO EDGE: expectancy -4.0% ≤ 0 после издержек. Сигналы в �
   "strategy": {
     "signals": 228,
     "horizon": "24h",
-    "evaluable": 123,
-    "winRate": 0.42276422764227645,
-    "expectancy": -0.040053965488058,
-    "medianReturn": -0.021520703035057376,
-    "profitFactor": 0.6669148077419486,
+    "evaluable": 124,
+    "winRate": 0.41935483870967744,
+    "expectancy": -0.0399894151483736,
+    "medianReturn": -0.021778991856080676,
+    "profitFactor": 0.6654728275066552,
     "maxDrawdown": 1.0000017674860007,
     "rugRate": 0.07804878048780488,
     "rugMeasurable": 205,
     "unclosablePct": 0.10087719298245613,
     "byMonth": {
       "2026-08": {
-        "n": 123,
-        "meanReturn": -0.04005396548805797
+        "n": 124,
+        "meanReturn": -0.03998941514837357
       }
     }
   },
@@ -47,7 +47,7 @@ NO EDGE: expectancy -4.0% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 10 с при лимите 600 с; код ssh 0._
+_Расчёт занял 16 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -59,9 +59,9 @@ NO EDGE: expectancy -4.2% ≤ 0 после издержек. Сигналы в �
     "horizon": "6h",
     "evaluable": 171,
     "winRate": 0.36257309941520466,
-    "expectancy": -0.04243918981051973,
+    "expectancy": -0.04243752722293902,
     "medianReturn": -0.018139065984117297,
-    "profitFactor": 0.5506599595622789,
+    "profitFactor": 0.5506696531313979,
     "maxDrawdown": 1.0000000003832348,
     "rugRate": 0.04411764705882353,
     "rugMeasurable": 204,
@@ -69,7 +69,7 @@ NO EDGE: expectancy -4.2% ≤ 0 после издержек. Сигналы в �
     "byMonth": {
       "2026-08": {
         "n": 171,
-        "meanReturn": -0.04243918981051975
+        "meanReturn": -0.04243752722293904
       }
     }
   },
@@ -96,4 +96,4 @@ NO EDGE: expectancy -4.2% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 6 с при лимите 600 с; код ssh 0._
+_Расчёт занял 7 с при лимите 600 с; код ssh 0._
