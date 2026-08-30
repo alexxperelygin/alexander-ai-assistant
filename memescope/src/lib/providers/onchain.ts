@@ -197,15 +197,36 @@ async function currencyDecimals(chain: string, currency: string): Promise<number
  * наводится по времени создания пула, если оно известно, и лишь иначе журнал
  * просматривается назад от текущего блока.
  */
-async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): Promise<PoolMeta | null> {
+/**
+ * Сколько окон журнала просматриваем за один заход и откуда продолжать.
+ *
+ * Публичный узел base отдаёт eth_getLogs кусками по 10 000 блоков и при этом
+ * ограничивает частоту: 30 августа он ушёл в HTTP 429, счётчик ошибок вырос с
+ * 209 до 1341 за сутки. Сплошной проход на 32 окна за раз — сам по себе
+ * источник этой нагрузки, а при отказе он ещё и заканчивался выводом «пул не
+ * найден», хотя узел просто не ответил.
+ *
+ * Поэтому за один заход просматривается небольшой кусок, а место остановки
+ * запоминается: следующий цикл монитора продолжит оттуда, а не начнёт заново.
+ */
+const V4_WINDOWS_PER_ATTEMPT = 8;
+const v4ScanCursor = new Map<string, number>();
+
+type V4Lookup =
+  | { status: "found"; meta: PoolMeta }
+  | { status: "absent" }
+  /** Узел не ответил. Это НЕ «пула нет»: вывод откладывается до следующего раза. */
+  | { status: "unavailable" };
+
+async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): Promise<V4Lookup> {
   const cfg = chainConfig(chain);
-  if (!cfg?.v4) return null;
+  if (!cfg?.v4) return { status: "absent" };
   const { poolManager, blockTimeSec } = cfg.v4;
 
   const headHex = await rpc<string>(chain, "eth_blockNumber", []);
-  if (!headHex) return null;
+  if (!headHex) return { status: "unavailable" };
   const head = Number(BigInt(headHex));
-  if (!Number.isFinite(head) || head <= 0) return null;
+  if (!Number.isFinite(head) || head <= 0) return { status: "unavailable" };
 
   const SPAN = 9_500;
   const windows: [number, number][] = [];
@@ -220,10 +241,8 @@ async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): P
     }
   }
   // Запасной проход: сплошь назад от головы. Нужен, когда времени создания нет
-  // или оно разошлось с реальным блоком — например, если источник записал его
-  // приблизительно. Дороже прицельного, но случается только при промахе, а
-  // тихо остаться без цены дороже: именно этим и была вызвана вся правка.
-  // Токены старше недели в работу не берутся, дальше искать незачем.
+  // или оно разошлось с реальным блоком. Токены старше недели в работу не
+  // берутся, дальше искать незачем.
   const maxBlocks = Math.ceil((7 * 24 * 3600) / blockTimeSec);
   for (let back = 0; back < maxBlocks; back += SPAN) {
     const hi = head - back;
@@ -231,7 +250,14 @@ async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): P
     windows.push([Math.max(0, hi - SPAN), hi]);
   }
 
-  for (const [from, to] of windows) {
+  const cursorKey = `${chain}:${poolId.toLowerCase()}`;
+  const start = v4ScanCursor.get(cursorKey) ?? 0;
+  const end = Math.min(windows.length, start + V4_WINDOWS_PER_ATTEMPT);
+
+  for (let i = start; i < end; i++) {
+    const w = windows[i];
+    if (!w) break;
+    const [from, to] = w;
     const logs = await rpc<{ topics: string[] }[]>(chain, "eth_getLogs", [
       {
         address: poolManager,
@@ -240,7 +266,15 @@ async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): P
         topics: [V4_INITIALIZE_TOPIC, poolId.toLowerCase()],
       },
     ]);
-    const topics = logs?.[0]?.topics;
+    // Пустой список и НЕОТВЕТ — разные вещи. Раньше и то и другое вело к
+    // «продолжаем дальше», и весь проход мог закончиться выводом «пула нет»,
+    // ни разу не получив ответа. Теперь при отказе узла заход прерывается и
+    // место остановки сохраняется.
+    if (logs == null) {
+      v4ScanCursor.set(cursorKey, i);
+      return { status: "unavailable" };
+    }
+    const topics = logs[0]?.topics;
     if (!topics || topics.length < 4) continue;
     const c0 = topics[2] && "0x" + topics[2].slice(26);
     const c1 = topics[3] && "0x" + topics[3].slice(26);
@@ -251,9 +285,17 @@ async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): P
       currencyDecimals(chain, token0),
       currencyDecimals(chain, token1),
     ]);
-    return { token0, token1, dec0, dec1, kind: "v4" };
+    v4ScanCursor.delete(cursorKey);
+    return { status: "found", meta: { token0, token1, dec0, dec1, kind: "v4" } };
   }
-  return null;
+
+  if (end < windows.length) {
+    // Кусок просмотрен, журнал не кончился — продолжим со следующего захода.
+    v4ScanCursor.set(cursorKey, end);
+    return { status: "unavailable" };
+  }
+  v4ScanCursor.delete(cursorKey);
+  return { status: "absent" };
 }
 
 async function poolMeta(chain: string, pair: string, createdAt?: Date | null): Promise<PoolMeta | null> {
@@ -261,7 +303,13 @@ async function poolMeta(chain: string, pair: string, createdAt?: Date | null): P
   const hit = cachedMeta(key);
   if (hit !== undefined) return hit;
 
-  if (isPoolId(pair)) return rememberMeta(key, await v4Meta(chain, pair, createdAt));
+  if (isPoolId(pair)) {
+    const found = await v4Meta(chain, pair, createdAt);
+    // «Узел не ответил» в кеш не кладём вовсе: отрицательный ответ здесь был бы
+    // выводом, которого мы не делали.
+    if (found.status === "unavailable") return null;
+    return rememberMeta(key, found.status === "found" ? found.meta : null);
+  }
 
   const [t0raw, t1raw] = await Promise.all([
     ethCall(chain, pair, SIG.token0),

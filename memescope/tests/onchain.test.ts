@@ -28,6 +28,8 @@ interface PoolFixture {
   v4?: { liquidity: bigint };
   /** Что котировочный источник знает по адресу: цена в долларах или ничего. */
   marketUsd?: Record<string, number>;
+  /** Сколько первых запросов журнала узел отклонит (имитация HTTP 429). */
+  logFailures?: number;
 }
 
 const V4_STATE_VIEW = "0xa3c0c9b65bad0b08107aa264b0f3db444b867a71";
@@ -54,6 +56,10 @@ function stubRpc(pool: PoolFixture) {
       return { ok: true, json: async () => ({ result: "0x" + (1_000_000).toString(16) }) };
     }
     if (body.method === "eth_getLogs") {
+      if (pool.logFailures && pool.logFailures > 0) {
+        pool.logFailures -= 1;
+        return { ok: true, json: async () => ({ error: { message: "rate limited" } }) };
+      }
       const wanted = body.params?.[0]?.topics?.[1];
       const hit = pool.v4 && wanted;
       return {
@@ -253,6 +259,27 @@ describe("readPoolState", () => {
     const r = await read("base", poolId, token, new Date());
     expect(r?.kind).toBe("v4");
     expect(r?.priceUsd).toBeCloseTo(1000, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: отказ узла не превращается в вывод «пула нет»", async () => {
+    const token = "0xffff000000000000000000000000000000000001";
+    const poolId = "0x" + "5a".repeat(32);
+    // Узел отклоняет первый запрос журнала — ровно то, что делал публичный
+    // узел base 30 августа, уйдя в HTTP 429.
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 500n * 10n ** 18n },
+      logFailures: 1,
+    });
+    const read = await load();
+    // Первый заход честно ничего не даёт...
+    expect(await read("base", poolId, token, new Date())).toBeNull();
+    // ...но вывод «пула нет» не запомнен, и следующий заход читает пул.
+    const second = await read("base", poolId, token, new Date());
+    expect(second?.kind).toBe("v4");
+    expect(second?.priceUsd).toBeCloseTo(4, 6);
     vi.unstubAllGlobals();
   });
 
