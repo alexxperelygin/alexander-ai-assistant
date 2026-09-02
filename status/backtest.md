@@ -1,4 +1,4 @@
-# Backtest (2026-09-02T08:38:37Z)
+# Backtest (2026-09-02T16:38:52Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -47,7 +47,7 @@ NO EDGE: expectancy -4.0% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 8 с при лимите 600 с; код ssh 0._
+_Расчёт занял 7 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -100,4 +100,4 @@ NO EDGE: expectancy -4.4% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 5 с при лимите 600 с; код ssh 0._
+_Расчёт занял 8 с при лимите 600 с; код ssh 0._
