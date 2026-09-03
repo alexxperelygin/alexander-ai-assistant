@@ -1488,6 +1488,48 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
     ratioLow = ratios.length ? quantile(ratios, 0.025) : null;
   }
 
+  // ИСПОЛНИМОСТЬ ВЫХОДА — для венчурной проверки это не придирка, а суть.
+  //
+  // Модель издержек учитывает размер пула, но не учитывает, идёт ли в нём
+  // торговля. Пара с одной сделкой в час даёт котировку, а не рынок: наши $50
+  // были бы там единственной сделкой. Для проверки 4f этот фильтр отбросил 437
+  // сделок из 654, и результат на остатке разошёлся с общим.
+  //
+  // Здесь он бьёт сильнее, чем где-либо: вся венчурная гипотеза держится на
+  // ЧАСТОТЕ хвостов, а рост в два раза в паре, где никто не торгует, — самый
+  // подозрительный вид роста. Если превышение над контролем не переживает
+  // фильтр, значит преимущество жило в сделках, которые нельзя было закрыть.
+  //
+  // Фильтр УЖЕСТОЧАЕТ проверку и потому добавлен по ходу законно: ослаблять
+  // критерии нельзя, ужесточать при обнаружении собственной ошибки измерения
+  // обязательно (см. docs/PREREGISTRATION.md).
+  const MIN_EXIT_TXNS = 10;
+  const liveOnly = (es: ExitEntry[]): number[] => {
+    const kept: number[] = [];
+    for (const e of es) {
+      const d = simulateExitDetailed(e.series, e.i, VENTURE_POLICY);
+      if (!d) continue;
+      if ((d.exit.buys1h ?? 0) + (d.exit.sells1h ?? 0) >= MIN_EXIT_TXNS) kept.push(d.ret);
+    }
+    return kept;
+  };
+  const rsLive = liveOnly(testE);
+  const ctrlLive = liveOnly(ctrlE);
+  const trLive = tailRate(rsLive), crLive = tailRate(ctrlLive);
+  let ratioLowLive: number | null = null;
+  if (rsLive.length >= 20 && ctrlLive.length >= 20 && crLive) {
+    let seed = 192837465;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+    const ratios: number[] = [];
+    for (let k = 0; k < 2000; k++) {
+      const a = tailRate(Array.from({ length: rsLive.length }, () => rsLive[Math.floor(rnd() * rsLive.length)] as number));
+      const b = tailRate(Array.from({ length: ctrlLive.length }, () => ctrlLive[Math.floor(rnd() * ctrlLive.length)] as number));
+      if (a != null && b != null && b > 0) ratios.push(a / b);
+    }
+    ratios.sort((a, b) => a - b);
+    ratioLowLive = ratios.length ? quantile(ratios, 0.025) : null;
+  }
+
   const days = Math.max(0, (Date.now() - VENTURE_FREEZE_AT.getTime()) / 86_400_000);
   log(`Прошло с заморозки: **${days.toFixed(1)} сут**. Сделок: **${rs.length}**, контроль: ${ctrl.length}.`);
   log();
@@ -1506,6 +1548,15 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
       name: "Хвосты из ≥5 суток и ≥2 сетей",
       ok: days < 5 || !tailEntries.length ? null : tailDays.size >= 5 && tailChains.size >= 2,
       detail: `${tailEntries.length} хвостов, ${tailDays.size} сут, ${tailChains.size} сет.`,
+    },
+    // Ужесточение, добавленное 3 сентября: то же превышение частоты, но
+    // только на сделках, которые в момент выхода реально торговались.
+    {
+      name: `Превышение сохраняется на сделках с живой торговлей (≥${MIN_EXIT_TXNS} сделок/ч на выходе)`,
+      ok: ratioLowLive == null ? null : ratioLowLive > 1,
+      detail: `${pct(trLive, 2)} против ${pct(crLive, 2)}` +
+        `${ratioLowLive == null ? "" : `, нижняя граница ×${ratioLowLive.toFixed(2)}`}` +
+        ` (осталось ${rsLive.length} из ${rs.length})`,
     },
   ];
 
