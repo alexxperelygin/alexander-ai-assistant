@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-09T16:37:15.682Z (UTC)
+Сгенерирован: 2026-09-09T16:39:27.315Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 1265263; снапшотов за 24ч: 42441
+- Токенов в базе: 1265304; снапшотов за 24ч: 42442
 - Ошибок в audit log за 24ч: 0
 - memescope-web:  online, память 76 МБ, перезапусков 0
 - memescope-worker:  online, память 76 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 305 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 299 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,10 +16,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17724
-- robinhood: 11510
-- bsc: 4068
-- base: 3000
+- solana: 17729
+- robinhood: 11497
+- bsc: 4064
+- base: 2978
 - ethereum: 182
 - arbitrum: 21
 
@@ -31,35 +31,35 @@
 - READY: 6
 
 ## Топ-5 по score (не отбракованные)
+- PROLOGUE: READY, score 65.9, risk 4.0, conf 88% (обновлено 1 мин назад)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 19.3 дн назад)
-- ASTEROID: READY, score 65.6, risk 0.4, conf 88% (обновлено 1 мин назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 34.6 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 3.0 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 35.2 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- Libra — 2026-09-09T16:16:53.507Z (20 мин назад)
-- ASTEROID — 2026-09-09T15:44:54.042Z (52 мин назад)
-- ASTEROID — 2026-09-09T15:28:00.088Z (1.1 ч назад)
-- ASTEROID — 2026-09-09T14:23:59.273Z (2.2 ч назад)
+- Libra — 2026-09-09T16:16:53.507Z (23 мин назад)
+- ASTEROID — 2026-09-09T15:44:54.042Z (55 мин назад)
+- ASTEROID — 2026-09-09T15:28:00.088Z (1.2 ч назад)
+- ASTEROID — 2026-09-09T14:23:59.273Z (2.3 ч назад)
 - Libra — 2026-09-09T14:08:57.691Z (2.5 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- Libra: CANDIDATE → READY (20 мин назад) — Opportunity Score 65.8/100, Risk 1.1/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- Bonk: CANDIDATE → WATCH (42 мин назад) — Opportunity Score 43.9/100, Risk 18.4/100, confidence 100%. | Score в диапазоне 35–50 — наблюдение.
-- ASTEROID: CANDIDATE → READY (52 мин назад) — Opportunity Score 67.3/100, Risk 0.4/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Libra: CANDIDATE → READY (23 мин назад) — Opportunity Score 65.8/100, Risk 1.1/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Bonk: CANDIDATE → WATCH (44 мин назад) — Opportunity Score 43.9/100, Risk 18.4/100, confidence 100%. | Score в диапазоне 35–50 — наблюдение.
+- ASTEROID: CANDIDATE → READY (55 мин назад) — Opportunity Score 67.3/100, Risk 0.4/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
 - B: AVOID → WATCH (1.1 ч назад) — Opportunity Score 38.1/100, Risk 10.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
 - ASTEROID: READY → CANDIDATE (1.1 ч назад) — Opportunity Score 58.1/100, Risk 0.4/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- ASTEROID: CANDIDATE → READY (1.1 ч назад) — Opportunity Score 65.1/100, Risk 0.4/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- Bonk: WATCH → CANDIDATE (1.2 ч назад) — Opportunity Score 50.0/100, Risk 19.3/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данн
-- ASTEROID: READY → CANDIDATE (1.7 ч назад) — Opportunity Score 59.2/100, Risk 6.4/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- ASTEROID: CANDIDATE → READY (1.2 ч назад) — Opportunity Score 65.1/100, Risk 0.4/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Bonk: WATCH → CANDIDATE (1.3 ч назад) — Opportunity Score 50.0/100, Risk 19.3/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данн
+- ASTEROID: READY → CANDIDATE (1.8 ч назад) — Opportunity Score 59.2/100, Risk 6.4/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
 - RECEIPT: WATCH → AVOID (1.9 ч назад) — [liquidity-draining] Ликвидность упала на 6.3% с прошлого наблюдения (порог 5%) — из пула выводят средства.
 - RECEIPT: AVOID → WATCH (2.2 ч назад) — Opportunity Score 35.4/100, Risk 28.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
 - Bonk: CANDIDATE → WATCH (2.2 ч назад) — Opportunity Score 44.5/100, Risk 18.4/100, confidence 100%. | Score в диапазоне 35–50 — наблюдение.
-- ASTEROID: CANDIDATE → READY (2.2 ч назад) — Opportunity Score 66.7/100, Risk 0.4/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- ASTEROID: CANDIDATE → READY (2.3 ч назад) — Opportunity Score 66.7/100, Risk 0.4/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
 
 ## Позиции
 - Открытых: 29; всего: 970; realized P&L: $3993.33
@@ -103,7 +103,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 125 шт на $-6250.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 346 шт на $876.62 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- 🔴 выход НЕ ИСПОЛНЯЕТСЯ (симулятор отказывается моделировать сделку): BST (позиции 57.0 ч; «Продажа не исполнена: liquidity unknown — fill not simulatab»), SOPH (позиции 24.4 ч; «Продажа не исполнена: liquidity unknown — fill not simulatab»), VVV (позиции 22.2 ч; «Продажа не исполнена: liquidity unknown — fill not simulatab»)
+- 🔴 выход НЕ ИСПОЛНЯЕТСЯ (симулятор отказывается моделировать сделку): BST (позиции 57.0 ч; «Продажа не исполнена: liquidity unknown — fill not simulatab»), SOPH (позиции 24.5 ч; «Продажа не исполнена: liquidity unknown — fill not simulatab»), VVV (позиции 22.2 ч; «Продажа не исполнена: liquidity unknown — fill not simulatab»)
 
 ## Последние позиции (детально)
 - AGAI [paper/OPEN] вход $1.400e-7 × 355917311 = $50.00, остаток 100%, realized $0.00
@@ -135,22 +135,22 @@
     · 12:47:39 [ALERT] Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от 2026-09-09T12:21:49.653Z.
 
 ## Последний backtest
-- DONE (8.0 ч назад): NO EDGE: expectancy -5.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (0 мин назад): NO EDGE: expectancy -6.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3030056 / err 2839, последний успех 0 мин назад)
+- dexscreener: ok (ok 3030139 / err 2839, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 34.5 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 25890 / err 23479, последний успех 2 мин назад)
-- geckoterminal:base: ok (ok 49325 / err 56, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 45436 / err 3940, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 35419 / err 13955, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 24987 / err 24360, последний успех 0 мин назад)
-- geckoterminal:solana: ok (ok 49380 / err 1, последний успех 1 мин назад)
-- goplus: ok (ok 90409 / err 28, последний успех 0 мин назад)
-- jupiter: ok (ok 521114 / err 1028, последний успех 0 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 25891 / err 23480, последний успех 2 мин назад)
+- geckoterminal:base: ok (ok 49328 / err 56, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 45439 / err 3940, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 35420 / err 13956, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 24988 / err 24361, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 49383 / err 1, последний успех 0 мин назад)
+- goplus: ok (ok 90412 / err 28, последний успех 2 мин назад)
+- jupiter: ok (ok 521123 / err 1028, последний успех 1 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 8.0 дн назад)
-- rpc:base: ok (ok 109187 / err 2631, последний успех 0 мин назад)
-- rpc:bsc: ok (ok 9367 / err 0, последний успех 0 мин назад)
+- rpc:base: ok (ok 109195 / err 2631, последний успех 0 мин назад)
+- rpc:bsc: ok (ok 9371 / err 0, последний успех 0 мин назад)
 - rpc:ethereum: ok (ok 10490 / err 9, последний успех 1.1 дн назад)
-- rugcheck: ok (ok 133531 / err 401, последний успех 0 мин назад)
+- rugcheck: ok (ok 133532 / err 401, последний успех 1 мин назад)
 
