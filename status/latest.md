@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-09T20:38:40.932Z (UTC)
+Сгенерирован: 2026-09-09T20:55:17.059Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1271484; снапшотов за 24ч: 42954
+- Worker: ✅ работает (последний цикл: 0 мин назад)
+- Токенов в базе: 1271895; снапшотов за 24ч: 42955
 - Ошибок в audit log за 24ч: 0
 - memescope-web:  online, память 76 МБ, перезапусков 0
 - memescope-worker:  online, память 76 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 259 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 225 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,50 +16,50 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17944
-- robinhood: 11354
-- bsc: 4021
-- base: 2686
-- ethereum: 165
-- arbitrum: 17
+- solana: 17983
+- robinhood: 11344
+- bsc: 4015
+- base: 2682
+- ethereum: 161
+- arbitrum: 16
 
 ## Статусы возможностей
 - AVOID: 148937
-- DATA_UNAVAILABLE: 44358
-- WATCH: 40
-- CANDIDATE: 19
-- READY: 5
+- DATA_UNAVAILABLE: 44359
+- WATCH: 41
+- CANDIDATE: 16
+- READY: 6
 
 ## Топ-5 по score (не отбракованные)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 19.4 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 34.8 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 3.2 дн назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 35.3 дн назад)
-- PROLOGUE: READY, score 63.8, risk 4.0, conf 88% (обновлено 1 мин назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 35.4 дн назад)
+- PROLOGUE: READY, score 64.6, risk 4.0, conf 88% (обновлено 0 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- PROLOGUE — 2026-09-09T20:02:07.858Z (37 мин назад)
-- ASTEROID — 2026-09-09T19:21:58.234Z (1.3 ч назад)
-- TFI — 2026-09-09T18:59:58.632Z (1.6 ч назад)
-- PROLOGUE — 2026-09-09T18:52:54.826Z (1.8 ч назад)
-- PROLOGUE — 2026-09-09T17:46:07.197Z (2.9 ч назад)
+- TFI — 2026-09-09T20:51:49.539Z (3 мин назад)
+- PROLOGUE — 2026-09-09T20:02:07.858Z (53 мин назад)
+- ASTEROID — 2026-09-09T19:21:58.234Z (1.6 ч назад)
+- TFI — 2026-09-09T18:59:58.632Z (1.9 ч назад)
+- PROLOGUE — 2026-09-09T18:52:54.826Z (2.0 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- Bonk: WATCH → CANDIDATE (8 мин назад) — Opportunity Score 52.4/100, Risk 18.5/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данн
-- BEE: WATCH → CANDIDATE (12 мин назад) — Opportunity Score 50.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- BOW: CANDIDATE → WATCH (18 мин назад) — Opportunity Score 44.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BEE: CANDIDATE → WATCH (20 мин назад) — Opportunity Score 44.7/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BEE: WATCH → CANDIDATE (25 мин назад) — Opportunity Score 50.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- Bonk: CANDIDATE → WATCH (36 мин назад) — Opportunity Score 44.9/100, Risk 18.5/100, confidence 100%. | Score в диапазоне 35–50 — наблюдение.
-- PROLOGUE: CANDIDATE → READY (37 мин назад) — Opportunity Score 65.8/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- PROLOGUE: READY → CANDIDATE (39 мин назад) — Opportunity Score 59.9/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- BEE: CANDIDATE → WATCH (43 мин назад) — Opportunity Score 44.8/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- Bonk: WATCH → CANDIDATE (44 мин назад) — Opportunity Score 50.8/100, Risk 19.0/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данн
-- 屎壳郎: CANDIDATE → WATCH (44 мин назад) — Opportunity Score 44.5/100, Risk 7.2/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- BEE: WATCH → CANDIDATE (46 мин назад) — Opportunity Score 51.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- FRONG: WATCH → DATA_UNAVAILABLE (0 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- TFI: CANDIDATE → READY (3 мин назад) — Opportunity Score 72.5/100, Risk 0.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Bonk: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 44.9/100, Risk 18.5/100, confidence 100%. | Score в диапазоне 35–50 — наблюдение.
+- BEE: CANDIDATE → WATCH (11 мин назад) — Opportunity Score 43.9/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Bonk: WATCH → CANDIDATE (24 мин назад) — Opportunity Score 52.4/100, Risk 18.5/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данн
+- BEE: WATCH → CANDIDATE (28 мин назад) — Opportunity Score 50.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- BOW: CANDIDATE → WATCH (34 мин назад) — Opportunity Score 44.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BEE: CANDIDATE → WATCH (36 мин назад) — Opportunity Score 44.7/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BEE: WATCH → CANDIDATE (41 мин назад) — Opportunity Score 50.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- Bonk: CANDIDATE → WATCH (52 мин назад) — Opportunity Score 44.9/100, Risk 18.5/100, confidence 100%. | Score в диапазоне 35–50 — наблюдение.
+- PROLOGUE: CANDIDATE → READY (53 мин назад) — Opportunity Score 65.8/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- PROLOGUE: READY → CANDIDATE (55 мин назад) — Opportunity Score 59.9/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
 
 ## Позиции
 - Открытых: 22; всего: 970; realized P&L: $4078.14
@@ -79,7 +79,7 @@
   · крупнейшая сделка трека: BINIU $881.26 (1763% от входа $50.00); без неё итог трека $-1856.58 по 472 сделкам
     сверить: вход $5.729e-8, максимум $0.000003346, https://dexscreener.com/bsc/0x2ca3d3b737d8db7e6df4475aa36f0d7071259b57
 - трек «низкая ликвидность $10k–$50k (лотерейный трек)»: открыто 7, закрыто 408, P&L $5706.56, прибыльных 18 из 408, медиана сделки -2.9%; из них 209 закрыто по устаревшей цене, без них итог $5407.64 по 199 сделкам; если все они на деле обнулились — $-5042.36
-  · за последние сутки закрыто 34, из них по устаревшей цене 6 (base 3, robinhood 2, ethereum 1)
+  · за последние сутки закрыто 32, из них по устаревшей цене 5 (base 3, robinhood 2)
     не читается: LAPTOP/base pair 0x8c3ddc08477688fac336ebf243e929ca6691f443ea2bf25fd9e427384ff56404
     не читается: WIFE/base pair 0x51bfcc6ced498c165fa3daa74d82c3627e913e0a5059afba7603fa909314320b
     не читается: MANIFESTING/base pair 0xf64bd08892477ec68d5d75d8a8c3731a46d0eff8c60c63b51cf099ae33a68f5c
@@ -136,22 +136,22 @@
     · 12:47:39 [ALERT] Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от 2026-09-09T12:21:49.653Z.
 
 ## Последний backtest
-- DONE (4.0 ч назад): NO EDGE: expectancy -6.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (4.3 ч назад): NO EDGE: expectancy -6.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3040126 / err 2840, последний успех 0 мин назад)
-- geckoterminal: ok (ok 18536 / err 1, последний успех 34.6 дн назад)
-- geckoterminal:arbitrum: ok (ok 26084 / err 23526, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 49567 / err 56, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 45678 / err 3940, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 35478 / err 14138, последний успех 0 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 25179 / err 24409, последний успех 2 мин назад)
-- geckoterminal:solana: ok (ok 49622 / err 1, последний успех 0 мин назад)
-- goplus: ok (ok 90970 / err 28, последний успех 1 мин назад)
-- jupiter: ok (ok 522319 / err 1032, последний успех 1 мин назад)
+- dexscreener: ok (ok 3040829 / err 2840, последний успех 0 мин назад)
+- geckoterminal: ok (ok 18536 / err 1, последний успех 34.7 дн назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 26092 / err 23535, последний успех 2 мин назад)
+- geckoterminal:base: ok (ok 49583 / err 56, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 45694 / err 3940, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 35486 / err 14146, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 25188 / err 24417, последний успех 0 мин назад)
+- geckoterminal:solana: ok (ok 49638 / err 1, последний успех 1 мин назад)
+- goplus: ok (ok 91011 / err 28, последний успех 0 мин назад)
+- jupiter: ok (ok 522408 / err 1033, последний успех 0 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 8.1 дн назад)
-- rpc:base: ok (ok 110154 / err 2632, последний успех 0 мин назад)
-- rpc:bsc: ok (ok 9613 / err 0, последний успех 1.3 ч назад)
+- rpc:base: ok (ok 110220 / err 2632, последний успех 0 мин назад)
+- rpc:bsc: ok (ok 9613 / err 0, последний успех 1.6 ч назад)
 - rpc:ethereum: ok (ok 10490 / err 9, последний успех 1.3 дн назад)
-- rugcheck: ok (ok 133580 / err 401, последний успех 2 мин назад)
+- rugcheck: ok (ok 133583 / err 401, последний успех 7 мин назад)
 
