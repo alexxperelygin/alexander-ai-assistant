@@ -495,6 +495,31 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     }
     const everSkipped = await prisma.auditLog.count({ where: { action: "validated.entry.skipped" } });
 
+    // ВЕРХ ВОРОНКИ. Без него две принципиально разные ситуации выглядят
+    // одинаково: «рынок не даёт подходящих токенов» и «правило перестало
+    // проверяться». 10 сентября входов не было тринадцать часов подряд, и
+    // отказов тоже не было — то есть правило не сработало НИ РАЗУ. Понять по
+    // отчёту, есть ли вообще кому срабатывать, было нельзя.
+    //
+    // Считаем РАЗНЫЕ токены, а не наблюдения: один и тот же токен опрашивается
+    // десятки раз за сутки, и по числу наблюдений диапазон выглядел бы полным
+    // даже при единственном подходящем токене.
+    const inBand = async (min: number, max: number | null) => {
+      const rows = await prisma.tokenSnapshot.findMany({
+        where: {
+          fetchedAt: { gte: dayAgo },
+          liquidityUsd: max == null ? { gt: min } : { gt: min, lte: max },
+        },
+        select: { tokenId: true },
+        distinct: ["tokenId"],
+      });
+      return rows.length;
+    };
+    const [bandValidated, bandLottery] = await Promise.all([
+      inBand(VALIDATED_ENTRY.minLiquidityUsd, null),
+      inBand(LOTTERY_ENTRY.minLiquidityUsd, LOTTERY_ENTRY.maxLiquidityUsd),
+    ]);
+
     lines.push("");
     lines.push("## Воронка входов за 24ч");
     for (const [rule, title] of [
@@ -513,10 +538,16 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
     lines.push(
       `- закрыто навсегда (токен однажды отклонён и больше не рассматривается): ${everSkipped} записей за всё время`,
     );
+    lines.push(
+      `- токенов в диапазоне за сутки: проверенное правило ${bandValidated}, лотерейный ${bandLottery} ` +
+      "(разные токены, не наблюдения; сюда входят и уже отторгованные, и закрытые навсегда)",
+    );
     if (!openedDay.length && !skipsDay.length)
       lines.push(
         "- ⚠️ за сутки правило не сработало НИ РАЗУ: ни одного входа и ни одного отказа. " +
-        "Это не «нет слотов» — это значит, что ни один наблюдаемый токен не попал в диапазон ликвидности.",
+        (bandValidated + bandLottery > 0
+          ? "При этом подходящие по ликвидности токены БЫЛИ — значит дело не в рынке, а в пути входа."
+          : "Подходящих по ликвидности токенов не было вовсе — это рынок, а не поломка."),
       );
     lines.push("");
   }
