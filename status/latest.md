@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-10T04:40:56.682Z (UTC)
+Сгенерирован: 2026-09-10T04:41:57.708Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1280672; снапшотов за 24ч: 42098
+- Токенов в базе: 1280694; снапшотов за 24ч: 42092
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 71 МБ, перезапусков 0
-- memescope-worker:  online, память 71 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 202 мс, порт 3000)
+- memescope-web:  online, память 69 МБ, перезапусков 0
+- memescope-worker:  online, память 69 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 312 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,10 +16,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17538
+- solana: 17547
 - robinhood: 9142
-- bsc: 3816
-- base: 2323
+- bsc: 3818
+- base: 2322
 - ethereum: 161
 - arbitrum: 15
 
@@ -38,7 +38,7 @@
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 37.9 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- PROLOGUE — 2026-09-10T03:46:21.064Z (55 мин назад)
+- PROLOGUE — 2026-09-10T03:46:21.064Z (56 мин назад)
 - TFI — 2026-09-10T03:30:21.634Z (1.2 ч назад)
 - PROLOGUE — 2026-09-10T03:19:16.849Z (1.4 ч назад)
 - ASTEROID — 2026-09-10T03:00:20.914Z (1.7 ч назад)
@@ -48,12 +48,12 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- PROLOGUE: READY → CANDIDATE (7 мин назад) — Opportunity Score 59.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- ASTEROID: READY → CANDIDATE (49 мин назад) — Opportunity Score 59.6/100, Risk 0.4/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- 屎壳郎: CANDIDATE → WATCH (52 мин назад) — Opportunity Score 44.5/100, Risk 7.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BOW: CANDIDATE → WATCH (52 мин назад) — Opportunity Score 44.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- BOW: WATCH → CANDIDATE (53 мин назад) — Opportunity Score 50.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- PROLOGUE: CANDIDATE → READY (55 мин назад) — Opportunity Score 67.9/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- PROLOGUE: READY → CANDIDATE (8 мин назад) — Opportunity Score 59.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- ASTEROID: READY → CANDIDATE (50 мин назад) — Opportunity Score 59.6/100, Risk 0.4/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- 屎壳郎: CANDIDATE → WATCH (53 мин назад) — Opportunity Score 44.5/100, Risk 7.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BOW: CANDIDATE → WATCH (53 мин назад) — Opportunity Score 44.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- BOW: WATCH → CANDIDATE (54 мин назад) — Opportunity Score 50.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- PROLOGUE: CANDIDATE → READY (56 мин назад) — Opportunity Score 67.9/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
 - PROLOGUE: READY → CANDIDATE (1.1 ч назад) — Opportunity Score 60.0/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
 - TFI: READY → CANDIDATE (1.1 ч назад) — Opportunity Score 55.8/100, Risk 0.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
 - TFI: CANDIDATE → READY (1.2 ч назад) — Opportunity Score 65.0/100, Risk 0.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
@@ -79,7 +79,7 @@
   · крупнейшая сделка трека: BINIU $881.26 (1763% от входа $50.00); без неё итог трека $-1197.32 по 474 сделкам
     сверить: вход $5.729e-8, максимум $0.000003346, https://dexscreener.com/bsc/0x2ca3d3b737d8db7e6df4475aa36f0d7071259b57
 - трек «низкая ликвидность $10k–$50k (лотерейный трек)»: открыто 7, закрыто 408, P&L $5706.56, прибыльных 18 из 408, медиана сделки -2.9%; из них 209 закрыто по устаревшей цене, без них итог $5407.64 по 199 сделкам; если все они на деле обнулились — $-5042.36
-  · за последние сутки закрыто 30, из них по устаревшей цене 5 (base 3, robinhood 2)
+  · за последние сутки закрыто 29, из них по устаревшей цене 4 (base 3, robinhood 1)
     не читается: LAPTOP/base pair 0x8c3ddc08477688fac336ebf243e929ca6691f443ea2bf25fd9e427384ff56404
     не читается: WIFE/base pair 0x51bfcc6ced498c165fa3daa74d82c3627e913e0a5059afba7603fa909314320b
     не читается: MANIFESTING/base pair 0xf64bd08892477ec68d5d75d8a8c3731a46d0eff8c60c63b51cf099ae33a68f5c
@@ -108,6 +108,7 @@
   · 20× Занято 15 из 15 слотов трека «low-liquidity-lottery».
   · 13× Занято 25 из 25 слотов трека «validated-liquidity».
 - закрыто навсегда (токен однажды отклонён и больше не рассматривается): 5767 записей за всё время
+- токенов в диапазоне за сутки: проверенное правило 71, лотерейный 120 (разные токены, не наблюдения; сюда входят и уже отторгованные, и закрытые навсегда)
 
 - ⚠️ исключено как НЕИЗМЕРИМЫЕ: 28 шт (2.9% от всех завершённых) — цену выхода получить не удалось: либо её не было ни в одном источнике, либо выход не исполнялся. Эти сделки не входят ни в один итог выше. Рост этой доли завышает результаты треков: источник перестаёт котировать прежде всего умершие токены
 - ⚠️ списано полностью (пул не может принять позицию): 125 шт на $-6250.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
@@ -148,19 +149,19 @@
 - DONE (4.0 ч назад): NO EDGE: expectancy -6.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3060061 / err 2840, последний успех 0 мин назад)
+- dexscreener: ok (ok 3060102 / err 2840, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 35.0 дн назад)
-- geckoterminal:arbitrum: ok (ok 26451 / err 23641, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 50049 / err 56, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 46160 / err 3940, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 35842 / err 14255, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 25303 / err 24767, последний успех 3.5 ч назад)
-- geckoterminal:solana: ok (ok 50104 / err 1, последний успех 0 мин назад)
-- goplus: ok (ok 92030 / err 28, последний успех 1 мин назад)
-- jupiter: 🔴 HTTP 400 https://lite-api.jup.ag/swap/v1/quote?inputMint=AmdVe1SCSyq6KQ9cSuu9z8B32qMqPuWRFovFke5a7fP4&outputMint=So11111111111111111111111111111111111111112&amount=15245042&slippageBps=300 (ok 523676 / err 1043, последний успех 18 мин назад)
+- geckoterminal:arbitrum: ok (ok 26452 / err 23641, последний успех 1 мин назад)
+- geckoterminal:base: ok (ok 50050 / err 56, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 46160 / err 3940, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 35843 / err 14255, последний успех 1 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 25303 / err 24768, последний успех 3.5 ч назад)
+- geckoterminal:solana: ok (ok 50105 / err 1, последний успех 0 мин назад)
+- goplus: ok (ok 92030 / err 28, последний успех 2 мин назад)
+- jupiter: 🔴 HTTP 400 https://lite-api.jup.ag/swap/v1/quote?inputMint=AmdVe1SCSyq6KQ9cSuu9z8B32qMqPuWRFovFke5a7fP4&outputMint=So11111111111111111111111111111111111111112&amount=15245042&slippageBps=300 (ok 523676 / err 1043, последний успех 19 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 8.5 дн назад)
 - rpc:base: 🔴 HTTP 413 https://mainnet.base.org (ok 111133 / err 2633, последний успех 4.0 ч назад)
-- rpc:bsc: ok (ok 9613 / err 0, последний успех 9.3 ч назад)
+- rpc:bsc: ok (ok 9613 / err 0, последний успех 9.4 ч назад)
 - rpc:ethereum: ok (ok 10490 / err 9, последний успех 1.6 дн назад)
-- rugcheck: ok (ok 133637 / err 401, последний успех 18 мин назад)
+- rugcheck: ok (ok 133637 / err 401, последний успех 19 мин назад)
 
