@@ -457,6 +457,70 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
       );
   }
 
+  // ВОРОНКА ВХОДОВ ЗА СУТКИ.
+  //
+  // 10 сентября входы прекратились на девять часов при живом сканере: он
+  // продолжал оценивать токены и переводить их между статусами, а новых
+  // позиций не появлялось. Отличить «нет подходящих токенов» от «путь входа
+  // сломан» по отчёту было НЕЛЬЗЯ — и я потратил час на догадки вместо ответа.
+  // Отдельно неприятно, что молчание монитора я едва не принял за поломку:
+  // он пишет события только при срабатывании, поэтому тишина в нём ничего не
+  // доказывает ни в одну сторону.
+  //
+  // Эти три числа отвечают на вопрос сразу. Открыто — сколько входов
+  // состоялось. Отклонено — сколько раз правило сработало, но открыть не
+  // удалось (и по какой причине). Закрыто навсегда — сколько токенов уже
+  // исключено из каждого трека: по замороженному правилу отклонённый токен
+  // больше не рассматривается, и этот запас со временем только растёт.
+  {
+    const openedDay = positions.filter((p) => p.openedAt >= dayAgo && p.entryRule);
+    const byRuleOpened = new Map<string, number>();
+    for (const p of openedDay) byRuleOpened.set(p.entryRule as string, (byRuleOpened.get(p.entryRule as string) ?? 0) + 1);
+
+    const skipsDay = await prisma.auditLog.findMany({
+      where: { action: "validated.entry.skipped", createdAt: { gte: dayAgo } },
+      select: { details: true },
+    });
+    const byRuleSkipped = new Map<string, number>();
+    const reasons = new Map<string, number>();
+    for (const row of skipsDay) {
+      try {
+        const d = JSON.parse(row.details ?? "{}") as { rule?: string; reason?: string };
+        if (d.rule) byRuleSkipped.set(d.rule, (byRuleSkipped.get(d.rule) ?? 0) + 1);
+        // Причина обрезается до узнаваемого начала: полный текст ошибки в
+        // сводке не нужен, а группировать по нему нельзя — он содержит числа.
+        const r = (d.reason ?? "неизвестно").replace(/^Error:\s*/, "").slice(0, 60);
+        reasons.set(r, (reasons.get(r) ?? 0) + 1);
+      } catch { /* битая запись */ }
+    }
+    const everSkipped = await prisma.auditLog.count({ where: { action: "validated.entry.skipped" } });
+
+    lines.push("");
+    lines.push("## Воронка входов за 24ч");
+    for (const [rule, title] of [
+      ["validated-liquidity", "проверенное правило"],
+      ["low-liquidity-lottery", "лотерейный трек"],
+    ] as const) {
+      lines.push(
+        `- ${title}: открыто ${byRuleOpened.get(rule) ?? 0}, отклонено ${byRuleSkipped.get(rule) ?? 0}`,
+      );
+    }
+    if (reasons.size) {
+      lines.push("- причины отказов:");
+      for (const [r, n] of [...reasons.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4))
+        lines.push(`  · ${n}× ${r}`);
+    }
+    lines.push(
+      `- закрыто навсегда (токен однажды отклонён и больше не рассматривается): ${everSkipped} записей за всё время`,
+    );
+    if (!openedDay.length && !skipsDay.length)
+      lines.push(
+        "- ⚠️ за сутки правило не сработало НИ РАЗУ: ни одного входа и ни одного отказа. " +
+        "Это не «нет слотов» — это значит, что ни один наблюдаемый токен не попал в диапазон ликвидности.",
+      );
+    lines.push("");
+  }
+
   // НЕИЗМЕРИМЫЕ СДЕЛКИ. Позиция, у которой за 6 часов после входа не появилось
   // ни одного наблюдения с ценой, помечается INVALIDATED и в статистику треков
   // не входит — исход неизвестен, и придумывать его нельзя.
