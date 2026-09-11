@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-11T04:38:28.773Z (UTC)
+Сгенерирован: 2026-09-11T04:38:39.986Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1311951; снапшотов за 24ч: 36597
+- Токенов в базе: 1311956; снапшотов за 24ч: 36597
 - Ошибок в audit log за 24ч: 0
 - memescope-web:  online, память 77 МБ, перезапусков 0
 - memescope-worker:  online, память 76 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 364 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 245 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -18,8 +18,8 @@
 ## Новые токены за 24ч по сетям
 - solana: 17746
 - robinhood: 9006
-- bsc: 2416
-- base: 1895
+- bsc: 2419
+- base: 1897
 - ethereum: 189
 - arbitrum: 30
 
@@ -116,7 +116,7 @@
 - цена доступна по всем открытым позициям
 - ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: UPONLY/base (8 мин назад), BITCAT/base (14 мин назад)
   · адреса первых пяти для проверки у источника: base/0xf67a537fe27258df55871cfef0b7e304606dec29, base/0xf54c9978fa100047a9da6f3265351a8ceb7d6b07
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): TLOS/base (11 мин назад), NVIDIA/base (1 мин назад), LAPTOP/base (4 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): TLOS/base (11 мин назад), NVIDIA/base (2 мин назад), LAPTOP/base (4 мин назад)
 
 ## Последние позиции (детально)
 - USDC [paper/OPEN] вход $0.0002512 × 198367 = $50.00, остаток 100%, realized $0.00
@@ -148,19 +148,19 @@
 - DONE (4.0 ч назад): NO EDGE: expectancy -6.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3122610 / err 2843, последний успех 0 мин назад)
+- dexscreener: ok (ok 3122617 / err 2843, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 36.0 дн назад)
-- geckoterminal:arbitrum: ok (ok 26974 / err 24555, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 51477 / err 65, последний успех 0 мин назад)
+- geckoterminal:arbitrum: ok (ok 26975 / err 24555, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 51477 / err 65, последний успех 1 мин назад)
 - geckoterminal:bsc: ok (ok 47012 / err 4525, последний успех 0 мин назад)
 - geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 36858 / err 14677, последний успех 36 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 26266 / err 25241, последний успех 36 мин назад)
-- geckoterminal:solana: ok (ok 51540 / err 2, последний успех 0 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 26266 / err 25242, последний успех 36 мин назад)
+- geckoterminal:solana: ok (ok 51540 / err 2, последний успех 1 мин назад)
 - goplus: ok (ok 94890 / err 30, последний успех 1 мин назад)
 - jupiter: ok (ok 524335 / err 1044, последний успех 8.0 ч назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 9.5 дн назад)
-- rpc:base: 🔴 HTTP 413 https://mainnet.base.org (ok 131052 / err 21099, последний успех 0 мин назад)
-- rpc:bsc: ok (ok 12256 / err 2, последний успех 0 мин назад)
+- rpc:base: 🔴 HTTP 413 https://mainnet.base.org (ok 131057 / err 21104, последний успех 0 мин назад)
+- rpc:bsc: ok (ok 12257 / err 2, последний успех 0 мин назад)
 - rpc:ethereum: ok (ok 10490 / err 9, последний успех 2.6 дн назад)
 - rugcheck: ok (ok 133661 / err 401, последний успех 8.0 ч назад)
 
