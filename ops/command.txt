@@ -1,2 +1,2 @@
-backtest
-run: 180
+status
+run: 181
