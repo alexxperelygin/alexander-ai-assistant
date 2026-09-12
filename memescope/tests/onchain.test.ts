@@ -26,6 +26,12 @@ interface PoolFixture {
   balances?: Record<string, bigint>;
   /** Пул Uniswap V4: своего контракта нет, состояние спрашивают по poolId. */
   v4?: { liquidity: bigint };
+  /**
+   * Зарегистрирован ли пул в PositionManager. «Нет» — это не отсутствие пула,
+   * а пул, ликвидность в который заводили минуя PositionManager: отображение
+   * пустое, и состав пары приходится искать по журналу.
+   */
+  v4Registered?: boolean;
   /** Что котировочный источник знает по адресу: цена в долларах или ничего. */
   marketUsd?: Record<string, number>;
   /** Сколько первых запросов журнала узел отклонит (имитация HTTP 429). */
@@ -33,6 +39,7 @@ interface PoolFixture {
 }
 
 const V4_STATE_VIEW = "0xa3c0c9b65bad0b08107aa264b0f3db444b867a71";
+const V4_POSITION_MANAGER = "0x7c5f5a4bbd8fd63184577525326123b519429bdc";
 const V4_INIT_TOPIC = "0xdd466e674ea557f56295e2d0218a125ea4b4f0f6f3307b95f85e6110838d6438";
 const wt = (a: string) => "0x" + wa(a);
 
@@ -101,6 +108,11 @@ function stubRpc(pool: PoolFixture) {
     }
     if (sel === "0xfa6793d5" && target === V4_STATE_VIEW) {
       return reply("0x" + w(pool.v4?.liquidity ?? 0n));
+    }
+    // PositionManager.poolKeys(bytes25): весь ключ пула одним ответом.
+    if (sel === "0x86b6be7d" && target === V4_POSITION_MANAGER) {
+      if (!pool.v4Registered) return reply("0x" + w(0).repeat(5));
+      return reply("0x" + wa(pool.token0) + wa(pool.token1) + w(3000) + w(60) + w(0));
     }
     return reply(null);
   });
@@ -296,6 +308,47 @@ describe("readPoolState", () => {
     // полностью и остаётся в статистике, по второму уходит в неизмеримые.
     expect(r?.priceUsd).toBeCloseTo(4, 6);
     expect(r?.liquidityUsd).toBe(0);
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: состав пула берётся из PositionManager без обращения к журналу", async () => {
+    const token = "0xaaaa000000000000000000000000000000000002";
+    const poolId = "0x" + "6b".repeat(32);
+    const fetchMock = stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 500n * 10n ** 18n },
+      v4Registered: true,
+    });
+    const read = await load();
+    const r = await read("base", poolId, token, new Date());
+    expect(r?.kind).toBe("v4");
+    expect(r?.priceUsd).toBeCloseTo(4, 6);
+    // Ни одного запроса журнала: именно они упирались в лимит публичного узла
+    // и оставляли закрытия лотерейного трека недостоверными.
+    const methods = fetchMock.mock.calls.map((c) => JSON.parse(String(c[1]?.body ?? "{}")).method);
+    expect(methods).not.toContain("eth_getLogs");
+    expect(methods).not.toContain("eth_blockNumber");
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: пустое отображение в PositionManager не мешает поиску по журналу", async () => {
+    const token = "0xaaaa000000000000000000000000000000000003";
+    const poolId = "0x" + "7c".repeat(32);
+    // PositionManager отдаёт нули — так 12 сентября ответил живой узел base по
+    // одному из пулов. Это не «пула нет», и вывод должен прийти из журнала.
+    const fetchMock = stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 500n * 10n ** 18n },
+      v4Registered: false,
+    });
+    const read = await load();
+    const r = await read("base", poolId, token, new Date());
+    expect(r?.kind).toBe("v4");
+    expect(r?.priceUsd).toBeCloseTo(4, 6);
+    const methods = fetchMock.mock.calls.map((c) => JSON.parse(String(c[1]?.body ?? "{}")).method);
+    expect(methods).toContain("eth_getLogs");
     vi.unstubAllGlobals();
   });
 

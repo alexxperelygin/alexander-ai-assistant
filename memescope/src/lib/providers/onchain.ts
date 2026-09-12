@@ -30,6 +30,8 @@ const SIG = {
   v4Slot0: "0xc815641c",
   /** StateView.getLiquidity(bytes32) — активная ликвидность пула V4. */
   v4Liquidity: "0xfa6793d5",
+  /** PositionManager.poolKeys(bytes25) — состав пула V4 одним вызовом. */
+  v4PoolKeys: "0x86b6be7d",
 } as const;
 
 /**
@@ -218,10 +220,50 @@ type V4Lookup =
   /** Узел не ответил. Это НЕ «пула нет»: вывод откладывается до следующего раза. */
   | { status: "unavailable" };
 
+/**
+ * Состав пула V4 одним вызовом: PositionManager хранит отображение первых
+ * 25 байт poolId на ключ пула.
+ *
+ * Это прямая замена поиску по журналу там, где он работает. Поиск стоил до
+ * 32 запросов eth_getLogs на пул и упирался в лимит частоты публичного узла:
+ * 12 сентября из 15 закрытий лотерейного трека за сутки 12 оказались
+ * недостоверными, и десять из них — на base, где чтение V4 формально
+ * поддерживается. Здесь же один вызов и никаких окон.
+ *
+ * Нули означают, что пул в PositionManager не зарегистрирован (ликвидность
+ * заводили минуя его). Валидный пул так выглядеть не может: currency0 может
+ * быть нулевым адресом (нативная монета), а currency1 — нет, потому что
+ * currency0 < currency1 по построению ключа.
+ */
+async function v4KeyFromPositionManager(chain: string, poolId: string): Promise<{ token0: string; token1: string } | null> {
+  const cfg = chainConfig(chain);
+  if (!cfg?.v4?.positionManager) return null;
+  // bytes25: первые 25 байт идентификатора, дополненные справа до слова.
+  const arg = poolId.toLowerCase().replace("0x", "").slice(0, 50).padEnd(64, "0");
+  const raw = await ethCall(chain, cfg.v4.positionManager, SIG.v4PoolKeys + arg);
+  if (!raw) return null;
+  const c0 = wordToAddress(raw, 0);
+  const c1 = wordToAddress(raw, 1);
+  if (!c0 || !c1) return null;
+  if (c1.toLowerCase() === NATIVE_CURRENCY) return null;
+  return { token0: c0.toLowerCase(), token1: c1.toLowerCase() };
+}
+
 async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): Promise<V4Lookup> {
   const cfg = chainConfig(chain);
   if (!cfg?.v4) return { status: "absent" };
   const { poolManager, blockTimeSec } = cfg.v4;
+
+  // Сначала прямой путь. Он отвечает по большинству пулов и стоит один вызов.
+  const direct = await v4KeyFromPositionManager(chain, poolId);
+  if (direct) {
+    const [dec0, dec1] = await Promise.all([
+      currencyDecimals(chain, direct.token0),
+      currencyDecimals(chain, direct.token1),
+    ]);
+    v4ScanCursor.delete(`${chain}:${poolId.toLowerCase()}`);
+    return { status: "found", meta: { ...direct, dec0, dec1, kind: "v4" } };
+  }
 
   const headHex = await rpc<string>(chain, "eth_blockNumber", []);
   if (!headHex) return { status: "unavailable" };

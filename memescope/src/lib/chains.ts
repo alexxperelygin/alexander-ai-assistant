@@ -44,7 +44,19 @@ export interface ChainConfig {
    * blockTimeSec нужен, чтобы по времени создания пула прицелиться в диапазон
    * блоков: eth_getLogs у публичных узлов ограничен 10 000 блоков за запрос.
    */
-  v4?: { poolManager: string; stateView: string; blockTimeSec: number };
+  v4?: {
+    poolManager: string;
+    stateView: string;
+    /**
+     * PositionManager хранит отображение первых 25 байт poolId на ключ пула.
+     * Это прямой ответ одним вызовом вместо поиска события Initialize по
+     * окнам журнала: дешевле, быстрее и не зависит от лимита eth_getLogs.
+     * Заполнено не для всех пулов — у тех, кому ликвидность заводили минуя
+     * PositionManager, вернутся нули, и тогда работает поиск по журналу.
+     */
+    positionManager: string;
+    blockTimeSec: number;
+  };
 }
 
 export const CHAINS: Record<string, ChainConfig> = {
@@ -60,6 +72,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     v4: {
       poolManager: "0x498581fF718922c3f8e6A244956aF099B2652b2b",
       stateView: "0xA3c0c9b65baD0b08107Aa264b0f3dB444b867A71",
+      positionManager: "0x7C5f5A4bBd8fD63184577525326123B519429bDc",
       blockTimeSec: 2,
     },
   },
@@ -74,6 +87,15 @@ export const CHAINS: Record<string, ChainConfig> = {
     hasRiskProvider: true, hasRouteProvider: false,
     rpcUrl: process.env.ETH_RPC_URL ?? "https://ethereum-rpc.publicnode.com",
     wrappedNative: { address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", symbol: "WETH" },
+    // Адреса сверены на живом узле 12 сентября: StateView отдаёт ненулевой
+    // sqrtPriceX96 по нашему пулу, PositionManager — его ключ, PoolManager
+    // эмитит Initialize с той же темой, что и на base.
+    v4: {
+      poolManager: "0x000000000004444c5dc75cB358380D2e3dE08A90",
+      stateView: "0x7fFE42C4a5DEeA5b0feC41C94C136Cf115597227",
+      positionManager: "0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e",
+      blockTimeSec: 12,
+    },
   },
   arbitrum: {
     id: "arbitrum", label: "Arbitrum", geckoNetwork: "arbitrum", goplusChainId: "42161",
