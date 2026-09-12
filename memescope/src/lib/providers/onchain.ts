@@ -252,7 +252,7 @@ async function v4KeyFromPositionManager(chain: string, poolId: string): Promise<
 async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): Promise<V4Lookup> {
   const cfg = chainConfig(chain);
   if (!cfg?.v4) return { status: "absent" };
-  const { poolManager, blockTimeSec } = cfg.v4;
+  const { poolManager, blockTimeSec, logSpan } = cfg.v4;
 
   // Сначала прямой путь. Он отвечает по большинству пулов и стоит один вызов.
   const direct = await v4KeyFromPositionManager(chain, poolId);
@@ -270,7 +270,12 @@ async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): P
   const head = Number(BigInt(headHex));
   if (!Number.isFinite(head) || head <= 0) return { status: "unavailable" };
 
-  const SPAN = 9_500;
+  // Окно берётся из настроек сети, а не общей константой. Общая константа в
+  // 9500 блоков была тихой поломкой: base отвечает на такой запрос ошибкой
+  // «limited to a 2,000 range», то есть отказывал КАЖДЫЙ запрос журнала, и
+  // запасной путь на base не работал вовсе — 31 810 отказов rpc:base в отчёте
+  // 12 сентября и 114 устаревших закрытий лотерейного трека на этой сети.
+  const SPAN = logSpan;
   const windows: [number, number][] = [];
   if (createdAt) {
     // Прицел по времени создания: оценка блока плюс запас в обе стороны.
