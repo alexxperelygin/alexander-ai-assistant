@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-12T08:38:48.642Z (UTC)
+Сгенерирован: 2026-09-12T08:40:25.813Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1343782; снапшотов за 24ч: 34084
+- Токенов в базе: 1343810; снапшотов за 24ч: 34080
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 71 МБ, перезапусков 0
-- memescope-worker:  online, память 71 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 278 мс, порт 3000)
+- memescope-web:  online, память 69 МБ, перезапусков 0
+- memescope-worker:  online, память 69 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 342 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,50 +16,50 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17836
-- bsc: 3710
-- robinhood: 3669
-- base: 1962
-- ethereum: 271
+- solana: 17853
+- bsc: 3706
+- robinhood: 3678
+- base: 1961
+- ethereum: 273
 - arbitrum: 8
 
 ## Статусы возможностей
-- AVOID: 149610
+- AVOID: 149611
 - DATA_UNAVAILABLE: 44450
 - WATCH: 32
-- CANDIDATE: 25
-- READY: 4
+- CANDIDATE: 24
+- READY: 5
 
 ## Топ-5 по score (не отбракованные)
+- SPX: READY, score 66.8, risk 2.8, conf 88% (обновлено 1 мин назад)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 21.9 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 37.3 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 5.7 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 37.8 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 40.1 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- CHILLGUY — 2026-09-12T08:32:02.928Z (7 мин назад)
-- FWA — 2026-09-12T08:11:05.904Z (28 мин назад)
-- ASTEROID — 2026-09-12T08:07:58.654Z (31 мин назад)
-- SPX — 2026-09-12T07:53:58.600Z (45 мин назад)
-- FWA — 2026-09-12T06:44:13.884Z (1.9 ч назад)
+- SPX — 2026-09-12T08:38:58.633Z (1 мин назад)
+- CHILLGUY — 2026-09-12T08:32:02.928Z (8 мин назад)
+- FWA — 2026-09-12T08:11:05.904Z (29 мин назад)
+- ASTEROID — 2026-09-12T08:07:58.654Z (32 мин назад)
+- SPX — 2026-09-12T07:53:58.600Z (46 мин назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- Stocked: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- MARIE: — → AVOID (2 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- FWA: READY → CANDIDATE (2 мин назад) — Opportunity Score 59.9/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- memes: WATCH → CANDIDATE (2 мин назад) — Opportunity Score 50.1/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- CHONGKY: — → AVOID (3 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- DOUGHSPIN: — → AVOID (4 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- INBOX: — → AVOID (5 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- Dogue: — → AVOID (6 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- PPLP: — → AVOID (7 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- CHILLGUY: CANDIDATE → READY (7 мин назад) — Opportunity Score 66.3/100, Risk 6.3/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- CATON: — → AVOID (8 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- OCTOSNIPE: — → AVOID (9 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- DROPMARK: — → AVOID (1 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- SPX: CANDIDATE → READY (1 мин назад) — Opportunity Score 66.8/100, Risk 2.8/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Stocked: — → AVOID (2 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- MARIE: — → AVOID (3 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- FWA: READY → CANDIDATE (3 мин назад) — Opportunity Score 59.9/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- memes: WATCH → CANDIDATE (3 мин назад) — Opportunity Score 50.1/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- CHONGKY: — → AVOID (4 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- DOUGHSPIN: — → AVOID (5 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- INBOX: — → AVOID (6 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- Dogue: — → AVOID (7 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- PPLP: — → AVOID (8 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- CHILLGUY: CANDIDATE → READY (8 мин назад) — Opportunity Score 66.3/100, Risk 6.3/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
 
 ## Позиции
 - Открытых: 34; всего: 1042; realized P&L: $6530.83
@@ -139,22 +139,22 @@
     · 00:52:28 [OPEN] Paper вход по проверенному правилу: 110.19 шт по $0.452156 (комиссии $0.17, impact 0.09%)
 
 ## Последний backtest
-- DONE (0 мин назад): NO EDGE: expectancy -5.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (2 мин назад): NO EDGE: expectancy -5.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3193037 / err 2843, последний успех 0 мин назад)
+- dexscreener: ok (ok 3193090 / err 2843, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 37.1 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 28243 / err 24966, последний успех 1.2 ч назад)
-- geckoterminal:base: ok (ok 53158 / err 65, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 48670 / err 4548, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 37378 / err 15837, последний успех 0 мин назад)
-- geckoterminal:robinhood: ok (ok 26705 / err 26481, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 53221 / err 2, последний успех 0 мин назад)
-- goplus: ok (ok 98176 / err 36, последний успех 2 мин назад)
-- jupiter: ok (ok 525728 / err 1044, последний успех 1 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 28243 / err 24967, последний успех 1.2 ч назад)
+- geckoterminal:base: ok (ok 53160 / err 65, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 48671 / err 4548, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 37379 / err 15837, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 26707 / err 26481, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 53223 / err 2, последний успех 0 мин назад)
+- goplus: ok (ok 98179 / err 36, последний успех 1 мин назад)
+- jupiter: ok (ok 525731 / err 1044, последний успех 1 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 10.6 дн назад)
-- rpc:base: ok (ok 143531 / err 31811, последний успех 0 мин назад)
+- rpc:base: ok (ok 143539 / err 31811, последний успех 0 мин назад)
 - rpc:bsc: ok (ok 12326 / err 2, последний успех 1.1 дн назад)
-- rpc:ethereum: ok (ok 11437 / err 9, последний успех 0 мин назад)
-- rugcheck: ok (ok 133705 / err 401, последний успех 6 мин назад)
+- rpc:ethereum: ok (ok 11445 / err 9, последний успех 0 мин назад)
+- rugcheck: ok (ok 133705 / err 401, последний успех 7 мин назад)
 
