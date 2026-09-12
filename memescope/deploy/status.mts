@@ -7,6 +7,13 @@ import { FREEZE_AT } from "../src/lib/paper/exit-policy";
 import { STALE_ALERT_INTERVAL_MS } from "../src/lib/monitor/positions";
 import { LOTTERY_ENTRY, VALIDATED_ENTRY } from "../src/lib/strategy/validated-entry";
 
+/**
+ * Порог исполнимости выхода: заморожен в docs/PREREGISTRATION_VENTURE.md.
+ * Здесь он ничего не фильтрует — только помечает в отчёте сделку, по которой
+ * на выходе почти не было торговли.
+ */
+const MIN_EXIT_TXNS = 10;
+
 function ago(d: Date | null | undefined): string {
   if (!d) return "—";
   const min = Math.round((Date.now() - d.getTime()) / 60000);
@@ -401,6 +408,57 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
           `максимум $${best.peakPriceUsd == null ? "—" : best.peakPriceUsd.toPrecision(4)}, ` +
           `https://dexscreener.com/${best.token.chain}/${best.token.mint}`,
         );
+        // ИСПОЛНИМОСТЬ ВЫХОДА, А НЕ ТОЛЬКО ЕГО ЦЕНА.
+        //
+        // «Цена прочитана» и «по этой цене было кому продать» — разные вещи, и
+        // до сих пор отчёт различал только первое. 12 сентября крупнейшая
+        // сделка проверенного трека ($TRXS, +4999%) в одиночку перевела трек
+        // из −$198 в +$2302, цена выхода была измерена честно — а пул к тому
+        // моменту, когда это заметили, стоял с нулевой ликвидностью.
+        // Отличить настоящий выход от напечатанной цифры можно только по
+        // состоянию пула на момент выхода, поэтому печатаем его рядом.
+        //
+        // Порог в 10 сделок/ч взят не отсюда: он заморожен в
+        // docs/PREREGISTRATION_VENTURE.md как критерий исполнимости. Здесь он
+        // ничего не фильтрует и ни на какой итог не влияет — это пометка в
+        // отчёте, чтобы цифру не прочитали как результат, не проверив.
+        if (best.closedAt) {
+          const at = best.closedAt;
+          const [atExit, nowSnap] = await Promise.all([
+            // Последний снимок ДО выхода: состояние пула, в которое продавали.
+            // Снимок после выхода уже мог застать слив и сказал бы не о том.
+            prisma.tokenSnapshot.findFirst({
+              where: {
+                tokenId: best.tokenId,
+                fetchedAt: { gte: new Date(at.getTime() - 60 * 60_000), lte: at },
+              },
+              orderBy: { fetchedAt: "desc" },
+              select: { liquidityUsd: true, buys1h: true, sells1h: true, fetchedAt: true },
+            }),
+            prisma.tokenSnapshot.findFirst({
+              where: { tokenId: best.tokenId },
+              orderBy: { fetchedAt: "desc" },
+              select: { liquidityUsd: true },
+            }),
+          ]);
+          if (atExit) {
+            const txns = (atExit.buys1h ?? 0) + (atExit.sells1h ?? 0);
+            const agoMin = Math.round((at.getTime() - atExit.fetchedAt.getTime()) / 60000);
+            const liq = atExit.liquidityUsd;
+            const nowLiq = nowSnap?.liquidityUsd;
+            const warn = txns < MIN_EXIT_TXNS
+              ? ` — ⚠️ меньше ${MIN_EXIT_TXNS} сделок/ч: продать по этой цене было, скорее всего, некому`
+              : "";
+            lines.push(
+              `    исполнимость выхода: ликвидность ` +
+              `${liq == null ? "не измерена" : "$" + Math.round(liq).toLocaleString("ru")}, ` +
+              `${txns} сделок/ч (снимок за ${agoMin} мин до выхода)` +
+              `${nowLiq == null ? "" : `; сейчас $${Math.round(nowLiq).toLocaleString("ru")}`}${warn}`,
+            );
+          } else {
+            lines.push("    исполнимость выхода: снимка пула за час до выхода нет — проверить нечем");
+          }
+        }
       }
     }
     // Пока сделок мало, любые проценты по треку — шум. Об этом лучше сказать
