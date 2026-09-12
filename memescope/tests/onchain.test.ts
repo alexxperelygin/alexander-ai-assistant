@@ -36,6 +36,11 @@ interface PoolFixture {
   marketUsd?: Record<string, number>;
   /** Сколько первых запросов журнала узел отклонит (имитация HTTP 429). */
   logFailures?: number;
+  /**
+   * Максимум блоков за один eth_getLogs. Превышение узел отклоняет ошибкой,
+   * а не пустым списком — так ведёт себя публичный узел base.
+   */
+  logSpanLimit?: number;
 }
 
 const V4_STATE_VIEW = "0xa3c0c9b65bad0b08107aa264b0f3db444b867a71";
@@ -66,6 +71,18 @@ function stubRpc(pool: PoolFixture) {
       if (pool.logFailures && pool.logFailures > 0) {
         pool.logFailures -= 1;
         return { ok: true, json: async () => ({ error: { message: "rate limited" } }) };
+      }
+      if (pool.logSpanLimit != null) {
+        const p0 = body.params?.[0] ?? {};
+        const span = Number(BigInt(p0.toBlock)) - Number(BigInt(p0.fromBlock));
+        if (span > pool.logSpanLimit) {
+          return {
+            ok: true,
+            json: async () => ({
+              error: { message: `eth_getLogs is limited to a ${pool.logSpanLimit} range` },
+            }),
+          };
+        }
       }
       const wanted = body.params?.[0]?.topics?.[1];
       const hit = pool.v4 && wanted;
@@ -349,6 +366,26 @@ describe("readPoolState", () => {
     expect(r?.priceUsd).toBeCloseTo(4, 6);
     const methods = fetchMock.mock.calls.map((c) => JSON.parse(String(c[1]?.body ?? "{}")).method);
     expect(methods).toContain("eth_getLogs");
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: окно журнала не превышает лимит узла", async () => {
+    const token = "0xaaaa000000000000000000000000000000000004";
+    const poolId = "0x" + "8d".repeat(32);
+    // Узел base отклоняет ошибкой всё, что шире 2000 блоков. Пока окно было
+    // общей константой 9500, на base отказывал каждый запрос журнала — и
+    // запасной путь не работал вовсе, молча, без падения.
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 500n * 10n ** 18n },
+      v4Registered: false,
+      logSpanLimit: 2_000,
+    });
+    const read = await load();
+    const r = await read("base", poolId, token, new Date());
+    expect(r?.kind).toBe("v4");
+    expect(r?.priceUsd).toBeCloseTo(4, 6);
     vi.unstubAllGlobals();
   });
 

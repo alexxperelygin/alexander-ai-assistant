@@ -56,6 +56,14 @@ export interface ChainConfig {
      */
     positionManager: string;
     blockTimeSec: number;
+    /**
+     * Сколько блоков узел отдаёт за один eth_getLogs. Значение у каждого узла
+     * своё, и превышение возвращает не пустой список, а ошибку — то есть
+     * запасной путь молча перестаёт работать целиком. Проверено запросом:
+     * base отвечает «limited to a 2,000 range» на всё, что больше 2000,
+     * ethereum отдаёт 9500 без возражений.
+     */
+    logSpan: number;
   };
 }
 
@@ -74,6 +82,7 @@ export const CHAINS: Record<string, ChainConfig> = {
       stateView: "0xA3c0c9b65baD0b08107Aa264b0f3dB444b867A71",
       positionManager: "0x7C5f5A4bBd8fD63184577525326123B519429bDc",
       blockTimeSec: 2,
+      logSpan: 2_000,
     },
   },
   bsc: {
@@ -95,6 +104,7 @@ export const CHAINS: Record<string, ChainConfig> = {
       stateView: "0x7fFE42C4a5DEeA5b0feC41C94C136Cf115597227",
       positionManager: "0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e",
       blockTimeSec: 12,
+      logSpan: 9_500,
     },
   },
   arbitrum: {
