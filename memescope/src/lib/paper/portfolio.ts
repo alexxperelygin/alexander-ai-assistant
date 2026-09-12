@@ -233,7 +233,19 @@ export async function sellPosition(args: SellArgs) {
         create: {
           kind: args.kind,
           message: `${args.reason}: продано ${qty.toFixed(2)} шт по $${fill.effectivePriceUsd.toPrecision(6)}, P&L $${pnl.toFixed(2)}`,
-          payload: JSON.stringify({ qty, price: fill.effectivePriceUsd, feesUsd: fill.feesUsd, pnl, impactPct: fill.impactPct }),
+          // liquidityUsd записывается вместе с остальным: без неё по закрытой
+          // сделке нельзя ответить, во что продавали. 12 сентября крупнейшая
+          // сделка трека дала 4999% при пуле, который к вечеру стоял пустым,
+          // и проверить это по базе было нечем — снимки пула пишет сканер, а
+          // он перестаёт видеть токен раньше, чем позиция закрывается.
+          payload: JSON.stringify({
+            qty,
+            price: fill.effectivePriceUsd,
+            feesUsd: fill.feesUsd,
+            pnl,
+            impactPct: fill.impactPct,
+            liquidityUsd: args.liquidityUsd ?? null,
+          }),
         },
       },
     },
