@@ -424,9 +424,18 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
         // отчёте, чтобы цифру не прочитали как результат, не проверив.
         if (best.closedAt) {
           const at = best.closedAt;
-          const [atExit, nowSnap] = await Promise.all([
-            // Последний снимок ДО выхода: состояние пула, в которое продавали.
-            // Снимок после выхода уже мог застать слив и сказал бы не о том.
+          // Спрашиваем СНАЧАЛА само событие выхода, а не снимок пула. Снимки
+          // пишет сканер, и он перестаёт видеть токен задолго до того, как
+          // позиция закроется: по всем трём трекам снимка за час до выхода не
+          // нашлось вовсе. А в событии выхода уже лежит то, что нужно — с
+          // какой ликвидностью считали продажу и во сколько обошёлся её
+          // удар по цене.
+          const [exitEvent, atExit, nowSnap] = await Promise.all([
+            prisma.positionEvent.findFirst({
+              where: { positionId: best.id, kind: { in: ["STOP_HIT", "CLOSE", "TP_HIT"] } },
+              orderBy: { createdAt: "desc" },
+              select: { payload: true },
+            }),
             prisma.tokenSnapshot.findFirst({
               where: {
                 tokenId: best.tokenId,
@@ -438,26 +447,36 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
             prisma.tokenSnapshot.findFirst({
               where: { tokenId: best.tokenId },
               orderBy: { fetchedAt: "desc" },
-              select: { liquidityUsd: true },
+              select: { liquidityUsd: true, fetchedAt: true },
             }),
           ]);
+          const parts: string[] = [];
+          let payload: { impactPct?: unknown; liquidityUsd?: unknown } = {};
+          try {
+            payload = exitEvent?.payload ? JSON.parse(exitEvent.payload) : {};
+          } catch {
+            // Испорченный JSON — не причина терять всю строку.
+          }
+          const exitLiq = typeof payload.liquidityUsd === "number" ? payload.liquidityUsd : null;
+          const impact = typeof payload.impactPct === "number" ? payload.impactPct : null;
+          if (exitLiq != null) parts.push(`ликвидность на выходе $${Math.round(exitLiq).toLocaleString("ru")}`);
+          if (impact != null) parts.push(`удар по цене ${impact.toFixed(2)}%`);
+          if (exitLiq == null && impact == null)
+            // Сделки, закрытые до того, как ликвидность стали записывать в
+            // событие выхода. Задним числом её взять неоткуда — так и пишем.
+            parts.push("в событии выхода ликвидность не записана (сделка закрыта до 12 сентября)");
           if (atExit) {
             const txns = (atExit.buys1h ?? 0) + (atExit.sells1h ?? 0);
-            const agoMin = Math.round((at.getTime() - atExit.fetchedAt.getTime()) / 60000);
-            const liq = atExit.liquidityUsd;
-            const nowLiq = nowSnap?.liquidityUsd;
-            const warn = txns < MIN_EXIT_TXNS
-              ? ` — ⚠️ меньше ${MIN_EXIT_TXNS} сделок/ч: продать по этой цене было, скорее всего, некому`
-              : "";
-            lines.push(
-              `    исполнимость выхода: ликвидность ` +
-              `${liq == null ? "не измерена" : "$" + Math.round(liq).toLocaleString("ru")}, ` +
-              `${txns} сделок/ч (снимок за ${agoMin} мин до выхода)` +
-              `${nowLiq == null ? "" : `; сейчас $${Math.round(nowLiq).toLocaleString("ru")}`}${warn}`,
-            );
-          } else {
-            lines.push("    исполнимость выхода: снимка пула за час до выхода нет — проверить нечем");
+            parts.push(`${txns} сделок/ч по снимку пула`);
+            if (txns < MIN_EXIT_TXNS)
+              parts.push(`⚠️ меньше ${MIN_EXIT_TXNS} сделок/ч: продать по этой цене было, скорее всего, некому`);
           }
+          if (nowSnap?.liquidityUsd != null)
+            parts.push(
+              `сейчас $${Math.round(nowSnap.liquidityUsd).toLocaleString("ru")} ` +
+              `(${ago(nowSnap.fetchedAt)})`,
+            );
+          lines.push(`    исполнимость выхода: ${parts.join("; ")}`);
         }
       }
     }
