@@ -41,6 +41,8 @@ interface PoolFixture {
    * а не пустым списком — так ведёт себя публичный узел base.
    */
   logSpanLimit?: number;
+  /** Событие Initialize лежит ровно в этом блоке и больше нигде. */
+  initBlock?: number;
 }
 
 const V4_STATE_VIEW = "0xa3c0c9b65bad0b08107aa264b0f3db444b867a71";
@@ -85,7 +87,14 @@ function stubRpc(pool: PoolFixture) {
         }
       }
       const wanted = body.params?.[0]?.topics?.[1];
-      const hit = pool.v4 && wanted;
+      let inRange = true;
+      if (pool.initBlock != null) {
+        const p0 = body.params?.[0] ?? {};
+        const from = Number(BigInt(p0.fromBlock));
+        const to = Number(BigInt(p0.toBlock));
+        inRange = from <= pool.initBlock && pool.initBlock <= to;
+      }
+      const hit = pool.v4 && wanted && inRange;
       return {
         ok: true,
         json: async () => ({
@@ -384,6 +393,30 @@ describe("readPoolState", () => {
     });
     const read = await load();
     const r = await read("base", poolId, token, new Date());
+    expect(r?.kind).toBe("v4");
+    expect(r?.priceUsd).toBeCloseTo(4, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("V4: прицел по времени создания держит допуск в часах, а не в окнах", async () => {
+    const token = "0xaaaa000000000000000000000000000000000005";
+    const poolId = "0x" + "9e".repeat(32);
+    // Голова цепочки в заглушке — блок 1 000 000, base идёт по 2 секунды.
+    // Токену час от роду → оценка блока 998 200. Событие кладём на 7000
+    // блоков раньше: это промах оценки примерно на 3.9 часа, обычный для
+    // времени создания, которое приходит от котировочного источника.
+    // С прежним допуском «два соседних окна» этот заход не находит пул —
+    // проверено подменой константы.
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 500n * 10n ** 18n },
+      v4Registered: false,
+      logSpanLimit: 2_000,
+      initBlock: 991_200,
+    });
+    const read = await load();
+    const r = await read("base", poolId, token, new Date(Date.now() - 3600_000));
     expect(r?.kind).toBe("v4");
     expect(r?.priceUsd).toBeCloseTo(4, 6);
     vi.unstubAllGlobals();

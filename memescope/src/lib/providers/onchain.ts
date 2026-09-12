@@ -212,6 +212,13 @@ async function currencyDecimals(chain: string, currency: string): Promise<number
  * запоминается: следующий цикл монитора продолжит оттуда, а не начнёт заново.
  */
 const V4_WINDOWS_PER_ATTEMPT = 8;
+/**
+ * Насколько оценка блока по времени создания может разойтись с правдой.
+ * ±12 часов — с запасом: время создания берётся у котировочного источника,
+ * а он сам округляет. Величина задана во времени, чтобы смена ширины окна
+ * не меняла точность прицела.
+ */
+const V4_AIM_TOLERANCE_SEC = 12 * 3600;
 const v4ScanCursor = new Map<string, number>();
 
 type V4Lookup =
@@ -279,10 +286,18 @@ async function v4Meta(chain: string, poolId: string, createdAt?: Date | null): P
   const windows: [number, number][] = [];
   if (createdAt) {
     // Прицел по времени создания: оценка блока плюс запас в обе стороны.
-    // Промах по времени возможен, поэтому соседние окна тоже просматриваются.
+    // Запас задаётся ВРЕМЕНЕМ, а не числом окон. Раньше это были две соседние
+    // ступени по 9500 блоков — то есть примерно ±13 часов на base. Когда окно
+    // сузилось до 2000 блоков, те же две ступени дали бы ±2.8 часа, и прицел
+    // стал бы промахиваться там, где раньше попадал: время создания приходит
+    // от источника котировок и с блоком сходится лишь приблизительно.
     const ageBlocks = Math.floor((Date.now() - createdAt.getTime()) / 1000 / blockTimeSec);
     const est = Math.max(0, head - ageBlocks);
-    for (const shift of [0, -SPAN, SPAN, -2 * SPAN, 2 * SPAN]) {
+    const steps = Math.ceil(V4_AIM_TOLERANCE_SEC / blockTimeSec / SPAN);
+    // Ближние окна первыми: попадание вероятнее всего рядом с оценкой.
+    const shifts = [0];
+    for (let k = 1; k <= steps; k++) shifts.push(-k * SPAN, k * SPAN);
+    for (const shift of shifts) {
       const hi = Math.min(head, est + Math.floor(SPAN / 2) + shift);
       windows.push([Math.max(0, hi - SPAN), hi]);
     }
