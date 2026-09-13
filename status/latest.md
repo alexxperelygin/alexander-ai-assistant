@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-13T04:39:01.296Z (UTC)
+Сгенерирован: 2026-09-13T04:45:41.774Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1373342; снапшотов за 24ч: 35949
+- Токенов в базе: 1373429; снапшотов за 24ч: 35991
 - Ошибок в audit log за 24ч: 0
 - memescope-web:  online, память 71 МБ, перезапусков 0
 - memescope-worker:  online, память 71 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 265 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 226 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,18 +16,18 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17509
-- robinhood: 11913
-- bsc: 3511
-- base: 1712
-- ethereum: 369
+- solana: 17491
+- robinhood: 11893
+- bsc: 3499
+- base: 1714
+- ethereum: 363
 - arbitrum: 21
 
 ## Статусы возможностей
 - AVOID: 149959
 - DATA_UNAVAILABLE: 44474
-- WATCH: 41
-- CANDIDATE: 18
+- WATCH: 40
+- CANDIDATE: 19
 - READY: 3
 
 ## Топ-5 по score (не отбракованные)
@@ -35,31 +35,31 @@
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 38.1 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 6.5 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 38.7 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 40.9 дн назад)
+- FWA: CANDIDATE, score 64.0, risk 4.0, conf 88% (обновлено 1 мин назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- FWA — 2026-09-13T04:22:12.686Z (17 мин назад)
-- Cupsey — 2026-09-13T03:36:07.412Z (1.1 ч назад)
-- Cupsey — 2026-09-13T03:22:02.529Z (1.3 ч назад)
-- FWA — 2026-09-13T03:19:56.856Z (1.3 ч назад)
-- Cupsey — 2026-09-13T03:07:15.351Z (1.5 ч назад)
+- FWA — 2026-09-13T04:22:12.686Z (23 мин назад)
+- Cupsey — 2026-09-13T03:36:07.412Z (1.2 ч назад)
+- Cupsey — 2026-09-13T03:22:02.529Z (1.4 ч назад)
+- FWA — 2026-09-13T03:19:56.856Z (1.4 ч назад)
+- Cupsey — 2026-09-13T03:07:15.351Z (1.6 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- BITCOIN: WATCH → CANDIDATE (3 мин назад) — Opportunity Score 55.2/100, Risk 2.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- Sue: WATCH → AVOID (3 мин назад) — [liquidity-draining] Ликвидность упала на 12.2% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- XERA: WATCH → CANDIDATE (3 мин назад) — Opportunity Score 52.0/100, Risk 0.3/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- NDTA: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 34.7/100, Risk 4.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- FWA: READY → CANDIDATE (4 мин назад) — Opportunity Score 48.3/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- BITCOIN: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 40.8/100, Risk 2.8/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- Sue: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 40.9/100, Risk 18.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- XERA: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 37.3/100, Risk 0.3/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- FWA: CANDIDATE → READY (17 мин назад) — Opportunity Score 65.2/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- Sue: AVOID → CANDIDATE (28 мин назад) — Opportunity Score 54.2/100, Risk 18.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: WATCH → CANDIDATE (51 мин назад) — Opportunity Score 63.7/100, Risk 0.5/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: READY → WATCH (52 мин назад) — Opportunity Score 42.2/100, Risk 4.3/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- NDTA: WATCH → CANDIDATE (6 мин назад) — Opportunity Score 50.0/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- BITCOIN: WATCH → CANDIDATE (10 мин назад) — Opportunity Score 55.2/100, Risk 2.8/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- Sue: WATCH → AVOID (10 мин назад) — [liquidity-draining] Ликвидность упала на 12.2% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- XERA: WATCH → CANDIDATE (10 мин назад) — Opportunity Score 52.0/100, Risk 0.3/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- NDTA: CANDIDATE → WATCH (11 мин назад) — Opportunity Score 34.7/100, Risk 4.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
+- FWA: READY → CANDIDATE (11 мин назад) — Opportunity Score 48.3/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- BITCOIN: CANDIDATE → WATCH (11 мин назад) — Opportunity Score 40.8/100, Risk 2.8/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Sue: CANDIDATE → WATCH (11 мин назад) — Opportunity Score 40.9/100, Risk 18.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- XERA: CANDIDATE → WATCH (11 мин назад) — Opportunity Score 37.3/100, Risk 0.3/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- FWA: CANDIDATE → READY (24 мин назад) — Opportunity Score 65.2/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Sue: AVOID → CANDIDATE (35 мин назад) — Opportunity Score 54.2/100, Risk 18.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- Cupsey: WATCH → CANDIDATE (58 мин назад) — Opportunity Score 63.7/100, Risk 0.5/100, confidence 100%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
 
 ## Позиции
 - Открытых: 33; всего: 1062; realized P&L: $10740.87
@@ -110,7 +110,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 129 шт на $-6450.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 377 шт на $865.10 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: OPENHOLE/robinhood (0 мин назад), GEFURRCE/robinhood (9 мин назад), RAM/robinhood (5 мин назад)
+- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: OPENHOLE/robinhood (7 мин назад), GEFURRCE/robinhood (1 мин назад), RAM/robinhood (12 мин назад)
   · адреса первых пяти для проверки у источника: robinhood/0x13a074fa9be8bfb908f25a1394189a6a01bf1e18, robinhood/0xee88524589c594042bd545db64ab37935435e79a, robinhood/0xee5ac361d45af1479bc2c189b41ee7dae6e97777
 
 ## Последние позиции (детально)
@@ -139,22 +139,22 @@
     · 17:47:27 [OPEN] Paper вход по правилу низкой ликвидности: 228508428.23 шт по $2.18044e-7 (комиссии $0.17, impact 0.46%)
 
 ## Последний backtest
-- DONE (0 мин назад): NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (7 мин назад): NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3243228 / err 2844, последний успех 0 мин назад)
+- dexscreener: ok (ok 3243508 / err 2844, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 38.0 дн назад)
-- geckoterminal:arbitrum: ok (ok 28638 / err 25770, последний успех 0 мин назад)
-- geckoterminal:base: ok (ok 54359 / err 65, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 49871 / err 4548, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 38328 / err 16086, последний успех 0 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 27594 / err 26791, последний успех 43 мин назад)
-- geckoterminal:solana: ok (ok 54422 / err 2, последний успех 0 мин назад)
-- goplus: ok (ok 100366 / err 37, последний успех 2 мин назад)
-- jupiter: ok (ok 529751 / err 1044, последний успех 1 мин назад)
+- geckoterminal:arbitrum: ok (ok 28644 / err 25770, последний успех 1 мин назад)
+- geckoterminal:base: ok (ok 54366 / err 65, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 49878 / err 4548, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 38334 / err 16086, последний успех 1 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 27594 / err 26797, последний успех 50 мин назад)
+- geckoterminal:solana: ok (ok 54429 / err 2, последний успех 0 мин назад)
+- goplus: ok (ok 100381 / err 37, последний успех 2 мин назад)
+- jupiter: ok (ok 529772 / err 1044, последний успех 1 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 11.5 дн назад)
-- rpc:base: ok (ok 148983 / err 31815, последний успех 0 мин назад)
+- rpc:base: ok (ok 149011 / err 31815, последний успех 0 мин назад)
 - rpc:bsc: ok (ok 12326 / err 2, последний успех 2.0 дн назад)
-- rpc:ethereum: ok (ok 12061 / err 9, последний успех 10.9 ч назад)
-- rugcheck: ok (ok 133830 / err 402, последний успех 10 мин назад)
+- rpc:ethereum: ok (ok 12061 / err 9, последний успех 11.0 ч назад)
+- rugcheck: ok (ok 133831 / err 402, последний успех 6 мин назад)
 
