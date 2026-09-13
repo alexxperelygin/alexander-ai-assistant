@@ -11,7 +11,11 @@ const POSITION_USD = 50;
 const HORIZONS: [string, number][] = [["6h", 360], ["24h", 1440]];
 /** Ругпулл: ликвидность упала ниже пятой части от той, что была при вердикте. */
 const RUG_FRACTION = 0.2;
-const TOKEN_BATCH = 1500;
+// SQLite ограничивает число параметров в запросе. Prisma умеет резать
+// длинный `in` на части — но ТОЛЬКО если в том же запросе нет отрицания:
+// `priceUsd: { not: null }` эту разбивку запрещает, и запрос падает с P2029.
+// Поэтому пустые цены отсеиваются в коде, а батч взят с запасом.
+const TOKEN_BATCH = 500;
 
 interface Verdict { tokenId: string; at: number; avoid: boolean }
 interface Outcome {
@@ -117,14 +121,15 @@ for (let i = 0; i < verdicts.length; i += TOKEN_BATCH) {
   const minAt = new Date(Math.min(...batch.map((v) => v.at)) - 3600_000);
   const maxAt = new Date(Math.max(...batch.map((v) => v.at)) + 24 * 3600_000);
   const snaps = await prisma.tokenSnapshot.findMany({
-    where: { tokenId: { in: ids }, fetchedAt: { gte: minAt, lte: maxAt }, priceUsd: { not: null } },
+    where: { tokenId: { in: ids }, fetchedAt: { gte: minAt, lte: maxAt } },
     select: { tokenId: true, fetchedAt: true, priceUsd: true, liquidityUsd: true },
     orderBy: { fetchedAt: "asc" },
   });
   const byToken = new Map<string, { at: number; price: number; liq: number | null }[]>();
   for (const s of snaps) {
+    if (s.priceUsd == null) continue;
     const arr = byToken.get(s.tokenId) ?? [];
-    arr.push({ at: s.fetchedAt.getTime(), price: s.priceUsd as number, liq: s.liquidityUsd });
+    arr.push({ at: s.fetchedAt.getTime(), price: s.priceUsd, liq: s.liquidityUsd });
     byToken.set(s.tokenId, arr);
   }
   for (const v of batch) {
@@ -266,14 +271,15 @@ L.push("");
     const minAt = new Date((batch[0] as { at: number }).at - 3600_000);
     const maxAt = new Date((batch[batch.length - 1] as { at: number }).at + 24 * 3600_000);
     const snaps = await prisma.tokenSnapshot.findMany({
-      where: { tokenId: { in: ids }, fetchedAt: { gte: minAt, lte: maxAt }, priceUsd: { not: null } },
+      where: { tokenId: { in: ids }, fetchedAt: { gte: minAt, lte: maxAt } },
       select: { tokenId: true, fetchedAt: true, priceUsd: true },
       orderBy: { fetchedAt: "asc" },
     });
     const byToken = new Map<string, { at: number; price: number }[]>();
     for (const sn of snaps) {
+      if (sn.priceUsd == null) continue;
       const arr = byToken.get(sn.tokenId) ?? [];
-      arr.push({ at: sn.fetchedAt.getTime(), price: sn.priceUsd as number });
+      arr.push({ at: sn.fetchedAt.getTime(), price: sn.priceUsd });
       byToken.set(sn.tokenId, arr);
     }
     for (const d of batch) {
