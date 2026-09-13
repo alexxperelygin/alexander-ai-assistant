@@ -1,2 +1,2 @@
-update
-run: 195
+equity
+run: 196
