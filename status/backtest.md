@@ -1,30 +1,30 @@
-# Backtest (2026-09-13T04:38:37Z)
+# Backtest (2026-09-13T16:38:29Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
 Status: DONE
-NO EDGE: expectancy -4.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+NO EDGE: expectancy -4.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 348,
+    "signals": 353,
     "horizon": "24h",
-    "evaluable": 198,
-    "winRate": 0.3484848484848485,
-    "expectancy": -0.04709766257699028,
+    "evaluable": 204,
+    "winRate": 0.35294117647058826,
+    "expectancy": -0.04382043819189858,
     "medianReturn": -0.024666700229341587,
-    "profitFactor": 0.543937470073941,
+    "profitFactor": 0.5650342343947028,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.071875,
-    "rugMeasurable": 320,
-    "unclosablePct": 0.08333333333333333,
+    "rugRate": 0.07076923076923076,
+    "rugMeasurable": 325,
+    "unclosablePct": 0.0821529745042493,
     "byMonth": {
       "2026-08": {
         "n": 125,
         "meanReturn": -0.03999731969196851
       },
       "2026-09": {
-        "n": 73,
-        "meanReturn": -0.05925578395545214
+        "n": 79,
+        "meanReturn": -0.049869676324699234
       }
     }
   },
@@ -47,37 +47,37 @@ NO EDGE: expectancy -4.7% ≤ 0 после издержек. Сигналы в �
       }
     }
   },
-  "verdict": "NO EDGE: expectancy -4.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO EDGE: expectancy -4.4% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
 }
 exit=0
 
-_Расчёт занял 12 с при лимите 600 с; код ssh 0._
+_Расчёт занял 10 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
 Status: DONE
-NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+NO EDGE: expectancy -5.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 348,
+    "signals": 353,
     "horizon": "6h",
-    "evaluable": 277,
-    "winRate": 0.3249097472924188,
-    "expectancy": -0.05748757032832714,
-    "medianReturn": -0.016753882169638135,
-    "profitFactor": 0.40198451352299897,
+    "evaluable": 284,
+    "winRate": 0.323943661971831,
+    "expectancy": -0.05624398225390558,
+    "medianReturn": -0.016970897586333744,
+    "profitFactor": 0.4066746042556911,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.050156739811912224,
-    "rugMeasurable": 319,
-    "unclosablePct": 0.08333333333333333,
+    "rugRate": 0.04938271604938271,
+    "rugMeasurable": 324,
+    "unclosablePct": 0.0821529745042493,
     "byMonth": {
       "2026-08": {
         "n": 177,
         "meanReturn": -0.043455329139597446
       },
       "2026-09": {
-        "n": 100,
-        "meanReturn": -0.0823246372323787
+        "n": 107,
+        "meanReturn": -0.07739904394766765
       }
     }
   },
@@ -100,8 +100,8 @@ NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в �
       }
     }
   },
-  "verdict": "NO EDGE: expectancy -5.7% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO EDGE: expectancy -5.6% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
 }
 exit=0
 
-_Расчёт занял 9 с при лимите 600 с; код ssh 0._
+_Расчёт занял 6 с при лимите 600 с; код ssh 0._
