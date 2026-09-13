@@ -6,6 +6,7 @@ name: VPS ops
 #   update   — обновить код на сервере (installer) и снять отчёт
 #   backtest — запустить backtest (24h и 6h) → status/backtest.md + отчёт
 #   equity   — проиграть сделки на счёте с депозитом → status/equity.md
+#   riskfilter — проверить фильтр риска по пре-регистрации → status/riskfilter.md
 #   restart  — перезапустить сервисы pm2 и снять отчёт
 #   diag     — снять нагрузку, диск и список процессов сервера (без отчёта)
 # Требуются секреты VPS_HOST и VPS_SSH_PASSWORD (Settings → Secrets → Actions).
@@ -64,7 +65,7 @@ jobs:
           else
             TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
           fi
-          case "$TASK" in status|update|backtest|restart|domain|research|equity|diag) ;; *) TASK=status ;; esac
+          case "$TASK" in status|update|backtest|restart|domain|research|equity|riskfilter|diag) ;; *) TASK=status ;; esac
           echo "task=$TASK" >> "$GITHUB_OUTPUT"
           echo "Задача: $TASK"
 
@@ -187,6 +188,15 @@ jobs:
                 exit 1
               fi
               cat status/equity.md
+              ;;
+            riskfilter)
+              echo "== Проверка фильтра риска =="
+              if ! run_ssh 'git -C /opt/alexander-ai-assistant pull -q origin main; cd /opt/alexander-ai-assistant/memescope && NODE_OPTIONS=--max-old-space-size=1200 npx tsx deploy/riskfilter.mts' > status/riskfilter.md 2>/tmp/riskfilter.err; then
+                tail -30 /tmp/riskfilter.err
+                echo "::error::Проверка фильтра риска не завершилась"
+                exit 1
+              fi
+              cat status/riskfilter.md
               ;;
             diag)
               # Отчёт status.mts 19 августа стал занимать более получаса вместо
