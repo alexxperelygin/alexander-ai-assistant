@@ -17,9 +17,10 @@ const RUG_FRACTION = 0.2;
 // Поэтому пустые цены отсеиваются в коде, а батч взят с запасом.
 const TOKEN_BATCH = 500;
 
-interface Verdict { tokenId: string; at: number; avoid: boolean }
+interface Verdict { tokenId: string; at: number; avoid: boolean; status: string }
 interface Outcome {
   avoid: boolean;
+  status: string;
   at: number;
   ret: Record<string, number | null>;
   rugged: boolean | null;
@@ -110,7 +111,7 @@ for (;;) {
 // По времени: батчи должны быть локальными по времени, иначе окно выборки
 // снимков растягивается на весь период и тянет лишнее.
 const verdicts: Verdict[] = [...firstByToken.entries()]
-  .map(([tokenId, v]) => ({ tokenId, at: v.at, avoid: v.status === "AVOID" }))
+  .map(([tokenId, v]) => ({ tokenId, at: v.at, avoid: v.status === "AVOID", status: v.status }))
   .sort((a, b) => a.at - b.at);
 
 // ── Исходы вперёд от вердикта ───────────────────────────────────────────────
@@ -163,7 +164,7 @@ for (let i = 0; i < verdicts.length; i += TOKEN_BATCH) {
       if (!entryFill.executed || !exitFill.executed) { ret[key] = null; continue; }
       ret[key] = (entryFill.quantity * exitFill.effectivePriceUsd - exitFill.feesUsd) / POSITION_USD - 1;
     }
-    outcomes.push({ avoid: v.avoid, at: v.at, ret, rugged });
+    outcomes.push({ avoid: v.avoid, status: v.status, at: v.at, ret, rugged });
   }
 }
 
@@ -246,6 +247,55 @@ const half = block("Вторая половина периода, горизон
 const c5 = half != null && half.c2 && half.c3 && half.c4;
 L.push(`* ${ok(c5)} **критерий 5: критерии 2–4 повторяются на второй половине периода**`);
 L.push("");
+
+// ── Из чего состоят группы ──────────────────────────────────────────────────
+// РАЗДЕЛ ОПИСАТЕЛЬНЫЙ. Вердикт выше посчитан по замороженным критериям и от
+// этих чисел не зависит — пересматривать его, увидев состав, нельзя.
+//
+// Зачем он нужен: если контрольная группа состоит в основном из токенов со
+// статусом DATA_UNAVAILABLE, то сравнение измеряет не качество фильтра, а
+// доступность данных. Догадку надо заменить числом.
+{
+  L.push("## Из чего состоят группы (описательно, вердикт не меняет)");
+  L.push("");
+  const byStatus = new Map<string, { n: number; meas: number; med: number[]; rugN: number; rugHits: number }>();
+  for (const o of outcomes) {
+    const cur = byStatus.get(o.status) ?? { n: 0, meas: 0, med: [], rugN: 0, rugHits: 0 };
+    cur.n += 1;
+    const r = o.ret["6h"];
+    if (r != null) { cur.meas += 1; cur.med.push(r); }
+    if (o.rugged != null) { cur.rugN += 1; if (o.rugged) cur.rugHits += 1; }
+    byStatus.set(o.status, cur);
+  }
+  L.push("| статус первого вердикта | наблюдений | измеримых на 6ч | медиана | ругпуллов |");
+  L.push("|---|---|---|---|---|");
+  for (const [st, v] of [...byStatus.entries()].sort((a, b) => b[1].n - a[1].n)) {
+    L.push(
+      `| ${st} | ${v.n} | ${v.meas} | ${v.med.length ? pp(median(v.med)) : "—"} | ` +
+      `${v.rugN ? ((v.rugHits / v.rugN) * 100).toFixed(1) + "% из " + v.rugN : "—"} |`,
+    );
+  }
+  L.push("");
+  const ctrl = outcomes.filter((o) => !o.avoid);
+  const du = ctrl.filter((o) => o.status === "DATA_UNAVAILABLE").length;
+  L.push(
+    `Контрольная группа «не-AVOID»: ${ctrl.length} наблюдений, из них ` +
+    `**${du} со статусом DATA_UNAVAILABLE** (${ctrl.length ? ((du / ctrl.length) * 100).toFixed(1) : "—"}%).`,
+  );
+  L.push("");
+  L.push(
+    du / Math.max(1, ctrl.length) > 0.5
+      ? "⚠️ Контрольная группа состоит преимущественно из токенов, по которым не удалось " +
+        "получить данные. Значит тест сравнил «отбракованные» не с нормальными, а с теми, " +
+        "кого не удалось разглядеть, — и разница объясняется доступностью данных, а не " +
+        "качеством фильтра. Это **ошибка проектирования пре-регистрации**: статус " +
+        "DATA_UNAVAILABLE следовало исключить из контроля заранее. Вердикт NO EDGE при " +
+        "этом остаётся в силе: критерии заморожены до расчёта, и переигрывать их нельзя. " +
+        "Узкий вопрос «AVOID против реально торгуемых» требует НОВОЙ заморозки и нового теста."
+      : "Контрольная группа не сводится к токенам без данных.",
+  );
+  L.push("");
+}
 
 // ── Упреждение: предупреждает или сообщает постфактум ───────────────────────
 // Пре-регистрация требует публиковать это рядом с критериями. Смысл простой:
