@@ -5,6 +5,7 @@ name: VPS ops
 #   status   — снять отчёт о состоянии → status/latest.md
 #   update   — обновить код на сервере (installer) и снять отчёт
 #   backtest — запустить backtest (24h и 6h) → status/backtest.md + отчёт
+#   equity   — проиграть сделки на счёте с депозитом → status/equity.md
 #   restart  — перезапустить сервисы pm2 и снять отчёт
 #   diag     — снять нагрузку, диск и список процессов сервера (без отчёта)
 # Требуются секреты VPS_HOST и VPS_SSH_PASSWORD (Settings → Secrets → Actions).
@@ -63,7 +64,7 @@ jobs:
           else
             TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
           fi
-          case "$TASK" in status|update|backtest|restart|domain|research|diag) ;; *) TASK=status ;; esac
+          case "$TASK" in status|update|backtest|restart|domain|research|equity|diag) ;; *) TASK=status ;; esac
           echo "task=$TASK" >> "$GITHUB_OUTPUT"
           echo "Задача: $TASK"
 
@@ -177,6 +178,15 @@ jobs:
                 exit 1
               fi
               head -60 status/research.md
+              ;;
+            equity)
+              echo "== Счёт с фиксированным депозитом =="
+              if ! run_ssh 'git -C /opt/alexander-ai-assistant pull -q origin main; cd /opt/alexander-ai-assistant/memescope && npx tsx deploy/equity.mts' > status/equity.md 2>/tmp/equity.err; then
+                tail -30 /tmp/equity.err
+                echo "::error::Симуляция счёта не завершилась"
+                exit 1
+              fi
+              cat status/equity.md
               ;;
             diag)
               # Отчёт status.mts 19 августа стал занимать более получаса вместо
