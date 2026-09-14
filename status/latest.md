@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-14T12:39:37.247Z (UTC)
+Сгенерирован: 2026-09-14T12:44:14.950Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 2 мин назад)
-- Токенов в базе: 1408893; снапшотов за 24ч: 40844
+- Worker: ✅ работает (последний цикл: 0 мин назад)
+- Токенов в базе: 1409017; снапшотов за 24ч: 40864
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 68 МБ, перезапусков 0
-- memescope-worker:  online, память 69 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 353 мс, порт 3000)
+- memescope-web:  online, память 67 МБ, перезапусков 0
+- memescope-worker:  online, память 67 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 252 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,50 +16,50 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 17547
-- robinhood: 5898
-- bsc: 3457
-- base: 1694
-- ethereum: 249
+- solana: 17538
+- robinhood: 5942
+- bsc: 3469
+- base: 1692
+- ethereum: 250
 - arbitrum: 7
 
 ## Статусы возможностей
 - AVOID: 150717
 - DATA_UNAVAILABLE: 44532
-- WATCH: 31
+- WATCH: 32
 - CANDIDATE: 25
-- READY: 6
+- READY: 5
 
 ## Топ-5 по score (не отбракованные)
-- CATE: READY, score 75.2, risk 0.0, conf 100% (обновлено 2 мин назад)
+- CATE: READY, score 75.2, risk 0.6, conf 100% (обновлено 0 мин назад)
+- Cupsey: READY, score 67.8, risk 0.9, conf 100% (обновлено 0 мин назад)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 24.1 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 39.4 дн назад)
-- Cupsey: READY, score 65.2, risk 1.2, conf 100% (обновлено 1 мин назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 7.8 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- Cupsey — 2026-09-14T12:16:07.275Z (24 мин назад)
-- OL — 2026-09-14T11:57:01.347Z (43 мин назад)
-- Cupsey — 2026-09-14T11:46:05.873Z (54 мин назад)
-- Cupsey — 2026-09-14T11:23:05.144Z (1.3 ч назад)
-- OL — 2026-09-14T10:58:01.818Z (1.7 ч назад)
+- Cupsey — 2026-09-14T12:16:07.275Z (28 мин назад)
+- OL — 2026-09-14T11:57:01.347Z (47 мин назад)
+- Cupsey — 2026-09-14T11:46:05.873Z (58 мин назад)
+- Cupsey — 2026-09-14T11:23:05.144Z (1.4 ч назад)
+- OL — 2026-09-14T10:58:01.818Z (1.8 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- memestock: WATCH → CANDIDATE (3 мин назад) — Opportunity Score 50.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: CANDIDATE → READY (24 мин назад) — Opportunity Score 66.0/100, Risk 0.9/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- BREWCAT: WATCH → CANDIDATE (34 мин назад) — Opportunity Score 52.7/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- OL: CANDIDATE → READY (43 мин назад) — Opportunity Score 66.4/100, Risk 10.1/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- Cupsey: READY → CANDIDATE (48 мин назад) — Opportunity Score 58.1/100, Risk 1.0/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- OL: READY → CANDIDATE (51 мин назад) — Opportunity Score 59.9/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: CANDIDATE → READY (54 мин назад) — Opportunity Score 65.2/100, Risk 1.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- BREWCAT: CANDIDATE → WATCH (1.1 ч назад) — Opportunity Score 44.8/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- Cupsey: READY → CANDIDATE (1.2 ч назад) — Opportunity Score 59.5/100, Risk 1.1/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- BREWCAT: WATCH → CANDIDATE (1.2 ч назад) — Opportunity Score 50.5/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: CANDIDATE → READY (1.3 ч назад) — Opportunity Score 66.1/100, Risk 1.2/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- memestock: CANDIDATE → WATCH (1.3 ч назад) — Opportunity Score 44.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- OL: READY → CANDIDATE (0 мин назад) — Opportunity Score 59.3/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- BREWCAT: CANDIDATE → WATCH (4 мин назад) — Opportunity Score 44.9/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- memestock: WATCH → CANDIDATE (8 мин назад) — Opportunity Score 50.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- Cupsey: CANDIDATE → READY (28 мин назад) — Opportunity Score 66.0/100, Risk 0.9/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- BREWCAT: WATCH → CANDIDATE (39 мин назад) — Opportunity Score 52.7/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- OL: CANDIDATE → READY (47 мин назад) — Opportunity Score 66.4/100, Risk 10.1/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- Cupsey: READY → CANDIDATE (52 мин назад) — Opportunity Score 58.1/100, Risk 1.0/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- OL: READY → CANDIDATE (55 мин назад) — Opportunity Score 59.9/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- Cupsey: CANDIDATE → READY (58 мин назад) — Opportunity Score 65.2/100, Risk 1.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- BREWCAT: CANDIDATE → WATCH (1.2 ч назад) — Opportunity Score 44.8/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Cupsey: READY → CANDIDATE (1.3 ч назад) — Opportunity Score 59.5/100, Risk 1.1/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- BREWCAT: WATCH → CANDIDATE (1.3 ч назад) — Opportunity Score 50.5/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
 
 ## Позиции
 - Открытых: 33; всего: 1109; realized P&L: $9820.07
@@ -110,13 +110,13 @@
   · 63× Занято 15 из 15 слотов трека «low-liquidity-lottery».
   · 8× Занято 25 из 25 слотов трека «validated-liquidity».
 - закрыто навсегда (токен однажды отклонён и больше не рассматривается): 6029 записей за всё время
-- токенов в диапазоне за сутки: проверенное правило 98, лотерейный 198 (разные токены, не наблюдения; сюда входят и уже отторгованные, и закрытые навсегда)
+- токенов в диапазоне за сутки: проверенное правило 97, лотерейный 197 (разные токены, не наблюдения; сюда входят и уже отторгованные, и закрытые навсегда)
 
 - ⚠️ исключено как НЕИЗМЕРИМЫЕ: 30 шт (2.8% от всех завершённых) — цену выхода получить не удалось: либо её не было ни в одном источнике, либо выход не исполнялся. Эти сделки не входят ни в один итог выше. Рост этой доли завышает результаты треков: источник перестаёт котировать прежде всего умершие токены
 - ⚠️ списано полностью (пул не может принять позицию): 141 шт на $-7050.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 386 шт на $859.76 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): o/robinhood (1 мин назад)
+- ℹ️ считаются по снапшотам сканера (прямой запрос молчит, защита работает): o/robinhood (6 мин назад)
 
 ## Последние позиции (детально)
 - baton [paper/OPEN] вход $8.117e-8 × 613824837 = $50.00, остаток 100%, realized $0.00
@@ -147,22 +147,22 @@
     · 08:04:04 [ALERT] Продажа не исполнена: проскальзывание 100% — объём несопоставим с пулом, сделка неисполнима
 
 ## Последний backtest
-- DONE (4.0 ч назад): NO EDGE: expectancy -5.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (4.1 ч назад): NO EDGE: expectancy -5.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3323898 / err 2849, последний успех 0 мин назад)
+- dexscreener: ok (ok 3324101 / err 2849, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 39.3 дн назад)
-- geckoterminal:arbitrum: ok (ok 30038 / err 26289, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 56279 / err 66, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 51788 / err 4551, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 40174 / err 16159, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 28174 / err 28130, последний успех 2 мин назад)
-- geckoterminal:solana: ok (ok 56338 / err 7, последний успех 0 мин назад)
-- goplus: ok (ok 103947 / err 43, последний успех 1 мин назад)
-- jupiter: ok (ok 540087 / err 1044, последний успех 1 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 30038 / err 26294, последний успех 6 мин назад)
+- geckoterminal:base: ok (ok 56283 / err 66, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 51793 / err 4551, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 40179 / err 16159, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 28179 / err 28130, последний успех 0 мин назад)
+- geckoterminal:solana: ok (ok 56342 / err 7, последний успех 1 мин назад)
+- goplus: ok (ok 103956 / err 43, последний успех 2 мин назад)
+- jupiter: ok (ok 540114 / err 1044, последний успех 0 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 12.8 дн назад)
-- rpc:base: ok (ok 159292 / err 31822, последний успех 1.2 ч назад)
+- rpc:base: ok (ok 159292 / err 31822, последний успех 1.3 ч назад)
 - rpc:bsc: ok (ok 12326 / err 2, последний успех 3.3 дн назад)
-- rpc:ethereum: ok (ok 16433 / err 732, последний успех 0 мин назад)
-- rugcheck: ok (ok 134154 / err 402, последний успех 8 мин назад)
+- rpc:ethereum: ok (ok 16442 / err 732, последний успех 0 мин назад)
+- rugcheck: ok (ok 134156 / err 402, последний успех 1 мин назад)
 
