@@ -1,4 +1,4 @@
-# Backtest (2026-09-16T08:38:42Z)
+# Backtest (2026-09-16T16:41:32Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -6,17 +6,17 @@ Status: DONE
 NO EDGE: expectancy -4.8% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 371,
+    "signals": 374,
     "horizon": "24h",
     "evaluable": 221,
     "winRate": 0.334841628959276,
-    "expectancy": -0.047782027648901625,
+    "expectancy": -0.04783818264439097,
     "medianReturn": -0.02582252408900443,
-    "profitFactor": 0.5313475088841649,
+    "profitFactor": 0.5310550166989528,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.06705539358600583,
-    "rugMeasurable": 343,
-    "unclosablePct": 0.07816711590296496,
+    "rugRate": 0.06666666666666667,
+    "rugMeasurable": 345,
+    "unclosablePct": 0.08021390374331551,
     "byMonth": {
       "2026-08": {
         "n": 125,
@@ -24,7 +24,7 @@ NO EDGE: expectancy -4.8% ≤ 0 после издержек. Сигналы в �
       },
       "2026-09": {
         "n": 96,
-        "meanReturn": -0.057918366134491535
+        "meanReturn": -0.05804763961369097
       }
     }
   },
@@ -51,7 +51,7 @@ NO EDGE: expectancy -4.8% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 13 с при лимите 600 с; код ssh 0._
+_Расчёт занял 12 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -59,25 +59,25 @@ Status: DONE
 NO EDGE: expectancy -5.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 371,
+    "signals": 374,
     "horizon": "6h",
-    "evaluable": 301,
-    "winRate": 0.31561461794019935,
-    "expectancy": -0.05298947367081367,
+    "evaluable": 303,
+    "winRate": 0.31683168316831684,
+    "expectancy": -0.05263172926637491,
     "medianReturn": -0.017695933612167813,
-    "profitFactor": 0.4231624037454273,
+    "profitFactor": 0.4237729926317667,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.04678362573099415,
-    "rugMeasurable": 342,
-    "unclosablePct": 0.07816711590296496,
+    "rugRate": 0.046511627906976744,
+    "rugMeasurable": 344,
+    "unclosablePct": 0.08021390374331551,
     "byMonth": {
       "2026-08": {
         "n": 177,
         "meanReturn": -0.043455329139597446
       },
       "2026-09": {
-        "n": 124,
-        "meanReturn": -0.06659869610650136
+        "n": 126,
+        "meanReturn": -0.06552238658732422
       }
     }
   },
