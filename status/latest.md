@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-16T16:41:56.968Z (UTC)
+Сгенерирован: 2026-09-16T16:53:53.198Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 0 мин назад)
-- Токенов в базе: 1480548; снапшотов за 24ч: 40938
+- Токенов в базе: 1480797; снапшотов за 24ч: 40979
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 67 МБ, перезапусков 0
-- memescope-worker:  online, память 67 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 355 мс, порт 3000)
+- memescope-web:  online, память 68 МБ, перезапусков 0
+- memescope-worker:  online, память 68 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 299 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,50 +16,50 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20514
-- robinhood: 5675
-- bsc: 3425
-- base: 1647
-- ethereum: 173
+- solana: 20393
+- robinhood: 5796
+- bsc: 3435
+- base: 1626
+- ethereum: 171
 - arbitrum: 17
 
 ## Статусы возможностей
 - AVOID: 151646
 - DATA_UNAVAILABLE: 44614
 - WATCH: 41
-- CANDIDATE: 18
-- READY: 3
+- CANDIDATE: 17
+- READY: 4
 
 ## Топ-5 по score (не отбракованные)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 26.3 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 41.6 дн назад)
+- Cupsey: READY, score 65.0, risk 1.2, conf 100% (обновлено 0 мин назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 10.0 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 42.2 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 44.4 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- Cupsey — 2026-09-16T16:24:09.902Z (18 мин назад)
-- Cupsey — 2026-09-16T13:32:09.082Z (3.2 ч назад)
-- Cupsey — 2026-09-16T12:53:07.773Z (3.8 ч назад)
-- WETH — 2026-09-16T11:48:02.013Z (4.9 ч назад)
-- Cupsey — 2026-09-16T10:11:01.452Z (6.5 ч назад)
+- Cupsey — 2026-09-16T16:45:29.189Z (8 мин назад)
+- Cupsey — 2026-09-16T16:24:09.902Z (30 мин назад)
+- Cupsey — 2026-09-16T13:32:09.082Z (3.4 ч назад)
+- Cupsey — 2026-09-16T12:53:07.773Z (4.0 ч назад)
+- WETH — 2026-09-16T11:48:02.013Z (5.1 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- ARB: CANDIDATE → WATCH (13 мин назад) — Opportunity Score 44.7/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- Cupsey: READY → CANDIDATE (15 мин назад) — Opportunity Score 55.7/100, Risk 2.1/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- Cupsey: CANDIDATE → READY (18 мин назад) — Opportunity Score 65.0/100, Risk 2.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- ARB: WATCH → CANDIDATE (18 мин назад) — Opportunity Score 50.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- USGR: WATCH → CANDIDATE (33 мин назад) — Opportunity Score 50.1/100, Risk 4.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- ARB: CANDIDATE → WATCH (36 мин назад) — Opportunity Score 44.2/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- ARB: WATCH → CANDIDATE (42 мин назад) — Opportunity Score 51.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- MarsCoin: — → WATCH (53 мин назад) — Opportunity Score 31.0/100, Risk 4.1/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- FOMOPAD: — → AVOID (54 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- emo小猴: — → AVOID (55 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
-- PBJ: — → AVOID (56 мин назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
-- Onbase: — → AVOID (57 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- Cupsey: CANDIDATE → READY (8 мин назад) — Opportunity Score 66.9/100, Risk 2.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- ARB: CANDIDATE → WATCH (25 мин назад) — Opportunity Score 44.7/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Cupsey: READY → CANDIDATE (27 мин назад) — Opportunity Score 55.7/100, Risk 2.1/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- Cupsey: CANDIDATE → READY (30 мин назад) — Opportunity Score 65.0/100, Risk 2.0/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- ARB: WATCH → CANDIDATE (30 мин назад) — Opportunity Score 50.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- USGR: WATCH → CANDIDATE (45 мин назад) — Opportunity Score 50.1/100, Risk 4.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- ARB: CANDIDATE → WATCH (48 мин назад) — Opportunity Score 44.2/100, Risk 22.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- ARB: WATCH → CANDIDATE (54 мин назад) — Opportunity Score 51.5/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- MarsCoin: — → WATCH (1.1 ч назад) — Opportunity Score 31.0/100, Risk 4.1/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
+- FOMOPAD: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
+- emo小猴: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- PBJ: — → AVOID (1.1 ч назад) — [sell-not-verified] В сети Robinhood Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без п
 
 ## Позиции
 - Открытых: 40; всего: 1180; realized P&L: $8456.63
@@ -78,7 +78,7 @@
     сверить: вход $8.917e-8, максимум $0.000007368, https://dexscreener.com/bsc/0x2887cc73ebd2f61c2b01528e0d0c07a501a902f4
     исполнимость выхода: удар по цене 0.96%; сейчас $474 736 (5.1 дн назад)
 - трек «низкая ликвидность $10k–$50k (лотерейный трек)»: открыто 15, закрыто 496, P&L $5699.73, прибыльных 20 из 496, медиана сделки -3.2%; из них 237 закрыто по устаревшей цене, без них итог $5429.02 по 259 сделкам; если все они на деле обнулились — $-6420.98
-  · за последние сутки закрыто 12, из них по устаревшей цене 1 (robinhood 1)
+  · за последние сутки закрыто 11, из них по устаревшей цене 1 (robinhood 1)
     не читается: ISLAMI/robinhood pair 0xfe062e62427c0e96c338fdb7e4b5611b619ac7dd8f11580d7147011adaef554e
   · base: 252 сделок, прибыльных 6, итог $-914.05, по устаревшей цене 114
   · robinhood: 122 сделок, прибыльных 5, итог $-463.01, по устаревшей цене 100
@@ -141,22 +141,22 @@
     · 06:30:55 [OPEN] Paper вход по правилу низкой ликвидности: 0.64 шт по $77.8991 (комиссии $0.17, impact 0.99%)
 
 ## Последний backtest
-- DONE (0 мин назад): NO EDGE: expectancy -5.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (12 мин назад): NO EDGE: expectancy -5.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3457272 / err 2850, последний успех 0 мин назад)
+- dexscreener: ok (ok 3457804 / err 2850, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 41.5 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 31772 / err 27677, последний успех 2 мин назад)
-- geckoterminal:base: ok (ok 59400 / err 67, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 54907 / err 4555, последний успех 0 мин назад)
-- geckoterminal:eth: ok (ok 43287 / err 16168, последний успех 1 мин назад)
-- geckoterminal:robinhood: ok (ok 29650 / err 29776, последний успех 1 мин назад)
-- geckoterminal:solana: ok (ok 59457 / err 10, последний успех 0 мин назад)
-- goplus: ok (ok 110006 / err 52, последний успех 0 мин назад)
-- jupiter: ok (ok 550507 / err 1046, последний успех 0 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 31772 / err 27689, последний успех 14 мин назад)
+- geckoterminal:base: ok (ok 59412 / err 67, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 54918 / err 4555, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 43299 / err 16168, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 29662 / err 29776, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 59469 / err 10, последний успех 0 мин назад)
+- goplus: ok (ok 110033 / err 52, последний успех 0 мин назад)
+- jupiter: ok (ok 550543 / err 1046, последний успех 0 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 15.0 дн назад)
-- rpc:base: ok (ok 169828 / err 31899, последний успех 0 мин назад)
+- rpc:base: ok (ok 169949 / err 31922, последний успех 0 мин назад)
 - rpc:bsc: ok (ok 12326 / err 2, последний успех 5.5 дн назад)
-- rpc:ethereum: ok (ok 18956 / err 733, последний успех 8.6 ч назад)
-- rugcheck: ok (ok 134482 / err 402, последний успех 4 мин назад)
+- rpc:ethereum: ok (ok 18956 / err 733, последний успех 8.8 ч назад)
+- rugcheck: ok (ok 134483 / err 402, последний успех 5 мин назад)
 
