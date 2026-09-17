@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-17T16:39:20.263Z (UTC)
+Сгенерирован: 2026-09-17T16:40:45.652Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1506994; снапшотов за 24ч: 35367
+- Токенов в базе: 1507035; снапшотов за 24ч: 35362
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 69 МБ, перезапусков 0
-- memescope-worker:  online, память 69 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 394 мс, порт 3000)
+- memescope-web:  online, память 67 МБ, перезапусков 0
+- memescope-worker:  online, память 67 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 259 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,10 +16,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 13054
-- robinhood: 8439
-- bsc: 3479
-- base: 1390
+- solana: 13058
+- robinhood: 8419
+- bsc: 3490
+- base: 1391
 - ethereum: 148
 - arbitrum: 10
 
@@ -38,28 +38,28 @@
 - KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 45.4 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- Cupsey — 2026-09-17T16:28:59.873Z (10 мин назад)
-- XERA — 2026-09-17T16:02:58.430Z (36 мин назад)
-- TEN — 2026-09-17T15:55:53.041Z (43 мин назад)
-- Cupsey — 2026-09-17T15:30:10.470Z (1.1 ч назад)
+- Cupsey — 2026-09-17T16:28:59.873Z (12 мин назад)
+- XERA — 2026-09-17T16:02:58.430Z (38 мин назад)
+- TEN — 2026-09-17T15:55:53.041Z (45 мин назад)
+- Cupsey — 2026-09-17T15:30:10.470Z (1.2 ч назад)
 - Cupsey — 2026-09-17T14:37:59.508Z (2.0 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- PAID: WATCH → DATA_UNAVAILABLE (4 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
-- Cupsey: CANDIDATE → READY (10 мин назад) — Opportunity Score 67.3/100, Risk 0.9/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- LINK: CANDIDATE → WATCH (12 мин назад) — Opportunity Score 44.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- LINK: WATCH → CANDIDATE (19 мин назад) — Opportunity Score 51.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- TEN: READY → CANDIDATE (23 мин назад) — Opportunity Score 59.9/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- PAID: CANDIDATE → WATCH (26 мин назад) — Opportunity Score 42.5/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- LINK: CANDIDATE → WATCH (27 мин назад) — Opportunity Score 44.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- LINK: WATCH → CANDIDATE (31 мин назад) — Opportunity Score 51.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- XERA: CANDIDATE → READY (36 мин назад) — Opportunity Score 71.2/100, Risk 0.3/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- Cupsey: READY → CANDIDATE (39 мин назад) — Opportunity Score 60.0/100, Risk 6.9/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- TEN: AVOID → READY (43 мин назад) — Opportunity Score 75.7/100, Risk 6.9/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- LINK: CANDIDATE → WATCH (50 мин назад) — Opportunity Score 44.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- PAID: WATCH → DATA_UNAVAILABLE (6 мин назад) — Ключевые данные отсутствуют или устарели — решение невозможно. | Недостаточно данных для решения: priceUsd, liquidityUsd, volume24
+- Cupsey: CANDIDATE → READY (12 мин назад) — Opportunity Score 67.3/100, Risk 0.9/100, confidence 100%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- LINK: CANDIDATE → WATCH (14 мин назад) — Opportunity Score 44.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- LINK: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 51.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- TEN: READY → CANDIDATE (25 мин назад) — Opportunity Score 59.9/100, Risk 12.9/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- PAID: CANDIDATE → WATCH (28 мин назад) — Opportunity Score 42.5/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- LINK: CANDIDATE → WATCH (29 мин назад) — Opportunity Score 44.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- LINK: WATCH → CANDIDATE (33 мин назад) — Opportunity Score 51.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- XERA: CANDIDATE → READY (38 мин назад) — Opportunity Score 71.2/100, Risk 0.3/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- Cupsey: READY → CANDIDATE (41 мин назад) — Opportunity Score 60.0/100, Risk 6.9/100, confidence 100%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- TEN: AVOID → READY (45 мин назад) — Opportunity Score 75.7/100, Risk 6.9/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- LINK: CANDIDATE → WATCH (52 мин назад) — Opportunity Score 44.4/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
 
 ## Позиции
 - Открытых: 28; всего: 1194; realized P&L: $7845.94
@@ -115,7 +115,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 175 шт на $-8750.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 395 шт на $890.37 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: ROTTEN/base (4 мин назад)
+- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: ROTTEN/base (5 мин назад)
   · адреса первых пяти для проверки у источника: base/0xa245f517bf0f2d992516398d49e3f1787fb1bb90
 
 ## Последние позиции (детально)
@@ -145,22 +145,22 @@
     · 03:28:17 [OPEN] Paper вход по правилу низкой ликвидности: 1950425.39 шт по $0.0000255457 (комиссии $0.17, impact 0.39%)
 
 ## Последний backtest
-- DONE (8.0 ч назад): NO EDGE: expectancy -5.2% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (0 мин назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3519946 / err 2850, последний успех 0 мин назад)
+- dexscreener: ok (ok 3519994 / err 2850, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 42.5 дн назад)
-- geckoterminal:arbitrum: ok (ok 32271 / err 28613, последний успех 2 мин назад)
-- geckoterminal:base: ok (ok 60837 / err 68, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 56341 / err 4558, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 44639 / err 16254, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 30656 / err 30205, последний успех 9 мин назад)
-- geckoterminal:solana: ok (ok 60895 / err 10, последний успех 0 мин назад)
-- goplus: ok (ok 112918 / err 57, последний успех 1 мин назад)
-- jupiter: ok (ok 555472 / err 1047, последний успех 1 мин назад)
+- geckoterminal:arbitrum: ok (ok 32273 / err 28613, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 60838 / err 68, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 56343 / err 4558, последний успех 0 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 44639 / err 16256, последний успех 2 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 30656 / err 30207, последний успех 10 мин назад)
+- geckoterminal:solana: ok (ok 60896 / err 10, последний успех 1 мин назад)
+- goplus: ok (ok 112919 / err 57, последний успех 1 мин назад)
+- jupiter: ok (ok 555475 / err 1047, последний успех 1 мин назад)
 - rpc:arbitrum: ok (ok 248 / err 1, последний успех 16.0 дн назад)
-- rpc:base: ok (ok 190393 / err 32685, последний успех 0 мин назад)
+- rpc:base: ok (ok 190427 / err 32687, последний успех 0 мин назад)
 - rpc:bsc: ok (ok 12326 / err 2, последний успех 6.5 дн назад)
 - rpc:ethereum: ok (ok 18956 / err 733, последний успех 1.4 дн назад)
-- rugcheck: ok (ok 134642 / err 402, последний успех 2 мин назад)
+- rugcheck: ok (ok 134642 / err 402, последний успех 4 мин назад)
 
