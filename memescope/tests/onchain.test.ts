@@ -151,6 +151,12 @@ async function load() {
   return (await import("../src/lib/providers/onchain")).readPoolState;
 }
 
+async function loadBoth() {
+  vi.resetModules();
+  const m = await import("../src/lib/providers/onchain");
+  return { read: m.readPoolState, failure: m.poolReadFailure };
+}
+
 describe("readPoolState", () => {
   it("V2: цена как отношение резервов, разные decimals у сторон", async () => {
     const token = "0x1111111111111111111111111111111111111111";
@@ -419,6 +425,36 @@ describe("readPoolState", () => {
     const r = await read("base", poolId, token, new Date(Date.now() - 3600_000));
     expect(r?.kind).toBe("v4");
     expect(r?.priceUsd).toBeCloseTo(4, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("причина отказа записывается и стирается после успеха", async () => {
+    const token = "0xaaaa000000000000000000000000000000000006";
+    const poolId = "0x" + "af".repeat(32);
+    // Сначала пул, состав которого восстановить неоткуда: ни прямого ключа,
+    // ни события в журнале. Отчёт должен уметь сказать, ПОЧЕМУ не прочитали,
+    // иначе каждый такой случай приходится разбирать вручную.
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4Registered: false,
+      // v4 не задан — журнал пуст.
+    });
+    const first = await loadBoth();
+    expect(await first.read("base", poolId, token, new Date())).toBeNull();
+    expect(first.failure("base", poolId)).toContain("состав пула неизвестен");
+    vi.unstubAllGlobals();
+
+    // Теперь тот же пул читается — прошлая причина не должна остаться.
+    stubRpc({
+      token0: token, token1: USDC_BASE, dec0: 18, dec1: 18,
+      sqrtPriceX96: 2n * 2n ** 96n,
+      v4: { liquidity: 500n * 10n ** 18n },
+      v4Registered: true,
+    });
+    const second = await loadBoth();
+    expect((await second.read("base", poolId, token, new Date()))?.kind).toBe("v4");
+    expect(second.failure("base", poolId)).toBeNull();
     vi.unstubAllGlobals();
   });
 

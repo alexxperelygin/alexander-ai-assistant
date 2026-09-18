@@ -458,6 +458,25 @@ async function quoteUsd(chain: string, quote: string): Promise<number | null> {
 }
 
 /**
+ * Почему последнее чтение пула не удалось. Ключ — `сеть:пара`.
+ *
+ * Одного «не читается» в отчёте недостаточно: 18 сентября пришлось руками
+ * опрашивать узел, чтобы выяснить, что часть пулов base — это V4 вне
+ * PositionManager, а один вообще не V4. Причину надо записывать в момент
+ * отказа, иначе каждый такой вопрос снова решается догадками.
+ *
+ * Map, а не поле результата: причина нужна только для отчёта и диагностики,
+ * а протаскивать её через десяток точек выхода значило бы менять контракт
+ * функции ради побочной надобности.
+ */
+const lastFailure = new Map<string, string>();
+
+/** Причина последнего неудачного чтения пула, если оно было. */
+export function poolReadFailure(chain: string, pair: string): string | null {
+  return lastFailure.get(`${chain}:${pair.toLowerCase()}`) ?? null;
+}
+
+/**
  * Цена и глубина пула по его собственному состоянию.
  * null означает «прочитать не удалось» — вызывающий обязан отличать это от нуля.
  */
@@ -468,33 +487,38 @@ export async function readPoolState(
   /** Время создания пары: наводит поиск события Initialize у пулов V4. */
   pairCreatedAt?: Date | null,
 ): Promise<PoolState | null> {
+  const key = `${chain}:${pairAddress.toLowerCase()}`;
+  // Прошлая причина стирается на входе: иначе успешное чтение оставляло бы
+  // в отчёте объяснение отказа, которого больше нет.
+  lastFailure.delete(key);
+  const fail = (why: string): null => { lastFailure.set(key, why); return null; };
   const cfg = chainConfig(chain);
-  if (!cfg?.rpcUrl) return null;
+  if (!cfg?.rpcUrl) return fail("для сети не задан узел");
 
   const meta = await poolMeta(chain, pairAddress, pairCreatedAt);
-  if (!meta) return null;
+  if (!meta) return fail("состав пула неизвестен: прямой ключ пуст и событие Initialize не найдено");
 
   const token = tokenAddress.toLowerCase();
-  if (token !== meta.token0 && token !== meta.token1) return null;
+  if (token !== meta.token0 && token !== meta.token1) return fail("токена нет в этом пуле");
   const tokenIsZero = token === meta.token0;
   const quote = tokenIsZero ? meta.token1 : meta.token0;
   const decToken = tokenIsZero ? meta.dec0 : meta.dec1;
   const decQuote = tokenIsZero ? meta.dec1 : meta.dec0;
 
   const qUsd = await quoteUsd(chain, quote);
-  if (qUsd == null) return null;
+  if (qUsd == null) return fail("вторая сторона пары не котируется");
 
   if (meta.kind === "v2") {
     const raw = await ethCall(chain, pairAddress, SIG.getReserves);
-    if (!raw) return null;
+    if (!raw) return fail("getReserves не ответил");
     const r0 = wordToBigInt(raw, 0);
     const r1 = wordToBigInt(raw, 1);
-    if (r0 == null || r1 == null) return null;
+    if (r0 == null || r1 == null) return fail("резервы пула не разобраны");
     const resToken = scaled(tokenIsZero ? r0 : r1, decToken);
     const resQuote = scaled(tokenIsZero ? r1 : r0, decQuote);
-    if (resToken <= 0 || resQuote <= 0) return null;
+    if (resToken <= 0 || resQuote <= 0) return fail("пул пуст: нулевые резервы");
     const priceUsd = (resQuote / resToken) * qUsd;
-    if (!Number.isFinite(priceUsd) || priceUsd <= 0) return null;
+    if (!Number.isFinite(priceUsd) || priceUsd <= 0) return fail("цена по резервам вышла невалидной");
     // Обе стороны пула по построению равны по стоимости, поэтому глубина —
     // удвоенная сторона котировки. Так же считает и котировочный источник,
     // иначе числа перестали бы сравниваться между собой.
@@ -506,24 +530,24 @@ export async function readPoolState(
   // кого спрашивать: у V4 своего контракта нет, состояние лежит в общем
   // хранилище и запрашивается по poolId.
   const v4 = meta.kind === "v4" ? cfg.v4 : null;
-  if (meta.kind === "v4" && !v4) return null;
+  if (meta.kind === "v4" && !v4) return fail("сеть не настроена под V4");
   const poolArg = pairAddress.toLowerCase().replace("0x", "").padStart(64, "0");
   const raw = v4
     ? await ethCall(chain, v4.stateView, SIG.v4Slot0 + poolArg)
     : await ethCall(chain, pairAddress, SIG.slot0);
   const sqrtX96 = raw ? wordToBigInt(raw, 0) : null;
-  if (sqrtX96 == null || sqrtX96 === 0n) return null;
+  if (sqrtX96 == null || sqrtX96 === 0n) return fail("slot0 не ответил или пул не инициализирован");
   // (sqrt/2^96)^2 = цена token0, выраженная в token1, в их «сырых» единицах.
   // Возводим в квадрат УЖЕ отношение: sqrtX96 доходит до 2^160, и квадрат
   // такого числа теряет значащие разряды раньше, чем само отношение.
   const Q96 = 2n ** 96n;
   const ratio = scaled(sqrtX96, 0) / scaled(Q96, 0);
   const price0in1raw = ratio * ratio;
-  if (!Number.isFinite(price0in1raw) || price0in1raw <= 0) return null;
+  if (!Number.isFinite(price0in1raw) || price0in1raw <= 0) return fail("квадрат sqrtPriceX96 вышел невалидным");
   const price0in1 = price0in1raw * 10 ** (meta.dec0 - meta.dec1);
   const priceInQuote = tokenIsZero ? price0in1 : 1 / price0in1;
   const priceUsd = priceInQuote * qUsd;
-  if (!Number.isFinite(priceUsd) || priceUsd <= 0) return null;
+  if (!Number.isFinite(priceUsd) || priceUsd <= 0) return fail("цена по тику вышла невалидной");
 
   if (v4) {
     // У пула V4 нет своего адреса, поэтому остатки на нём не спросишь: средства
