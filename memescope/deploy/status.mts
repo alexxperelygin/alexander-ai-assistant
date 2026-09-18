@@ -348,8 +348,20 @@ lines.push(`- Открытых: ${open.length}; всего: ${positions.length};
           .sort((a, b) => (b.closedAt?.getTime() ?? 0) - (a.closedAt?.getTime() ?? 0))
           .slice(0, 3);
         for (const st of latestShaky) {
+          // Причина отказа пишется монитором в событие ALERT позиции. Без неё
+          // «не читается» приходилось разбирать вручную, опрашивая узел по
+          // каждому пулу: 18 сентября так выяснилось, что за одной пометкой
+          // стоят три разных случая — пул V4 вне PositionManager, пул V4 в нём
+          // и вовсе не V4. Достаём причину сюда, где её читают.
+          const alert = await prisma.positionEvent.findFirst({
+            where: { positionId: st.id, kind: "ALERT", message: { contains: "Причина:" } },
+            orderBy: { createdAt: "desc" },
+            select: { message: true },
+          });
+          const why = alert?.message.split("Причина:")[1]?.trim().replace(/\.$/, "");
           lines.push(
-            `    не читается: ${st.token.symbol}/${st.token.chain} pair ${st.token.pairAddress ?? "адреса нет"}`,
+            `    не читается: ${st.token.symbol}/${st.token.chain} pair ${st.token.pairAddress ?? "адреса нет"}` +
+            (why ? ` — ${why}` : ""),
           );
         }
       }
