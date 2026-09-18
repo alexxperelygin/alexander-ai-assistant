@@ -1,7 +1,7 @@
 import { prisma } from "../db";
 import { getProviders } from "../providers";
 import { marketKey } from "../providers/types";
-import { readPoolState } from "../providers/onchain";
+import { poolReadFailure, readPoolState } from "../providers/onchain";
 import { notify } from "../notify/notifier";
 import { sellPosition, type SellArgs } from "../paper/portfolio";
 import { FROZEN_EXIT, VENTURE_EXIT, FREEZE_AT } from "../paper/exit-policy";
@@ -56,7 +56,7 @@ async function lastUsableSnapshot(tokenId: string) {
 }
 
 /** Отмечает работу на запасном источнике — не чаще раза в час, для диагностики. */
-async function noteFallback(positionId: string, at: Date, stale: boolean): Promise<void> {
+async function noteFallback(positionId: string, at: Date, stale: boolean, why: string | null): Promise<void> {
   const last = await prisma.positionEvent.findFirst({
     where: { positionId, kind: "ALERT" },
     orderBy: { createdAt: "desc" },
@@ -65,9 +65,12 @@ async function noteFallback(positionId: string, at: Date, stale: boolean): Promi
   await prisma.positionEvent.create({
     data: {
       positionId, kind: "ALERT",
-      message: stale
+      // Причина отказа пишется рядом: без неё «не читается» приходилось
+      // разбирать вручную, опрашивая узел по каждому пулу.
+      message: (stale
         ? `Прямой запрос цены не отвечает, снапшот сканера устарел (${at.toISOString()}): проверяются только стоп и обвал ликвидности, трейлинг — нет.`
-        : `Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от ${at.toISOString()}.`,
+        : `Прямой запрос цены не отвечает; стоп и трейлинг считаются по снапшоту сканера от ${at.toISOString()}.`)
+        + (why ? ` Причина: ${why}.` : ""),
     },
   });
 }
@@ -366,7 +369,12 @@ export async function monitorPositionsOnce(): Promise<void> {
           price = fallback.snap.priceUsd as number;
           liq = fallback.snap.liquidityUsd;
           stalePrice = fallback.stale;
-          await noteFallback(pos.id, fallback.snap.fetchedAt, fallback.stale);
+          await noteFallback(
+            pos.id,
+            fallback.snap.fetchedAt,
+            fallback.stale,
+            pos.token.pairAddress ? poolReadFailure(pos.token.chain, pos.token.pairAddress) : "у токена не записан адрес пары",
+          );
         }
       }
 
