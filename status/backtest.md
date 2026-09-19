@@ -1,18 +1,18 @@
-# Backtest (2026-09-19T00:38:20Z)
+# Backtest (2026-09-19T08:40:52Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
 Status: DONE
-NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+NO EDGE: expectancy -4.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
     "signals": 396,
     "horizon": "24h",
-    "evaluable": 239,
-    "winRate": 0.36401673640167365,
-    "expectancy": -0.04462315633555336,
-    "medianReturn": -0.02247567835401232,
-    "profitFactor": 0.5512925696319214,
+    "evaluable": 240,
+    "winRate": 0.36666666666666664,
+    "expectancy": -0.04257031711372695,
+    "medianReturn": -0.022256479515558147,
+    "profitFactor": 0.5701437938630778,
     "maxDrawdown": 1.0000017674860007,
     "rugRate": 0.0625,
     "rugMeasurable": 368,
@@ -23,8 +23,8 @@ NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в �
         "meanReturn": -0.03999731969196851
       },
       "2026-09": {
-        "n": 114,
-        "meanReturn": -0.04969534563772964
+        "n": 115,
+        "meanReturn": -0.045367053441725175
       }
     }
   },
@@ -47,7 +47,7 @@ NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в �
       }
     }
   },
-  "verdict": "NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
+  "verdict": "NO EDGE: expectancy -4.3% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают."
 }
 exit=0
 
@@ -104,4 +104,4 @@ NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 9 с при лимите 600 с; код ssh 0._
+_Расчёт занял 10 с при лимите 600 с; код ssh 0._
