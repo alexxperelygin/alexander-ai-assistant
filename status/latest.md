@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-19T20:38:38.488Z (UTC)
+Сгенерирован: 2026-09-19T20:39:40.550Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1579184; снапшотов за 24ч: 36124
+- Токенов в базе: 1579184; снапшотов за 24ч: 36133
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 76 МБ, перезапусков 0
-- memescope-worker:  online, память 75 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 341 мс, порт 3000)
+- memescope-web:  online, память 69 МБ, перезапусков 0
+- memescope-worker:  online, память 69 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 357 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,9 +16,9 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20684
-- robinhood: 8595
-- bsc: 3007
+- solana: 20665
+- robinhood: 8584
+- bsc: 3005
 - base: 1638
 - ethereum: 200
 - arbitrum: 7
@@ -48,12 +48,12 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- INX: CANDIDATE → WATCH (27 мин назад) — Opportunity Score 44.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- INX: WATCH → CANDIDATE (32 мин назад) — Opportunity Score 51.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- XDNA: CANDIDATE → WATCH (41 мин назад) — Opportunity Score 44.8/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- INX: CANDIDATE → WATCH (48 мин назад) — Opportunity Score 44.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- INX: WATCH → CANDIDATE (49 мин назад) — Opportunity Score 50.1/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- INX: CANDIDATE → WATCH (56 мин назад) — Opportunity Score 42.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- INX: CANDIDATE → WATCH (28 мин назад) — Opportunity Score 44.5/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- INX: WATCH → CANDIDATE (33 мин назад) — Opportunity Score 51.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- XDNA: CANDIDATE → WATCH (42 мин назад) — Opportunity Score 44.8/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- INX: CANDIDATE → WATCH (49 мин назад) — Opportunity Score 44.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- INX: WATCH → CANDIDATE (50 мин назад) — Opportunity Score 50.1/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- INX: CANDIDATE → WATCH (57 мин назад) — Opportunity Score 42.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
 - GCTABLE: WATCH → AVOID (1.2 ч назад) — [liquidity-draining] Ликвидность упала на 8.9% с прошлого наблюдения (порог 5%) — из пула выводят средства.
 - GCTABLE: AVOID → WATCH (1.3 ч назад) — Opportunity Score 40.6/100, Risk 16.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
 - INX: WATCH → CANDIDATE (1.4 ч назад) — Opportunity Score 50.0/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
@@ -146,18 +146,18 @@
 - DONE (4.0 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3650111 / err 2891, последний успех 0 мин назад)
+- dexscreener: ok (ok 3650141 / err 2891, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 44.6 дн назад)
-- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 33682 / err 30318, последний успех 13 мин назад)
-- geckoterminal:base: ok (ok 63936 / err 84, последний успех 1 мин назад)
-- geckoterminal:bsc: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/bsc/new_pools?page=1 (ok 58980 / err 5035, последний успех 14 мин назад)
-- geckoterminal:eth: ok (ok 46871 / err 17138, последний успех 0 мин назад)
-- geckoterminal:robinhood: ok (ok 32532 / err 31445, последний успех 0 мин назад)
-- geckoterminal:solana: ok (ok 64005 / err 15, последний успех 1 мин назад)
-- goplus: ok (ok 119074 / err 64, последний успех 1 мин назад)
-- jupiter: ok (ok 560905 / err 1047, последний успех 22.8 ч назад)
-- rpc:arbitrum: ok (ok 824 / err 1, последний успех 3.6 ч назад)
-- rpc:base: ok (ok 219400 / err 32808, последний успех 0 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 33682 / err 30318, последний успех 14 мин назад)
+- geckoterminal:base: ok (ok 63938 / err 84, последний успех 0 мин назад)
+- geckoterminal:bsc: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/bsc/new_pools?page=1 (ok 58980 / err 5035, последний успех 15 мин назад)
+- geckoterminal:eth: ok (ok 46871 / err 17138, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 32532 / err 31445, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 64007 / err 15, последний успех 0 мин назад)
+- goplus: ok (ok 119074 / err 64, последний успех 2 мин назад)
+- jupiter: ok (ok 560905 / err 1047, последний успех 22.9 ч назад)
+- rpc:arbitrum: ok (ok 824 / err 1, последний успех 3.7 ч назад)
+- rpc:base: ok (ok 219411 / err 32808, последний успех 0 мин назад)
 - rpc:bsc: ok (ok 12575 / err 2, последний успех 1.3 дн назад)
 - rpc:ethereum: ok (ok 19682 / err 733, последний успех 10.6 ч назад)
 - rugcheck: ok (ok 134817 / err 402, последний успех 22.9 ч назад)
