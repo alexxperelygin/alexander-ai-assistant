@@ -1,4 +1,5 @@
 import { config } from "../lib/config";
+import { describeError } from "../lib/describe-error";
 import { prisma } from "../lib/db";
 import { scanOnce } from "../lib/ingestion/scanner";
 import { applySettingsMigrations } from "../lib/settings";
@@ -46,13 +47,13 @@ async function loop(name: string, intervalSec: number, fn: () => Promise<void>):
         // best-effort audit write with a hard exit either way.
         setTimeout(() => process.exit(1), 3000).unref();
         prisma.auditLog
-          .create({ data: { actor: "worker", action: `${name}.cycle.error`, details: String(err) } })
+          .create({ data: { actor: "worker", action: `${name}.cycle.error`, details: describeError(err) } })
           .catch(() => {})
           .finally(() => process.exit(1));
         return;
       }
       await prisma.auditLog.create({
-        data: { actor: "worker", action: `${name}.cycle.error`, details: String(err) },
+        data: { actor: "worker", action: `${name}.cycle.error`, details: describeError(err) },
       }).catch(() => {});
     }
     const elapsed = Date.now() - started;
