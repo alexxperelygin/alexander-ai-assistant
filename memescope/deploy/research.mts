@@ -18,6 +18,7 @@
 //    исходом. Высокий coverage у правила при низком у базы = результат
 //    правила завышен выживаемостью, а не предсказанием.
 import { prisma } from "../src/lib/db";
+import { LOTTERY_ENTRY } from "../src/lib/strategy/validated-entry";
 import { simulateFill } from "../src/lib/paper/execution";
 import { FREEZE_AT, FROZEN_EXIT, VENTURE_EXIT, VENTURE_FREEZE_AT } from "../src/lib/paper/exit-policy";
 
@@ -1701,6 +1702,126 @@ const baseXs = withMain.map((o) => o.ret[MAIN_H] as number);
     log(`результаты напрямую бессмысленно.`);
     log();
   }
+}
+
+// ── Пре-регистрация низкой ликвидности: четыре замороженных критерия ────────
+//
+// Написано ДО того, как трек добрал 300 измеренных сделок: на момент этого
+// коммита их 288. Так и должно быть — код проверки, написанный после того,
+// как результат известен, проверяет не гипотезу, а память автора.
+//
+// Кандидат берётся из НАСТОЯЩИХ бумажных сделок трека, а не из симуляции:
+// именно их считает счётчик «измерено N из 300», и именно к ним относится
+// первый критерий. Контроль симулируется по снимкам — иначе контрольной
+// группы просто не существует.
+//
+// Асимметрия названа прямо: у кандидата исполнение живое (лесенка монитора,
+// реальные отказы чтения цены), у контроля — модельное. Она может работать в
+// обе стороны, и вывод о её направлении делать не из чего. Поэтому рядом
+// печатается полностью симулированный кандидат: если он расходится с живым,
+// значит ответ зависит от способа измерения, и это надо будет сказать вслух.
+{
+  log(`## 4j. Низкая ликвидность: docs/PREREGISTRATION_LOWLIQ.md`);
+  log();
+
+  const TAIL_LOW = 1.0; // рост больше +100%
+  const MIN_LOW_TRADES = 300;
+  const LOTTERY_FROZE = new Date("2026-08-17T00:00:00Z");
+
+  const positions = await prisma.position.findMany({
+    where: {
+      entryRule: "low-liquidity-lottery",
+      status: { in: ["CLOSED", "STOPPED"] },
+      closedAt: { not: null },
+      openedAt: { gte: LOTTERY_FROZE },
+    },
+    include: { token: true },
+  });
+  // «Измеримый исход» — ровно то, что считает отчёт: выход прочитан, а не
+  // взят по устаревшей цене. Иначе в статистику попадает допущение.
+  const measured = positions.filter((p) => !p.closeReason?.includes("НЕДОСТОВЕРЕН") && p.costUsd > 0);
+  const rets = measured.map((p) => p.realizedPnlUsd / p.costUsd);
+
+  const ctrlEntries = collectExitEntries({
+    minLiquidityUsd: LOTTERY_ENTRY.minLiquidityUsd,
+    maxLiquidityUsd: LOTTERY_ENTRY.maxLiquidityUsd,
+  }).entries.filter((e) => (e.series[e.i] as Snap).fetchedAt.getTime() >= LOTTERY_FROZE.getTime());
+  const ctrlRets = ctrlEntries
+    .map((e) => simulateLiveLadder(e.series, e.i))
+    .filter((r): r is number => r != null);
+  // Тот же отбор, но кандидат симулирован: проверка на то, не решает ли ответ
+  // сам способ измерения.
+  const simRets = collectExitEntries({
+    minLiquidityUsd: LOTTERY_ENTRY.minLiquidityUsd,
+    maxLiquidityUsd: LOTTERY_ENTRY.maxLiquidityUsd,
+  }).entries
+    .filter((e) => (e.series[e.i] as Snap).fetchedAt.getTime() >= LOTTERY_FROZE.getTime())
+    .map((e) => simulateLiveLadder(e.series, e.i))
+    .filter((r): r is number => r != null);
+
+  const tailRateLow = (xs: number[]) => (xs.length ? xs.filter((r) => r > TAIL_LOW).length / xs.length : null);
+  const tRate = tailRateLow(rets), cRate = tailRateLow(ctrlRets);
+
+  let lowRatioLow: number | null = null;
+  if (rets.length >= 20 && ctrlRets.length >= 20 && cRate) {
+    let seed = 170820261;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+    const ratios: number[] = [];
+    for (let k = 0; k < 2000; k++) {
+      const a = tailRateLow(Array.from({ length: rets.length }, () => rets[Math.floor(rnd() * rets.length)] as number));
+      const b = tailRateLow(Array.from({ length: ctrlRets.length }, () => ctrlRets[Math.floor(rnd() * ctrlRets.length)] as number));
+      if (a != null && b != null && b > 0) ratios.push(a / b);
+    }
+    ratios.sort((a, b) => a - b);
+    lowRatioLow = ratios.length ? quantile(ratios, 0.025) : null;
+  }
+
+  const tailPos = measured.filter((p) => p.realizedPnlUsd / p.costUsd > TAIL_LOW);
+  const tailDaysLow = new Set(tailPos.map((p) => (p.closedAt as Date).toISOString().slice(0, 10)));
+  const tailChainsLow = new Set(tailPos.map((p) => p.token.chain));
+  const meanLow = mean(rets);
+
+  log(`Сделок с измеримым исходом: **${rets.length}** из ${positions.length} закрытых. ` +
+      `Контроль (вход в любой токен $${LOTTERY_ENTRY.minLiquidityUsd / 1000}–$${LOTTERY_ENTRY.maxLiquidityUsd / 1000}k): ${ctrlRets.length}.`);
+  log();
+
+  const lowChecks: { name: string; ok: boolean | null; detail: string }[] = [
+    {
+      name: `Объём ≥ ${MIN_LOW_TRADES} измеримых сделок`,
+      // Порог ещё не набран — это не провал, а «рано». Печатать NO EDGE на
+      // недобранной выборке значило бы выдать отсутствие данных за результат.
+      ok: rets.length >= MIN_LOW_TRADES ? true : null,
+      detail: `${rets.length}`,
+    },
+    { name: "Среднее по всем сделкам > 0 после издержек", ok: meanLow == null ? null : meanLow > 0, detail: pct(meanLow) },
+    {
+      name: "Частота хвостов (>+100%) выше контроля, нижняя граница > 1.0",
+      ok: lowRatioLow == null ? null : lowRatioLow > 1,
+      detail: `${pct(tRate, 2)} против ${pct(cRate, 2)}${lowRatioLow == null ? "" : `, нижняя граница ×${lowRatioLow.toFixed(2)}`}`,
+    },
+    {
+      name: "Хвосты из ≥5 разных суток и ≥2 разных сетей",
+      ok: tailPos.length === 0 ? null : tailDaysLow.size >= 5 && tailChainsLow.size >= 2,
+      detail: `${tailPos.length} хвостов, ${tailDaysLow.size} сут, ${tailChainsLow.size} сет.`,
+    },
+  ];
+  for (const c of lowChecks) log(`- ${c.ok == null ? "…" : c.ok ? "✅" : "❌"} ${c.name}: ${c.detail}`);
+  log();
+  log(`Симулированный кандидат того же отбора: среднее ${pct(mean(simRets))}, ` +
+      `хвостов ${pct(tailRateLow(simRets), 2)} (n=${simRets.length}). ` +
+      `Заметное расхождение с живыми сделками означало бы, что ответ определяет способ измерения, а не гипотеза.`);
+  log();
+  if (lowChecks.some((c) => c.ok === false)) {
+    log(`**NO EDGE для низкой ликвидности.** Провален хотя бы один замороженный критерий. ` +
+        `Критерии заморожены до расчёта, подбирать другой срез нельзя.`);
+  } else if (lowChecks.every((c) => c.ok === true)) {
+    log(`Все четыре критерия выполнены. Это означает ровно одно: на измеренном периоде ` +
+        `отбор давал хвосты чаще контроля при положительном среднем. Не обещание доходности; ` +
+        `\`liveTradingEnabled\` остаётся выключенным.`);
+  } else {
+    log(`Проверка не завершена: часть критериев ещё нельзя посчитать (см. «…» выше).`);
+  }
+  log();
 }
 
 log(`## 5. Итог`);
