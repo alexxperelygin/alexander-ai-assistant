@@ -1,17 +1,17 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-20T20:43:09.259Z (UTC)
+Сгенерирован: 2026-09-20T20:45:59.025Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1609037; снапшотов за 24ч: 38589
+- Токенов в базе: 1609104; снапшотов за 24ч: 38579
 - Ошибок в audit log за 24ч: 3
   · scan.token.error (4.0 ч назад): {"mint":"0x0fa5f0c9937d7b667bb63d34f7d7b7f82d96f87e","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
   · monitor.cycle.error (4.0 ч назад): PrismaClientKnownRequestError: Invalid `prisma.position.findMany()` invocation in /opt/alexander-ai-assistant/memescope/src/lib/monitor/positions.ts:290:38 287 
   · scan.token.error (4.0 ч назад): {"mint":"0x3e2c25bb0c9bc624f8e789fdf2227dbcd43fe1c8","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
 - memescope-web:  online, память 69 МБ, перезапусков 0
 - memescope-worker:  online, память 69 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 332 мс, порт 3000)
+- дашборд: ✅ отвечает (HTTP 200, 317 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -19,31 +19,31 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20246
-- robinhood: 4217
-- bsc: 3347
-- base: 1707
-- ethereum: 204
+- solana: 20249
+- robinhood: 4226
+- bsc: 3343
+- base: 1714
+- ethereum: 202
 - arbitrum: 6
 
 ## Статусы возможностей
-- AVOID: 153208
+- AVOID: 153207
 - DATA_UNAVAILABLE: 44695
 - WATCH: 43
-- CANDIDATE: 19
+- CANDIDATE: 20
 - READY: 4
 
 ## Топ-5 по score (не отбракованные)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 30.4 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 45.8 дн назад)
+- 蝴蝶之王: READY, score 65.2, risk 0.7, conf 88% (обновлено 2 мин назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 14.2 дн назад)
-- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 46.3 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 48.6 дн назад)
+- GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 46.4 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- 蝴蝶之王 — 2026-09-20T20:15:26.724Z (28 мин назад)
-- FWA — 2026-09-20T19:52:33.655Z (51 мин назад)
-- FWA — 2026-09-20T19:16:36.127Z (1.4 ч назад)
+- 蝴蝶之王 — 2026-09-20T20:15:26.724Z (31 мин назад)
+- FWA — 2026-09-20T19:52:33.655Z (53 мин назад)
+- FWA — 2026-09-20T19:16:36.127Z (1.5 ч назад)
 - 蝴蝶之王 — 2026-09-20T19:09:30.664Z (1.6 ч назад)
 - 蝴蝶之王 — 2026-09-20T17:38:33.190Z (3.1 ч назад)
 
@@ -51,18 +51,18 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- Olympus: WATCH → AVOID (6 мин назад) — [liquidity-draining] Ликвидность упала на 9.4% с прошлого наблюдения (порог 5%) — из пула выводят средства. | [suspected-wash-trad
-- Olympus: AVOID → WATCH (7 мин назад) — Opportunity Score 42.5/100, Risk 24.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- MELANIA: AVOID → WATCH (19 мин назад) — Opportunity Score 33.8/100, Risk 24.5/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
-- 蝴蝶之王: CANDIDATE → READY (28 мин назад) — Opportunity Score 65.4/100, Risk 0.7/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- FWA: READY → CANDIDATE (49 мин назад) — Opportunity Score 58.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- JEANPHIL: AVOID → WATCH (49 мин назад) — Opportunity Score 44.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- FWA: CANDIDATE → READY (51 мин назад) — Opportunity Score 65.2/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- Olympus: WATCH → AVOID (58 мин назад) — [liquidity-draining] Ликвидность упала на 23.3% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- Olympus: AVOID → WATCH (59 мин назад) — Opportunity Score 48.7/100, Risk 21.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- WSOS: WATCH → CANDIDATE (1.2 ч назад) — Opportunity Score 52.4/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- AFTERHOURS: AVOID → WATCH (1.2 ч назад) — Opportunity Score 28.9/100, Risk 17.0/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- FWA: READY → CANDIDATE (1.4 ч назад) — Opportunity Score 59.6/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- FOMO: WATCH → CANDIDATE (1 мин назад) — Opportunity Score 50.3/100, Risk 18.5/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- FOMO: AVOID → WATCH (2 мин назад) — Opportunity Score 50.0/100, Risk 18.5/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- Olympus: WATCH → AVOID (9 мин назад) — [liquidity-draining] Ликвидность упала на 9.4% с прошлого наблюдения (порог 5%) — из пула выводят средства. | [suspected-wash-trad
+- Olympus: AVOID → WATCH (10 мин назад) — Opportunity Score 42.5/100, Risk 24.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- MELANIA: AVOID → WATCH (22 мин назад) — Opportunity Score 33.8/100, Risk 24.5/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
+- 蝴蝶之王: CANDIDATE → READY (31 мин назад) — Opportunity Score 65.4/100, Risk 0.7/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- FWA: READY → CANDIDATE (52 мин назад) — Opportunity Score 58.3/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- JEANPHIL: AVOID → WATCH (52 мин назад) — Opportunity Score 44.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- FWA: CANDIDATE → READY (53 мин назад) — Opportunity Score 65.2/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- Olympus: WATCH → AVOID (1.0 ч назад) — [liquidity-draining] Ликвидность упала на 23.3% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- Olympus: AVOID → WATCH (1.0 ч назад) — Opportunity Score 48.7/100, Risk 21.2/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- WSOS: WATCH → CANDIDATE (1.3 ч назад) — Opportunity Score 52.4/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
 
 ## Позиции
 - Открытых: 38; всего: 1293; realized P&L: $9581.93
@@ -118,7 +118,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 191 шт на $-9550.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 410 шт на $873.92 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: THANOS/robinhood (4 мин назад)
+- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: THANOS/robinhood (6 мин назад)
   · адреса первых пяти для проверки у источника: robinhood/0xa87e42ac244ad1b72e2deda0e6761173a366fcd0
 
 ## Последние позиции (детально)
@@ -150,19 +150,19 @@
 - DONE (4.1 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3712509 / err 2891, последний успех 0 мин назад)
+- dexscreener: ok (ok 3712596 / err 2891, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 45.6 дн назад)
-- geckoterminal:arbitrum: ok (ok 34719 / err 30723, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 65382 / err 84, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 60413 / err 5046, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 48221 / err 17231, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 33003 / err 32416, последний успех 3 мин назад)
-- geckoterminal:solana: ok (ok 65451 / err 15, последний успех 0 мин назад)
-- goplus: ok (ok 122199 / err 66, последний успех 1 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 34720 / err 30725, последний успех 3 мин назад)
+- geckoterminal:base: ok (ok 65385 / err 84, последний успех 0 мин назад)
+- geckoterminal:bsc: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/bsc/new_pools?page=1 (ok 60414 / err 5048, последний успех 3 мин назад)
+- geckoterminal:eth: ok (ok 48223 / err 17232, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 33004 / err 32417, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 65454 / err 15, последний успех 0 мин назад)
+- goplus: ok (ok 122204 / err 66, последний успех 1 мин назад)
 - jupiter: 🔴 HTTP 500 https://lite-api.jup.ag/swap/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn&amount=184463947&slippageBps=300 (ok 561035 / err 1048, последний успех 8.7 ч назад)
 - rpc:arbitrum: ok (ok 824 / err 1, последний успех 1.2 дн назад)
 - rpc:base: ok (ok 227394 / err 32948, последний успех 4.2 ч назад)
 - rpc:bsc: ok (ok 12575 / err 2, последний успех 2.3 дн назад)
-- rpc:ethereum: ok (ok 19931 / err 733, последний успех 10.6 ч назад)
+- rpc:ethereum: ok (ok 19931 / err 733, последний успех 10.7 ч назад)
 - rugcheck: ok (ok 134825 / err 402, последний успех 8.7 ч назад)
 
