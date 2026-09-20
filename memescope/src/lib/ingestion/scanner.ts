@@ -1,4 +1,5 @@
 import { prisma } from "../db";
+import { describeError } from "../describe-error";
 import { config, SOL_MINT } from "../config";
 import { chainConfig, DEFAULT_CHAIN } from "../chains";
 import { getProviders } from "../providers";
@@ -157,7 +158,7 @@ export async function scanOnce(now = new Date()): Promise<{ discovered: number; 
       evaluated++;
     } catch (err) {
       await prisma.auditLog.create({
-        data: { actor: "worker", action: "scan.token.error", details: JSON.stringify({ mint: token.mint, error: String(err) }) },
+        data: { actor: "worker", action: "scan.token.error", details: JSON.stringify({ mint: token.mint, error: describeError(err) }) },
       }).catch(() => {});
     }
   }
