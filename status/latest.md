@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-20T04:39:38.619Z (UTC)
+Сгенерирован: 2026-09-20T04:52:28.644Z (UTC)
 
 ## Ядро
-- Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1589143; снапшотов за 24ч: 36905
+- Worker: ✅ работает (последний цикл: 0 мин назад)
+- Токенов в базе: 1589349; снапшотов за 24ч: 36932
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 69 МБ, перезапусков 0
-- memescope-worker:  online, память 68 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 345 мс, порт 3000)
+- memescope-web:  online, память 68 МБ, перезапусков 0
+- memescope-worker:  online, память 67 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 257 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,11 +16,11 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20698
-- robinhood: 7997
-- bsc: 2959
-- base: 1777
-- ethereum: 201
+- solana: 20726
+- robinhood: 7951
+- bsc: 2964
+- base: 1775
+- ethereum: 203
 - arbitrum: 9
 
 ## Статусы возможностей
@@ -35,12 +35,12 @@
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 45.1 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 13.5 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 45.7 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 47.9 дн назад)
+- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 48.0 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- wildebeest — 2026-09-19T15:46:39.025Z (12.9 ч назад)
-- HEDGE — 2026-09-19T10:37:20.645Z (18.0 ч назад)
-- HEDGE — 2026-09-19T09:22:24.302Z (19.3 ч назад)
+- wildebeest — 2026-09-19T15:46:39.025Z (13.1 ч назад)
+- HEDGE — 2026-09-19T10:37:20.645Z (18.3 ч назад)
+- HEDGE — 2026-09-19T09:22:24.302Z (19.5 ч назад)
 - Cupsey — 2026-09-18T19:59:56.025Z (1.4 дн назад)
 - Cupsey — 2026-09-18T19:49:14.231Z (1.4 дн назад)
 
@@ -48,18 +48,18 @@
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- USFD: AVOID → WATCH (9 мин назад) — Opportunity Score 27.9/100, Risk 10.0/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
-- INX: CANDIDATE → WATCH (33 мин назад) — Opportunity Score 42.8/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- INX: WATCH → CANDIDATE (40 мин назад) — Opportunity Score 51.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- USFD: WATCH → AVOID (1.0 ч назад) — [liquidity-draining] Ликвидность упала на 5.8% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- 蝴蝶之王: AVOID → CANDIDATE (1.0 ч назад) — Opportunity Score 51.9/100, Risk 6.3/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- USFD: CANDIDATE → WATCH (1.8 ч назад) — Opportunity Score 44.8/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- 蝴蝶之王: CANDIDATE → AVOID (1.9 ч назад) — [liquidity-draining] Ликвидность упала на 5.8% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- memes: CANDIDATE → WATCH (3.2 ч назад) — Opportunity Score 42.7/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- memes: WATCH → CANDIDATE (3.3 ч назад) — Opportunity Score 50.4/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- VSFO: AVOID → WATCH (3.5 ч назад) — Opportunity Score 26.3/100, Risk 10.0/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
-- VSOF: AVOID → WATCH (3.5 ч назад) — Opportunity Score 26.8/100, Risk 10.1/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
-- 蝴蝶之王: AVOID → CANDIDATE (3.5 ч назад) — Opportunity Score 58.3/100, Risk 6.3/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- USFD: AVOID → WATCH (21 мин назад) — Opportunity Score 27.9/100, Risk 10.0/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
+- INX: CANDIDATE → WATCH (45 мин назад) — Opportunity Score 42.8/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- INX: WATCH → CANDIDATE (52 мин назад) — Opportunity Score 51.6/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- USFD: WATCH → AVOID (1.2 ч назад) — [liquidity-draining] Ликвидность упала на 5.8% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- 蝴蝶之王: AVOID → CANDIDATE (1.2 ч назад) — Opportunity Score 51.9/100, Risk 6.3/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- USFD: CANDIDATE → WATCH (2.0 ч назад) — Opportunity Score 44.8/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- 蝴蝶之王: CANDIDATE → AVOID (2.0 ч назад) — [liquidity-draining] Ликвидность упала на 5.8% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- memes: CANDIDATE → WATCH (3.5 ч назад) — Opportunity Score 42.7/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- memes: WATCH → CANDIDATE (3.5 ч назад) — Opportunity Score 50.4/100, Risk 10.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- VSFO: AVOID → WATCH (3.6 ч назад) — Opportunity Score 26.3/100, Risk 10.0/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
+- VSOF: AVOID → WATCH (3.7 ч назад) — Opportunity Score 26.8/100, Risk 10.1/100, confidence 88%. | Score ниже порога наблюдения — низкий приоритет.
+- 蝴蝶之王: AVOID → CANDIDATE (3.7 ч назад) — Opportunity Score 58.3/100, Risk 6.3/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
 
 ## Позиции
 - Открытых: 35; всего: 1267; realized P&L: $9948.40
@@ -111,7 +111,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 186 шт на $-9300.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 406 шт на $877.66 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: HOODCAT/robinhood (9 мин назад), ANAL OS/robinhood (9 мин назад)
+- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: HOODCAT/robinhood (6 мин назад), ANAL OS/robinhood (6 мин назад)
   · адреса первых пяти для проверки у источника: robinhood/0x4eed914c38fa91a2fb0e5faf140917412b22a0f2, robinhood/0x286b4b65d11f24fcf46fdd5404b7d5f9fc1601fc
 
 ## Последние позиции (детально)
@@ -140,22 +140,22 @@
     · 22:30:10 [OPEN] Paper вход по проверенному правилу: 43.57 шт по $1.14344 (комиссии $0.17, impact 0.00%)
 
 ## Последний backtest
-- DONE (4.0 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (4.2 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3670948 / err 2891, последний успех 0 мин назад)
+- dexscreener: ok (ok 3671509 / err 2891, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 45.0 дн назад)
-- geckoterminal:arbitrum: ok (ok 34010 / err 30470, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 64418 / err 84, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 59460 / err 5035, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 47350 / err 17139, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 32691 / err 31766, последний успех 2.1 ч назад)
-- geckoterminal:solana: ok (ok 64487 / err 15, последний успех 0 мин назад)
-- goplus: ok (ok 120144 / err 65, последний успех 2 мин назад)
+- geckoterminal:arbitrum: ok (ok 34023 / err 30470, последний успех 1 мин назад)
+- geckoterminal:base: ok (ok 64430 / err 84, последний успех 1 мин назад)
+- geckoterminal:bsc: ok (ok 59473 / err 5035, последний успех 1 мин назад)
+- geckoterminal:eth: ok (ok 47363 / err 17139, последний успех 1 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 32691 / err 31779, последний успех 2.4 ч назад)
+- geckoterminal:solana: ok (ok 64499 / err 15, последний успех 1 мин назад)
+- goplus: ok (ok 120173 / err 65, последний успех 0 мин назад)
 - jupiter: ok (ok 560905 / err 1047, последний успех 1.3 дн назад)
-- rpc:arbitrum: ok (ok 824 / err 1, последний успех 11.7 ч назад)
-- rpc:base: ok (ok 224093 / err 32946, последний успех 0 мин назад)
+- rpc:arbitrum: ok (ok 824 / err 1, последний успех 11.9 ч назад)
+- rpc:base: ok (ok 224143 / err 32946, последний успех 0 мин назад)
 - rpc:bsc: ok (ok 12575 / err 2, последний успех 1.6 дн назад)
-- rpc:ethereum: ok (ok 19682 / err 733, последний успех 18.6 ч назад)
-- rugcheck: ok (ok 134819 / err 402, последний успех 6.2 ч назад)
+- rpc:ethereum: ok (ok 19682 / err 733, последний успех 18.8 ч назад)
+- rugcheck: ok (ok 134819 / err 402, последний успех 6.4 ч назад)
 
