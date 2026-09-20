@@ -1,4 +1,4 @@
-# Backtest (2026-09-20T08:38:52Z)
+# Backtest (2026-09-20T16:38:48Z)
 
 ## Горизонт 24h
 Running backtest: horizon=24h, dataMode=live, position=$50
@@ -6,7 +6,7 @@ Status: DONE
 NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 399,
+    "signals": 401,
     "horizon": "24h",
     "evaluable": 241,
     "winRate": 0.3651452282157676,
@@ -14,9 +14,9 @@ NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в �
     "medianReturn": -0.02247567835401232,
     "profitFactor": 0.5549984900389224,
     "maxDrawdown": 1.0000017674860007,
-    "rugRate": 0.062162162162162166,
-    "rugMeasurable": 370,
-    "unclosablePct": 0.07518796992481203,
+    "rugRate": 0.06182795698924731,
+    "rugMeasurable": 372,
+    "unclosablePct": 0.07481296758104738,
     "byMonth": {
       "2026-08": {
         "n": 125,
@@ -51,7 +51,7 @@ NO EDGE: expectancy -4.5% ≤ 0 после издержек. Сигналы в �
 }
 exit=0
 
-_Расчёт занял 12 с при лимите 600 с; код ssh 0._
+_Расчёт занял 10 с при лимите 600 с; код ssh 0._
 
 ## Горизонт 6h
 Running backtest: horizon=6h, dataMode=live, position=$50
@@ -59,25 +59,25 @@ Status: DONE
 NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 {
   "strategy": {
-    "signals": 399,
+    "signals": 401,
     "horizon": "6h",
-    "evaluable": 327,
-    "winRate": 0.3241590214067278,
-    "expectancy": -0.050390921490393266,
-    "medianReturn": -0.016753882169638135,
-    "profitFactor": 0.4297589881404605,
+    "evaluable": 328,
+    "winRate": 0.32621951219512196,
+    "expectancy": -0.049921939993815674,
+    "medianReturn": -0.016627475603976205,
+    "profitFactor": 0.43333851770614085,
     "maxDrawdown": 1.0000000003832348,
-    "rugRate": 0.04336043360433604,
-    "rugMeasurable": 369,
-    "unclosablePct": 0.07518796992481203,
+    "rugRate": 0.0431266846361186,
+    "rugMeasurable": 371,
+    "unclosablePct": 0.07481296758104738,
     "byMonth": {
       "2026-08": {
         "n": 177,
         "meanReturn": -0.043455329139597446
       },
       "2026-09": {
-        "n": 150,
-        "meanReturn": -0.05857492046433237
+        "n": 151,
+        "meanReturn": -0.05750200702160795
       }
     }
   },
