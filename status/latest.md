@@ -1,17 +1,17 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-21T16:39:19.259Z (UTC)
+Сгенерирован: 2026-09-21T16:40:32.456Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1633995; снапшотов за 24ч: 36626
+- Токенов в базе: 1634034; снапшотов за 24ч: 36630
 - Ошибок в audit log за 24ч: 3
-  · scan.token.error (23.9 ч назад): {"mint":"0x0fa5f0c9937d7b667bb63d34f7d7b7f82d96f87e","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
-  · monitor.cycle.error (23.9 ч назад): PrismaClientKnownRequestError: Invalid `prisma.position.findMany()` invocation in /opt/alexander-ai-assistant/memescope/src/lib/monitor/positions.ts:290:38 287 
-  · scan.token.error (23.9 ч назад): {"mint":"0x3e2c25bb0c9bc624f8e789fdf2227dbcd43fe1c8","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
-- memescope-web:  online, память 68 МБ, перезапусков 0
-- memescope-worker:  online, память 68 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 428 мс, порт 3000)
+  · scan.token.error (24.0 ч назад): {"mint":"0x0fa5f0c9937d7b667bb63d34f7d7b7f82d96f87e","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
+  · monitor.cycle.error (24.0 ч назад): PrismaClientKnownRequestError: Invalid `prisma.position.findMany()` invocation in /opt/alexander-ai-assistant/memescope/src/lib/monitor/positions.ts:290:38 287 
+  · scan.token.error (24.0 ч назад): {"mint":"0x3e2c25bb0c9bc624f8e789fdf2227dbcd43fe1c8","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
+- memescope-web:  online, память 66 МБ, перезапусков 0
+- memescope-worker:  online, память 66 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 249 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -19,10 +19,10 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20675
-- robinhood: 5017
-- bsc: 3487
-- base: 1715
+- solana: 20671
+- robinhood: 5033
+- bsc: 3486
+- base: 1717
 - ethereum: 143
 - arbitrum: 9
 
@@ -34,35 +34,35 @@
 - READY: 4
 
 ## Топ-5 по score (не отбракованные)
-- CATE: READY, score 69.6, risk 1.1, conf 100% (обновлено 1 мин назад)
+- CATE: READY, score 70.7, risk 0.7, conf 100% (обновлено 1 мин назад)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 31.3 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 46.6 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 15.0 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 47.2 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- FWA — 2026-09-21T16:34:10.720Z (5 мин назад)
-- CATE — 2026-09-21T15:07:02.150Z (1.5 ч назад)
+- FWA — 2026-09-21T16:34:10.720Z (6 мин назад)
+- CATE — 2026-09-21T15:07:02.150Z (1.6 ч назад)
 - FWA — 2026-09-21T07:20:09.593Z (9.3 ч назад)
-- FWA — 2026-09-21T06:55:09.114Z (9.7 ч назад)
+- FWA — 2026-09-21T06:55:09.114Z (9.8 ч назад)
 - CATE — 2026-09-21T06:10:16.926Z (10.5 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- 宇宙所: CANDIDATE → WATCH (1 мин назад) — Opportunity Score 40.0/100, Risk 16.5/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- FWA: READY → CANDIDATE (4 мин назад) — Opportunity Score 58.0/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- FWA: CANDIDATE → READY (5 мин назад) — Opportunity Score 65.1/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
-- NEXUS: DATA_UNAVAILABLE → AVOID (6 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- TWT: — → WATCH (12 мин назад) — Opportunity Score 40.5/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
-- NTDA: WATCH → AVOID (13 мин назад) — [mint-authority] Mint authority не отозвана — возможна дополнительная эмиссия.
-- NTDA: — → WATCH (24 мин назад) — Opportunity Score 31.1/100, Risk 10.1/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
-- FLIPCOIN: — → AVOID (25 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- TG: — → AVOID (26 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
-- 宇宙所: WATCH → CANDIDATE (26 мин назад) — Opportunity Score 52.0/100, Risk 4.5/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- FLIP: — → AVOID (27 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
-- INF535: — → AVOID (28 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
+- 宇宙所: CANDIDATE → WATCH (2 мин назад) — Opportunity Score 40.0/100, Risk 16.5/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- FWA: READY → CANDIDATE (5 мин назад) — Opportunity Score 58.0/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- FWA: CANDIDATE → READY (6 мин назад) — Opportunity Score 65.1/100, Risk 4.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки ос
+- NEXUS: DATA_UNAVAILABLE → AVOID (8 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- TWT: — → WATCH (13 мин назад) — Opportunity Score 40.5/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 35–50 — наблюдение.
+- NTDA: WATCH → AVOID (14 мин назад) — [mint-authority] Mint authority не отозвана — возможна дополнительная эмиссия.
+- NTDA: — → WATCH (25 мин назад) — Opportunity Score 31.1/100, Risk 10.1/100, confidence 76%. | Score ниже порога наблюдения — низкий приоритет.
+- FLIPCOIN: — → AVOID (26 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- TG: — → AVOID (27 мин назад) — [sell-not-verified] В сети Ethereum продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверж
+- 宇宙所: WATCH → CANDIDATE (27 мин назад) — Opportunity Score 52.0/100, Risk 4.5/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- FLIP: — → AVOID (28 мин назад) — [sell-not-verified] В сети Base продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтверждени
+- INF535: — → AVOID (29 мин назад) — [sell-not-verified] В сети BNB Chain продажа не симулируется, а проверка контракта не подтвердила возможность продать. Без подтвер
 
 ## Позиции
 - Открытых: 32; всего: 1317; realized P&L: $9286.20
@@ -117,7 +117,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 198 шт на $-9900.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 414 шт на $889.27 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: AFTERHOURS/robinhood (10 мин назад), 4663/robinhood (0 мин назад)
+- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: AFTERHOURS/robinhood (11 мин назад), 4663/robinhood (1 мин назад)
   · адреса первых пяти для проверки у источника: robinhood/0x0ab48c8cc8edc332111ab2e8f70c5e540d45cf5c, robinhood/0x4b0eb3da6e4ffed0aba913e16d97e82bc8ca9319
 
 ## Последние позиции (детально)
@@ -132,8 +132,8 @@
 - XRP [paper/OPEN] вход $1.305 × 38 = $50.00, остаток 100%, realized $0.00
     · 12:58:08 [OPEN] Paper вход по проверенному правилу: 38.19 шт по $1.30456 (комиссии $0.17, impact 0.05%)
 - FXNW [paper/OPEN] вход $9.636e-8 × 517046015 = $50.00, остаток 100%, realized $0.00
+    · 16:40:15 [NOTE] Unrealized P&L 455% (цена $5.35000e-7)
     · 16:25:27 [NOTE] Unrealized P&L 427% (цена $5.07400e-7)
-    · 16:22:57 [NOTE] Unrealized P&L 396% (цена $4.77800e-7)
 - VANG [paper/STOPPED] вход $0.01767 × 2819 = $50.00, остаток 0%, realized $107.09, закрыта: Ликвидность упала до $60,045 (<60% от входа) — аварийный выход
     · 16:33:27 [STOP_HIT] Ликвидность упала до $60,045 (<60% от входа) — аварийный выход: продано 2818.97 шт по $0.0558844, P&L $107.09
     · 16:15:57 [NOTE] Unrealized P&L 203% (цена $0.0535600)
@@ -148,22 +148,22 @@
     · 09:35:29 [OPEN] Paper вход по проверенному правилу: 3678375.61 шт по $0.0000135454 (комиссии $0.17, impact 0.19%)
 
 ## Последний backtest
-- DONE (8.0 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (0 мин назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3761374 / err 2896, последний успех 0 мин назад)
+- dexscreener: ok (ok 3761415 / err 2896, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 46.5 дн назад)
-- geckoterminal:arbitrum: ok (ok 35548 / err 31089, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 66577 / err 86, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 61602 / err 5053, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 48936 / err 17712, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 33403 / err 33209, последний успех 49 мин назад)
-- geckoterminal:solana: ok (ok 66646 / err 17, последний успех 0 мин назад)
-- goplus: ok (ok 124575 / err 68, последний успех 1 мин назад)
-- jupiter: ok (ok 562910 / err 1048, последний успех 1 мин назад)
+- geckoterminal:arbitrum: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/arbitrum/new_pools?page=1 (ok 35548 / err 31090, последний успех 2 мин назад)
+- geckoterminal:base: ok (ok 66578 / err 86, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 61603 / err 5054, последний успех 0 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 48937 / err 17713, последний успех 1 мин назад)
+- geckoterminal:robinhood: ok (ok 33404 / err 33209, последний успех 1 мин назад)
+- geckoterminal:solana: ok (ok 66647 / err 17, последний успех 0 мин назад)
+- goplus: ok (ok 124575 / err 68, последний успех 2 мин назад)
+- jupiter: ok (ok 562913 / err 1048, последний успех 1 мин назад)
 - rpc:arbitrum: ok (ok 824 / err 1, последний успех 2.0 дн назад)
-- rpc:base: ok (ok 228635 / err 32949, последний успех 56 мин назад)
+- rpc:base: ok (ok 228635 / err 32949, последний успех 58 мин назад)
 - rpc:bsc: ok (ok 12575 / err 2, последний успех 3.1 дн назад)
 - rpc:ethereum: ok (ok 19931 / err 733, последний успех 1.3 дн назад)
-- rugcheck: ok (ok 134883 / err 402, последний успех 10 мин назад)
+- rugcheck: ok (ok 134884 / err 402, последний успех 1 мин назад)
 
