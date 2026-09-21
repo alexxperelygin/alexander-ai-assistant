@@ -1,17 +1,17 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-21T04:39:46.694Z (UTC)
+Сгенерирован: 2026-09-21T04:54:00.816Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 1 мин назад)
-- Токенов в базе: 1618062; снапшотов за 24ч: 37778
+- Токенов в базе: 1618419; снапшотов за 24ч: 37750
 - Ошибок в audit log за 24ч: 3
-  · scan.token.error (11.9 ч назад): {"mint":"0x0fa5f0c9937d7b667bb63d34f7d7b7f82d96f87e","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
-  · monitor.cycle.error (11.9 ч назад): PrismaClientKnownRequestError: Invalid `prisma.position.findMany()` invocation in /opt/alexander-ai-assistant/memescope/src/lib/monitor/positions.ts:290:38 287 
-  · scan.token.error (11.9 ч назад): {"mint":"0x3e2c25bb0c9bc624f8e789fdf2227dbcd43fe1c8","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
-- memescope-web:  online, память 69 МБ, перезапусков 0
-- memescope-worker:  online, память 69 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 334 мс, порт 3000)
+  · scan.token.error (12.2 ч назад): {"mint":"0x0fa5f0c9937d7b667bb63d34f7d7b7f82d96f87e","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
+  · monitor.cycle.error (12.2 ч назад): PrismaClientKnownRequestError: Invalid `prisma.position.findMany()` invocation in /opt/alexander-ai-assistant/memescope/src/lib/monitor/positions.ts:290:38 287 
+  · scan.token.error (12.2 ч назад): {"mint":"0x3e2c25bb0c9bc624f8e789fdf2227dbcd43fe1c8","error":"PrismaClientKnownRequestError: \nInvalid `prisma.riskReport.create()` invocation in\n/opt/alexande
+- memescope-web:  online, память 68 МБ, перезапусков 0
+- memescope-worker:  online, память 68 МБ, перезапусков 0
+- дашборд: ✅ отвечает (HTTP 200, 291 мс, порт 3000)
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -19,11 +19,11 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20279
-- robinhood: 3402
-- bsc: 3386
-- base: 1672
-- ethereum: 173
+- solana: 20306
+- robinhood: 3451
+- bsc: 3399
+- base: 1684
+- ethereum: 186
 - arbitrum: 7
 
 ## Статусы возможностей
@@ -38,31 +38,31 @@
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 46.1 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 14.5 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 46.7 дн назад)
-- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 48.9 дн назад)
+- KINS: CANDIDATE, score 63.7, risk 1.5, conf 100% (обновлено 49.0 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- FWA — 2026-09-21T03:03:49.813Z (1.6 ч назад)
-- FWA — 2026-09-21T01:43:45.323Z (2.9 ч назад)
-- FWA — 2026-09-21T01:34:45.748Z (3.1 ч назад)
-- FWA — 2026-09-21T00:35:47.379Z (4.1 ч назад)
-- FWA — 2026-09-21T00:24:51.036Z (4.3 ч назад)
+- FWA — 2026-09-21T03:03:49.813Z (1.8 ч назад)
+- FWA — 2026-09-21T01:43:45.323Z (3.2 ч назад)
+- FWA — 2026-09-21T01:34:45.748Z (3.3 ч назад)
+- FWA — 2026-09-21T00:35:47.379Z (4.3 ч назад)
+- FWA — 2026-09-21T00:24:51.036Z (4.5 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- FWA: READY → CANDIDATE (14 мин назад) — Opportunity Score 59.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- MELANIA: WATCH → AVOID (54 мин назад) — [insufficient-liquidity] Ликвидность $30,197 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 70.2% с прошлого н
-- FWA: CANDIDATE → READY (1.6 ч назад) — Opportunity Score 65.0/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- MELANIA: AVOID → WATCH (2.2 ч назад) — Opportunity Score 35.4/100, Risk 28.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- FWA: READY → CANDIDATE (2.8 ч назад) — Opportunity Score 59.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
-- FWA: CANDIDATE → READY (2.9 ч назад) — Opportunity Score 65.3/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- FWA: READY → CANDIDATE (3.0 ч назад) — Opportunity Score 59.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
-- WLFI: WATCH → CANDIDATE (3.1 ч назад) — Opportunity Score 51.8/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- FWA: CANDIDATE → READY (3.1 ч назад) — Opportunity Score 66.2/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
-- MELANIA: WATCH → AVOID (3.9 ч назад) — [liquidity-draining] Ликвидность упала на 7.3% с прошлого наблюдения (порог 5%) — из пула выводят средства.
-- UDS: CANDIDATE → WATCH (3.9 ч назад) — Opportunity Score 37.6/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- FWA: READY → CANDIDATE (4.0 ч назад) — Opportunity Score 59.2/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- FWA: READY → CANDIDATE (28 мин назад) — Opportunity Score 59.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- MELANIA: WATCH → AVOID (1.1 ч назад) — [insufficient-liquidity] Ликвидность $30,197 ниже минимума $50,000. | [liquidity-draining] Ликвидность упала на 70.2% с прошлого н
+- FWA: CANDIDATE → READY (1.8 ч назад) — Opportunity Score 65.0/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- MELANIA: AVOID → WATCH (2.4 ч назад) — Opportunity Score 35.4/100, Risk 28.1/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- FWA: READY → CANDIDATE (3.0 ч назад) — Opportunity Score 59.8/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
+- FWA: CANDIDATE → READY (3.2 ч назад) — Opportunity Score 65.3/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- FWA: READY → CANDIDATE (3.2 ч назад) — Opportunity Score 59.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данны
+- WLFI: WATCH → CANDIDATE (3.3 ч назад) — Opportunity Score 51.8/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- FWA: CANDIDATE → READY (3.3 ч назад) — Opportunity Score 66.2/100, Risk 10.0/100, confidence 88%. | Score ≥ 65 и confidence ≥ 60% — сигнал готов; подтверждение покупки о
+- MELANIA: WATCH → AVOID (4.1 ч назад) — [liquidity-draining] Ликвидность упала на 7.3% с прошлого наблюдения (порог 5%) — из пула выводят средства.
+- UDS: CANDIDATE → WATCH (4.1 ч назад) — Opportunity Score 37.6/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- FWA: READY → CANDIDATE (4.3 ч назад) — Opportunity Score 59.2/100, Risk 4.0/100, confidence 88%. | Score в диапазоне 45–65 — кандидат, ждём подтверждения momentum/данных
 
 ## Позиции
 - Открытых: 29; всего: 1294; realized P&L: $9473.68
@@ -118,7 +118,7 @@
 - ⚠️ списано полностью (пул не может принять позицию): 193 шт на $-9650.00 — входит в итоги выше. Цена выхода взята нулевой: это допущение в консервативную сторону, а не измерение
 - из них закрыто по устаревшей цене (результат недостоверен): 411 шт на $872.72 — эта часть суммы выше является допущением, а не измерением
 - цена доступна по всем открытым позициям
-- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: GEORGE/robinhood (11 мин назад)
+- ⚠️ цена устарела: стоп и обвал ликвидности проверяются, трейлинг — нет: GEORGE/robinhood (9 мин назад)
   · адреса первых пяти для проверки у источника: robinhood/0xda9458b5dc99c8a6ac240c048e8469e3ebbe1e18
 
 ## Последние позиции (детально)
@@ -148,22 +148,22 @@
     · 15:28:13 [NOTE] Unrealized P&L 33% (цена $0.0000854600)
 
 ## Последний backtest
-- DONE (4.0 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (4.3 ч назад): NO EDGE: expectancy -5.0% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3732095 / err 2894, последний успех 0 мин назад)
+- dexscreener: ok (ok 3732670 / err 2894, последний успех 0 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 46.0 дн назад)
-- geckoterminal:arbitrum: ok (ok 35184 / err 30734, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 65859 / err 84, последний успех 0 мин назад)
-- geckoterminal:bsc: ok (ok 60884 / err 5051, последний успех 2 мин назад)
-- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 48235 / err 17693, последний успех 40 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 33018 / err 32876, последний успех 41 мин назад)
-- geckoterminal:solana: ok (ok 65928 / err 15, последний успех 0 мин назад)
-- goplus: ok (ok 123186 / err 67, последний успех 1 мин назад)
-- jupiter: 🔴 HTTP 500 https://lite-api.jup.ag/swap/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn&amount=184463947&slippageBps=300 (ok 561035 / err 1048, последний успех 16.6 ч назад)
+- geckoterminal:arbitrum: ok (ok 35195 / err 30738, последний успех 0 мин назад)
+- geckoterminal:base: ok (ok 65873 / err 84, последний успех 0 мин назад)
+- geckoterminal:bsc: ok (ok 60899 / err 5051, последний успех 0 мин назад)
+- geckoterminal:eth: ok (ok 48249 / err 17694, последний успех 0 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 33023 / err 32886, последний успех 9 мин назад)
+- geckoterminal:solana: ok (ok 65942 / err 15, последний успех 0 мин назад)
+- goplus: ok (ok 123210 / err 67, последний успех 1 мин назад)
+- jupiter: 🔴 HTTP 500 https://lite-api.jup.ag/swap/v1/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn&amount=184463947&slippageBps=300 (ok 561035 / err 1048, последний успех 16.8 ч назад)
 - rpc:arbitrum: ok (ok 824 / err 1, последний успех 1.5 дн назад)
-- rpc:base: ok (ok 227894 / err 32949, последний успех 4.1 ч назад)
+- rpc:base: ok (ok 227894 / err 32949, последний успех 4.3 ч назад)
 - rpc:bsc: ok (ok 12575 / err 2, последний успех 2.6 дн назад)
-- rpc:ethereum: ok (ok 19931 / err 733, последний успех 18.6 ч назад)
-- rugcheck: ok (ok 134825 / err 402, последний успех 16.6 ч назад)
+- rpc:ethereum: ok (ok 19931 / err 733, последний успех 18.8 ч назад)
+- rugcheck: ok (ok 134825 / err 402, последний успех 16.8 ч назад)
 
