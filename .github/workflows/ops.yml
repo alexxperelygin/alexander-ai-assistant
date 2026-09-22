@@ -7,6 +7,7 @@ name: VPS ops
 #   backtest — запустить backtest (24h и 6h) → status/backtest.md + отчёт
 #   equity   — проиграть сделки на счёте с депозитом → status/equity.md
 #   riskfilter — проверить фильтр риска по пре-регистрации → status/riskfilter.md
+#   stop     — остановить процессы memescope (проект закрыт)
 #   restart  — перезапустить сервисы pm2 и снять отчёт
 #   diag     — снять нагрузку, диск и список процессов сервера (без отчёта)
 # Требуются секреты VPS_HOST и VPS_SSH_PASSWORD (Settings → Secrets → Actions).
@@ -65,7 +66,7 @@ jobs:
           else
             TASK=$(head -1 ops/command.txt 2>/dev/null | tr -cd 'a-z')
           fi
-          case "$TASK" in status|update|backtest|restart|domain|research|equity|riskfilter|diag) ;; *) TASK=status ;; esac
+          case "$TASK" in status|update|backtest|restart|stop|domain|research|equity|riskfilter|diag) ;; *) TASK=status ;; esac
           echo "task=$TASK" >> "$GITHUB_OUTPUT"
           echo "Задача: $TASK"
 
@@ -156,6 +157,25 @@ jobs:
               } > status/backtest.md
               unset SSH_TIMEOUT
               cat status/backtest.md
+              ;;
+            stop)
+              # ОСТАНОВКА ПРОЕКТА. Только процессы memescope: на этом VPS живут
+              # приложения владельца, и `pm2 stop all` снёс бы их вместе с
+              # нашими. Имена перечислены явно именно поэтому.
+              #
+              # delete + save, а не stop: остановленный процесс вернётся при
+              # следующей перезагрузке машины, и «выключено» окажется неправдой.
+              echo "== Остановка MemeScope =="
+              run_ssh 'pm2 delete memescope-web memescope-worker || true; pm2 save; pm2 status' > /tmp/stop.log 2>&1 || true
+              cat /tmp/stop.log
+              # Проверяем по факту, а не по коду возврата: pm2 delete у уже
+              # удалённого процесса даёт ошибку, а нам важно только то, что в
+              # списке процессов memescope больше нет.
+              if grep -qE "memescope-(web|worker)" /tmp/stop.log; then
+                echo "::error::Процессы memescope всё ещё в списке pm2"
+                exit 1
+              fi
+              echo "MEMESCOPE ОСТАНОВЛЕН"
               ;;
             restart)
               echo "== Перезапуск сервисов =="
