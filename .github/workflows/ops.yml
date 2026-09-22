@@ -166,12 +166,22 @@ jobs:
               # delete + save, а не stop: остановленный процесс вернётся при
               # следующей перезагрузке машины, и «выключено» окажется неправдой.
               echo "== Остановка MemeScope =="
-              run_ssh 'pm2 delete memescope-web memescope-worker || true; pm2 save; pm2 status' > /tmp/stop.log 2>&1 || true
+              # save --force обязателен. Обычный `pm2 save` при пустом списке
+              # пишет «PM2 is not managing any process, skipping save» и НЕ
+              # перезаписывает сохранённый список — тот остаётся со старыми
+              # memescope, и после перезагрузки машины pm2 resurrect поднял бы
+              # их снова. «Выключено» тогда было бы неправдой.
+              #
+              # На этом pm2 других процессов нет (приложения владельца живут в
+              # Docker), поэтому сохранение пустого списка ничего чужого не
+              # затрагивает.
+              run_ssh 'pm2 delete memescope-web memescope-worker || true; pm2 save --force; pm2 jlist' > /tmp/stop.log 2>&1 || true
               cat /tmp/stop.log
-              # Проверяем по факту, а не по коду возврата: pm2 delete у уже
-              # удалённого процесса даёт ошибку, а нам важно только то, что в
-              # списке процессов memescope больше нет.
-              if grep -qE "memescope-(web|worker)" /tmp/stop.log; then
+              # Проверяем по jlist, а не по всему выводу: собственные сообщения
+              # pm2 об УСПЕШНОМ удалении содержат слово memescope, и первая
+              # версия проверки срабатывала на них же — прогон падал ровно в
+              # тот момент, когда всё получилось.
+              if grep -q '"name":"memescope' /tmp/stop.log; then
                 echo "::error::Процессы memescope всё ещё в списке pm2"
                 exit 1
               fi
