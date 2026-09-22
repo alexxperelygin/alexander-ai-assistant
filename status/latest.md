@@ -1,14 +1,14 @@
 # MemeScope AI — статус сервера
 
-Сгенерирован: 2026-09-22T02:56:46.678Z (UTC)
+Сгенерирован: 2026-09-22T03:01:14.950Z (UTC)
 
 ## Ядро
 - Worker: ✅ работает (последний цикл: 2 мин назад)
-- Токенов в базе: 1647608; снапшотов за 24ч: 35794
+- Токенов в базе: 1647646; снапшотов за 24ч: 35721
 - Ошибок в audit log за 24ч: 0
-- memescope-web:  online, память 73 МБ, перезапусков 0
-- memescope-worker:  online, память 73 МБ, перезапусков 0
-- дашборд: ✅ отвечает (HTTP 200, 3342 мс, порт 3000)
+- memescope-web: 🔴 процесса нет в pm2
+- memescope-worker: 🔴 процесса нет в pm2
+- дашборд: 🔴 НЕ ОТВЕЧАЕТ — TypeError: fetch failed
 
 ## Действующие пороги
 - минимальная ликвидность: $50 000
@@ -16,50 +16,50 @@
 - возраст токена: 20–10080 мин; живая торговля: выключена
 
 ## Новые токены за 24ч по сетям
-- solana: 20692
+- solana: 20658
 - robinhood: 5157
-- bsc: 3536
-- base: 1800
+- bsc: 3537
+- base: 1795
 - ethereum: 187
 - arbitrum: 8
 
 ## Статусы возможностей
 - AVOID: 153551
 - DATA_UNAVAILABLE: 44716
-- WATCH: 33
-- CANDIDATE: 26
+- WATCH: 34
+- CANDIDATE: 25
 - READY: 4
 
 ## Топ-5 по score (не отбракованные)
-- CATE: READY, score 75.9, risk 0.2, conf 100% (обновлено 0 мин назад)
+- CATE: READY, score 76.9, risk 0.4, conf 100% (обновлено 3 мин назад)
 - testicle: READY, score 65.7, risk 0.3, conf 100% (обновлено 31.7 дн назад)
 - CHEEMS: READY, score 65.5, risk 2.0, conf 100% (обновлено 47.0 дн назад)
 - FIST: READY, score 64.9, risk 0.0, conf 88% (обновлено 15.4 дн назад)
 - GINGY: CANDIDATE, score 64.8, risk 0.9, conf 100% (обновлено 47.6 дн назад)
 
 ## READY-сигналы (последние 5 за всё время)
-- CATE — 2026-09-22T02:26:07.175Z (31 мин назад)
+- CATE — 2026-09-22T02:26:07.175Z (35 мин назад)
 - ZIG — 2026-09-21T23:29:03.969Z (3.5 ч назад)
-- ZIG — 2026-09-21T22:16:04.213Z (4.7 ч назад)
-- FWA — 2026-09-21T21:25:06.257Z (5.5 ч назад)
+- ZIG — 2026-09-21T22:16:04.213Z (4.8 ч назад)
+- FWA — 2026-09-21T21:25:06.257Z (5.6 ч назад)
 - ZIG — 2026-09-21T20:47:54.813Z (6.2 ч назад)
 
 ## Социальные источники (24ч)
 - снимков нет: ни один ключ не настроен, либо ни один токен ещё не прошёл порог ликвидности
 
 ## Последние переходы статусов
-- XRP: WATCH → CANDIDATE (6 мин назад) — Opportunity Score 50.4/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- XRP: CANDIDATE → WATCH (15 мин назад) — Opportunity Score 42.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
-- SCAT: WATCH → CANDIDATE (17 мин назад) — Opportunity Score 50.3/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- WRENAI: WATCH → CANDIDATE (17 мин назад) — Opportunity Score 50.2/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- ZUNI: WATCH → CANDIDATE (17 мин назад) — Opportunity Score 50.2/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- VITC: WATCH → CANDIDATE (17 мин назад) — Opportunity Score 50.2/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- XRP: WATCH → CANDIDATE (20 мин назад) — Opportunity Score 51.4/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- LASER: WATCH → CANDIDATE (20 мин назад) — Opportunity Score 50.1/100, Risk 4.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- HEIR: WATCH → CANDIDATE (20 мин назад) — Opportunity Score 51.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
-- TWT: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.6/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- WSOS: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.4/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
-- HIDE: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.1/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- XRP: CANDIDATE → WATCH (2 мин назад) — Opportunity Score 45.0/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- XRP: WATCH → CANDIDATE (10 мин назад) — Opportunity Score 50.4/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- XRP: CANDIDATE → WATCH (19 мин назад) — Opportunity Score 42.9/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 35–50 — наблюдение.
+- SCAT: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.3/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- WRENAI: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.2/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- ZUNI: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.2/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- VITC: WATCH → CANDIDATE (21 мин назад) — Opportunity Score 50.2/100, Risk 4.1/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- XRP: WATCH → CANDIDATE (24 мин назад) — Opportunity Score 51.4/100, Risk 16.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- LASER: WATCH → CANDIDATE (24 мин назад) — Opportunity Score 50.1/100, Risk 4.1/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- HEIR: WATCH → CANDIDATE (24 мин назад) — Opportunity Score 51.2/100, Risk 10.0/100, confidence 88%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данны
+- TWT: WATCH → CANDIDATE (25 мин назад) — Opportunity Score 50.6/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
+- WSOS: WATCH → CANDIDATE (25 мин назад) — Opportunity Score 50.4/100, Risk 4.0/100, confidence 76%. | Score в диапазоне 50–65 — кандидат, ждём подтверждения momentum/данных
 
 ## Позиции
 - Открытых: 38; всего: 1331; realized P&L: $9169.21
@@ -139,22 +139,22 @@
     · 17:16:44 [OPEN] Paper вход по проверенному правилу: 246.29 шт по $0.202304 (комиссии $0.17, impact 0.15%)
 
 ## Последний backtest
-- DONE (2.3 ч назад): NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
+- DONE (2.4 ч назад): NO EDGE: expectancy -4.9% ≤ 0 после издержек. Сигналы в текущем виде не зарабатывают.
 
 ## Источники данных
-- dexscreener: ok (ok 3786708 / err 2899, последний успех 0 мин назад)
+- dexscreener: ok (ok 3786794 / err 2899, последний успех 2 мин назад)
 - geckoterminal: ok (ok 18536 / err 1, последний успех 46.9 дн назад)
-- geckoterminal:arbitrum: ok (ok 35940 / err 31314, последний успех 1 мин назад)
-- geckoterminal:base: ok (ok 67192 / err 87, последний успех 1 мин назад)
-- geckoterminal:bsc: ok (ok 62215 / err 5057, последний успех 1 мин назад)
-- geckoterminal:eth: ok (ok 49488 / err 17777, последний успех 1 мин назад)
-- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 33631 / err 33598, последний успех 2.4 ч назад)
-- geckoterminal:solana: ok (ok 67262 / err 17, последний успех 1 мин назад)
-- goplus: ok (ok 125791 / err 69, последний успех 0 мин назад)
-- jupiter: ok (ok 564743 / err 1048, последний успех 0 мин назад)
+- geckoterminal:arbitrum: ok (ok 35942 / err 31314, последний успех 3 мин назад)
+- geckoterminal:base: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/base/new_pools?page=1 (ok 67193 / err 88, последний успех 4 мин назад)
+- geckoterminal:bsc: ok (ok 62217 / err 5057, последний успех 3 мин назад)
+- geckoterminal:eth: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/eth/new_pools?page=1 (ok 49489 / err 17778, последний успех 4 мин назад)
+- geckoterminal:robinhood: 🔴 HTTP 429 https://api.geckoterminal.com/api/v2/networks/robinhood/new_pools?page=1 (ok 33631 / err 33600, последний успех 2.4 ч назад)
+- geckoterminal:solana: ok (ok 67264 / err 17, последний успех 3 мин назад)
+- goplus: ok (ok 125797 / err 69, последний успех 2 мин назад)
+- jupiter: ok (ok 564749 / err 1048, последний успех 3 мин назад)
 - rpc:arbitrum: ok (ok 824 / err 1, последний успех 2.4 дн назад)
-- rpc:base: ok (ok 228898 / err 32949, последний успех 1.0 ч назад)
+- rpc:base: ok (ok 228898 / err 32949, последний успех 1.1 ч назад)
 - rpc:bsc: ok (ok 12575 / err 2, последний успех 3.6 дн назад)
-- rpc:ethereum: ok (ok 20178 / err 733, последний успех 7.5 ч назад)
-- rugcheck: ok (ok 134941 / err 402, последний успех 1 мин назад)
+- rpc:ethereum: ok (ok 20178 / err 733, последний успех 7.6 ч назад)
+- rugcheck: ok (ok 134941 / err 402, последний успех 5 мин назад)
 
