@@ -16,6 +16,7 @@ STRATEGIES = {
     "info": "Только инфобизнес (подписка, курсы, услуги)",
     "fund": "Кэш-двигатель + фонд под управлением",
     "equity": "Кэш-двигатель + серия продуктовых компаний с долей",
+    "rollup": "Кэш-двигатель + скупка сервисных фирм на деньги фондов (доля 25%)",
 }
 THRESHOLDS = (0, 10e6, 100e6, 1e9)
 
@@ -106,8 +107,8 @@ def _path(strategy: str, m: dict, years: int, rng: random.Random) -> float:
             settle(income)
         asset = eng.value() + (fee * c["gp_value_multiple"] if aum > 0 else 0.0)
 
-    elif strategy == "equity":
-        c = m["equity"]
+    elif strategy in ("equity", "rollup"):
+        c = m[strategy]                                   # одна механика, разные параметры
         eng = _Engine(rng, m["info"], c["engine_share"])
         arr, own, age, clock, steps = 0.0, 0.0, 0, 0, 0
         for _ in range(years):

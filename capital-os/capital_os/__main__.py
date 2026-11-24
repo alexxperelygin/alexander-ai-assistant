@@ -38,7 +38,7 @@ def main(argv=None) -> int:
         out = mc.sensitivity(m, n=a.n) if a.sensitivity else mc.run_all(m, n=a.n)
         print(json.dumps(out, ensure_ascii=False, indent=1))
     elif a.cmd == "kb":
-        kb = kbmod.load()
+        kb = kbmod.load_all()
         hits = kbmod.search(kb, " ".join(a.query)) if a.query else list(kb.values())
         for h in hits:
             print(f"[{h.id}] {h.source}\n    {h.finding}\n    → {h.rule}")

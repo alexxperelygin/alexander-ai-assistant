@@ -14,8 +14,21 @@ def test_kb_is_16_domains_of_10():
     assert all(f.rule and f.finding and f.source for f in kb.values())
 
 
+def test_frontier_layer_has_links():
+    fr = kbmod.load_frontier()
+    assert len(fr) >= 40 and all(f.url.startswith("https://") for f in fr.values())
+    assert not set(fr) & set(kbmod.load())
+
+
+def test_universe_is_not_only_owner_assets():
+    items = scoring.load_opportunities()
+    assert sum(o.get("origin") == "universe" for o in items) >= 10
+    blocked = dict(items[0], access=0.0)
+    assert scoring.score(blocked).p == 0
+
+
 def test_every_opportunity_cites_existing_evidence():
-    kb = kbmod.load()
+    kb = kbmod.load_all()
     for o in scoring.load_opportunities():
         assert o["evidence"], o["id"]
         assert all(e in kb for e in o["evidence"]), o["id"]
@@ -42,6 +55,7 @@ def test_simulation_is_deterministic_and_ordered():
     p = a["p_ge"]
     assert p[0] >= p[int(10e6)] >= p[int(100e6)] >= p[int(1e9)]
     assert mc.simulate("trading", m, 15, 4000)["p_ge"][int(1e9)] == 0
+    assert set(mc.STRATEGIES) == {"trading", "info", "fund", "equity", "rollup"}
 
 
 def test_more_debt_never_helps():
@@ -86,7 +100,7 @@ def test_experiment_freeze_verdict_and_tamper(tmp_path, monkeypatch):
 
 
 def test_gate_routes_model_plan():
-    kb = kbmod.load()
+    kb = kbmod.load_all()
     plan = {"constraint": "x", "reflection": "", "new_opportunities": [], "estimate_updates": [],
             "actions": [
                 {"title": "Собрать реестр кредиторов", "opportunity_id": "debt-restructuring", "why": "",

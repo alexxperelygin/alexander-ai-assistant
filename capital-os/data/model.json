@@ -70,5 +70,27 @@
     "monthly_budget_usd": 10000,
     "safe_share": 0.7,
     "max_items_per_bucket": 3
+  },
+  "rollup": {
+    "_note": "arr — выручка купленных фирм; multiple — стоимость к выручке (маржа ~20% × ~10 EBITDA). p_pmf — вероятность получить финансирование и закрыть первую сделку за попытку.",
+    "engine_share": 0.6,
+    "burn_per_year": 50000,
+    "years_to_verdict": 2,
+    "p_pmf": 0.12,
+    "arr0_median": 10000000,
+    "arr0_sigma": 0.8,
+    "growth_boost": 1.0,
+    "growth_decay": 0.75,
+    "growth_sigma": 0.4,
+    "p_die": 0.1,
+    "ownership0": 0.25,
+    "dilution_steps_arr": [
+      50000000,
+      200000000,
+      1000000000
+    ],
+    "dilution_mult": 0.85,
+    "multiple_median": 2.0,
+    "multiple_sigma": 0.4
   }
 }

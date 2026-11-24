@@ -82,7 +82,7 @@ def gate(plan: dict, known_ids: set, kb: dict) -> dict:
 
 def cycle(n: int = 50_000, use_llm: bool = True, today: date | None = None, write: bool = True) -> dict:
     today = today or date.today()
-    kb = kbmod.load()
+    kb = kbmod.load_all()
     items = scoring.load_opportunities()
     by_id = {o["id"]: o for o in items}
     model = mc.load_model()
@@ -141,22 +141,24 @@ def _action_lines(a: dict) -> list[str]:
 
 
 def render(r: dict) -> str:
-    eq15 = next(s for s in r["sims"] if s["strategy"] == "equity" and s["years"] == 15)
+    eq15 = max((s for s in r["sims"] if s["years"] == 15), key=lambda s: s["p_ge"][int(1e9)])
     L = [f"# Capital OS — отчёт цикла {r['date']}", "",
-         f"База исследований: {r['kb_size']} записей. План: "
+         f"База исследований: {r['kb_size']} записей в двух слоях (классика и слой 2025–2026). План: "
          + ("составлен моделью" if r["plan_source"] == "model" else "детерминированный, без модели")
          + f" ({r['llm_note']}).", "",
          "## Главное", "",
-         f"- Вероятность чистого капитала от $1 млрд за 15 лет при лучшей стратегии: **{pct(eq15['p_ge'][int(1e9)])}**; "
+         f"- Вероятность чистого капитала от $1 млрд за 15 лет при лучшей стратегии ({mc.STRATEGIES[eq15['strategy']].lower()}): **{pct(eq15['p_ge'][int(1e9)])}**; "
          f"от $100 млн: {pct(eq15['p_ge'][int(100e6)])}; полного погашения долга: {pct(eq15['p_ge'][0])}.",
          "- Это оценка модели на допущениях из `capital-os/data/model.json`, а не прогноз.",
          f"- Узкое место недели: {r['plan']['constraint']}", "",
          "## Рейтинг возможностей", "",
-         "| № | возможность | тип | вероятность успеха | ожидаемая ценность за 3 года | на месяц работы | вероятность $1 млрд |",
-         "|---|---|---|---|---|---|---|"]
+         "| № | возможность | тип | откуда | вероятность успеха | ожидаемая ценность за 3 года | на месяц работы | вероятность $1 млрд |",
+         "|---|---|---|---|---|---|---|---|"]
     for i, s in enumerate(r["ranked"], 1):
-        L.append(f"| {i} | {s.name} | {KIND_RU[s.kind]} | {pct(s.p)} | {usd(s.ev_usd)} | {usd(s.ev_per_month)} | {pct(s.p_billion)} |")
-    L += ["", "Отрицательная ожидаемая ценность означает: при текущих оценках не делать.", "",
+        L.append(f"| {i} | {s.name} | {KIND_RU[s.kind]} | {'поиск' if s.raw.get('origin') == 'universe' else 'активы'} | {pct(s.p)} | {usd(s.ev_usd)} | {usd(s.ev_per_month)} | {pct(s.p_billion)} |")
+    L += ["", "«Поиск» — найдено исследованием без привязки к текущим проектам владельца; «активы» — выросло из "
+          "имеющихся. Вероятность успеха уже умножена на доступность входа (капитал, лицензия, партнёр). "
+          "Отрицательная ожидаемая ценность означает: при текущих оценках не делать.", "",
           "## Распределение ресурсов владельца", "", "| возможность | корзина | часов в неделю | бюджет в месяц |", "|---|---|---|---|"]
     for a in r["alloc"]:
         L.append(f"| {a['name']} | {a['bucket']} | {a['hours_per_week']} | {usd(a['usd_per_month'])} |")

@@ -36,7 +36,8 @@ def shrink(p_est: float, base_rate: float, weight: float) -> float:
 
 
 def score(o: dict) -> Scored:
-    p = shrink(o["p_est"], o["base_rate"], o.get("evidence_weight", 0.3))
+    # access — вероятность, что вход вообще открыт: капитал, лицензия, юрисдикция, партнёр.
+    p = shrink(o["p_est"], o["base_rate"], o.get("evidence_weight", 0.3)) * o.get("access", 1.0)
     risk = (1 - o["legal_risk"]) * (1 - o["reputation_risk"])
     ev = p * risk * o["value_if_success_usd"] * o["ownership"] - o["cost_usd"]
     return Scored(
