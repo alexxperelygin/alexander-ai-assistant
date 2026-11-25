@@ -27,8 +27,9 @@ class Scored:
     raw: dict = field(repr=False, default_factory=dict)
 
 
-def load_opportunities(path=None) -> list[dict]:
-    return json.loads((path or ROOT / "data" / "opportunities.json").read_text(encoding="utf-8"))["items"]
+def load_opportunities(path=None, include_inactive: bool = False) -> list[dict]:
+    items = json.loads((path or ROOT / "data" / "opportunities.json").read_text(encoding="utf-8"))["items"]
+    return [o for o in items if include_inactive or o.get("active", True)]
 
 
 def shrink(p_est: float, base_rate: float, weight: float) -> float:

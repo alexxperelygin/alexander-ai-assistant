@@ -23,6 +23,8 @@ def test_frontier_layer_has_links():
 def test_universe_is_not_only_owner_assets():
     items = scoring.load_opportunities()
     assert sum(o.get("origin") == "universe" for o in items) >= 10
+    assert all(o.get("active", True) for o in items)
+    assert "risk-desk-sub" not in {o["id"] for o in items}
     blocked = dict(items[0], access=0.0)
     assert scoring.score(blocked).p == 0
 
@@ -85,7 +87,7 @@ def test_action_rules_default_to_approval():
 
 def test_experiment_freeze_verdict_and_tamper(tmp_path, monkeypatch):
     monkeypatch.setattr(experiments, "DIR", tmp_path)
-    o = next(o for o in scoring.load_opportunities() if o["id"] == "risk-desk-sub")
+    o = next(o for o in scoring.load_opportunities(include_inactive=True) if o["id"] == "risk-desk-sub")
     spec = experiments.freeze(o, date(2026, 12, 1))
     assert spec["deadline"] == "2026-12-31"
     with pytest.raises(FileExistsError):

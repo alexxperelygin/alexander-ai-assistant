@@ -105,6 +105,9 @@ def cycle(n: int = 50_000, use_llm: bool = True, today: date | None = None, writ
         "sensitivity": sens, "experiment_verdicts": verdicts,
         "owner_hours_per_week": model["allocation"]["owner_hours_per_week"],
         "previous_reflection": last_reflection(),
+        # Решения владельца: исключённые возможности не предлагать заново и данных по ним не просить.
+        "owner_decisions": [{"id": o["id"], "decision": o["inactive_reason"]}
+                            for o in scoring.load_opportunities(include_inactive=True) if not o.get("active", True)],
     }
     plan, note = (llm.plan(kbmod.as_prompt(kb), state) if use_llm else (None, "модель отключена флагом"))
     source = "model"
