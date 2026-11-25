@@ -1,0 +1,96 @@
+{
+  "_note": "Параметры модели Монте-Карло. Это допущения, а не измерения. Каждое можно править; команда simulate покажет чувствительность результата к каждому.",
+  "common": {
+    "debt_usd": 20000000,
+    "debt_rate": 0.0,
+    "debt_paydown_share": 0.5,
+    "start_cash_usd": 50000
+  },
+  "trading": {
+    "p_skill": 0.02,
+    "skilled_mu": 0.25,
+    "skilled_sigma": 0.35,
+    "unskilled_mu": -0.25,
+    "unskilled_sigma": 0.45,
+    "prop_funded_cap_usd": 2000000,
+    "prop_profit_split": 0.8
+  },
+  "info": {
+    "profit_y1_median": 150000,
+    "profit_y1_sigma": 0.6,
+    "growth_median": 1.15,
+    "growth_sigma": 0.3,
+    "p_shock": 0.07,
+    "shock_mult": 0.3,
+    "profit_cap_usd": 5000000,
+    "exit_multiple": 2.0
+  },
+  "equity": {
+    "engine_share": 0.6,
+    "burn_per_year": 80000,
+    "years_to_verdict": 2,
+    "p_pmf": 0.12,
+    "arr0_median": 400000,
+    "arr0_sigma": 0.7,
+    "growth_boost": 1.2,
+    "growth_decay": 0.8,
+    "growth_sigma": 0.45,
+    "p_die": 0.08,
+    "ownership0": 0.8,
+    "dilution_steps_arr": [
+      2000000,
+      10000000,
+      50000000
+    ],
+    "dilution_mult": 0.82,
+    "multiple_median": 6.0,
+    "multiple_sigma": 0.5
+  },
+  "fund": {
+    "years_to_track": 2,
+    "p_launch": 0.06,
+    "aum0_median": 15000000,
+    "aum0_sigma": 0.8,
+    "aum_growth_sigma": 0.4,
+    "ret_mu": 0.08,
+    "ret_sigma": 0.15,
+    "mgmt_fee": 0.02,
+    "perf_fee": 0.2,
+    "cost_share": 0.4,
+    "gp_share": 0.5,
+    "drawdown_trigger": -0.15,
+    "drawdown_aum_mult": 0.5,
+    "gp_value_multiple": 6.0,
+    "aum_growth_boost": 0.35,
+    "aum_growth_decay": 0.85,
+    "p_terminal": 0.05
+  },
+  "allocation": {
+    "owner_hours_per_week": 50,
+    "monthly_budget_usd": 10000,
+    "safe_share": 0.7,
+    "max_items_per_bucket": 3
+  },
+  "rollup": {
+    "_note": "arr — выручка купленных фирм; multiple — стоимость к выручке (маржа ~20% × ~10 EBITDA). p_pmf — вероятность получить финансирование и закрыть первую сделку за попытку.",
+    "engine_share": 0.6,
+    "burn_per_year": 50000,
+    "years_to_verdict": 2,
+    "p_pmf": 0.12,
+    "arr0_median": 10000000,
+    "arr0_sigma": 0.8,
+    "growth_boost": 1.0,
+    "growth_decay": 0.75,
+    "growth_sigma": 0.4,
+    "p_die": 0.1,
+    "ownership0": 0.25,
+    "dilution_steps_arr": [
+      50000000,
+      200000000,
+      1000000000
+    ],
+    "dilution_mult": 0.85,
+    "multiple_median": 2.0,
+    "multiple_sigma": 0.4
+  }
+}
